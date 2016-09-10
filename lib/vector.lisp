@@ -10,7 +10,7 @@
   `,deg)
 
 (defmacro dimension (dimension)
-  #| length, how long|#
+  "length, how long is it"
   `,dimension)
 
 
@@ -19,6 +19,10 @@
 (defun dist (vec1 vec2)
   (sqrt (+ (expt (car (dxdy vec1 vec2)) 2)
            (expt (cdr (dxdy vec1 vec2)) 2))))
+
+(defun vector-dist (vec)
+  (sqrt (+ (expt (vx vec) 2)
+           (expt (vy vec) 2))))
 
 (defun vx (vec)
   (car vec))
@@ -30,9 +34,38 @@
   (cons (- (vx vec2) (vx vec1))
         (- (vy vec2) (vy vec1))))
 
+(defun vector-to-point (vector)
+  (list (car vector) (cdr vector)))
 
-;;; util
+(defun vector-to-line (vector-start vector-delta)
+  (line (vx vector-start) (vy vector-start)
+        (vx vector-delta) (vy vector-delta)))
 
-(defun coord-to-piece (coordinates)
-  ()
+
+(defun line-collision-detection (line1 line2)
+  "line hit-judge"
+  
   )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

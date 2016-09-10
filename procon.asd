@@ -18,8 +18,12 @@
             :components
             ((:file "vector")
              (:file "struct")
-             (:file "piece")))
+             (:file "piece")
+             (:file "util")
+             (:file "line")))
    (:module "src"
             :components
-            ((:file "game")))))
+            ((:file "game")
+             (:file "rule")
+             (:file "search")))))
   
