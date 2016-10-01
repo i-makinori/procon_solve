@@ -44,6 +44,20 @@
 (defun coordinate-to-dir (start-point end-point)
   (atan (- (x1 end-point) (x1 start-point)) (- (y1 end-point) (y1 start-point))))
 
+(defun line-center (line)
+  (point (/ (+ (x1 line) (x2 line)) 2)
+         (/ (+ (y1 line) (y2 line)) 2)))
+
+(defun line-equal (line1 line2)
+  (or (equal line1 line2)
+      (equal line1 (line (x2 line2) (y2 line2) (x1 line2) (y1 line2)))))
+  
+
+(defparameter *angle-line-criteria*
+  (line 0 0 0 10))
+
+(defparameter *2PI* (* PI 2))
+
 ;;;; search
 
 

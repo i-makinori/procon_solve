@@ -1,8 +1,11 @@
 
+(ql:quickload :lispbuilder-sdl)
+
 (in-package :cl-user)
 (defpackage procon-asd
   (:use :cl :asdf))
 (in-package :procon-asd)
+
 
 (defsystem procon
   :name "procon"
@@ -16,14 +19,20 @@
   ((:file "package")
    (:module "lib"
             :components
-            ((:file "vector")
+            ((:file "util")
+             (:file "standard-error")
+             (:file "lazy")
+             (:file "line")
+             (:file "vector")
              (:file "struct")
              (:file "piece")
-             (:file "util")
-             (:file "line")))
+             (:file "synth-piece")
+             (:file "test")))
    (:module "src"
             :components
             ((:file "game")
              (:file "rule")
-             (:file "search")))))
+             (:file "search")
+             (:file "gui")
+             (:file "profile")))))
   
