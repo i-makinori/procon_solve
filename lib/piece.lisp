@@ -8,6 +8,7 @@
 
 
 (defun degree-adjust (degrees)
+  "in n-polygon. when degree-rength is not (n-2)*pi, let degree-length (n-2)*pi "
   (let* ((length (length degrees))
          (adjust-func
           (if (a-d= (* PI (- length 2)) (reduce #'+ degrees))
@@ -63,13 +64,16 @@ t : included"
                ))))
 
 (defun point-included-in-piece (piece)
+  "search each triangle included in piece,
+center-deg is smaller than (pi - st-error), it's gravity-center is included in piece"
   (let ((n (search '(()) (piece-degrees piece)
-                   :test #'(lambda (n x) n (> pi x))))
+                   :test #'(lambda (n x) n (> (* pi 3/4) x))))
         (vecs (piece-vectors piece)))
     (gravity-center (list
                      (rotate-nth (- n 1) vecs)
                      (nth n vecs)
                      (rotate-nth (+ n 1) vecs)))))
+
 
 (defun piece-collision-detection (piece1 piece2)
   "piece hit-judge"

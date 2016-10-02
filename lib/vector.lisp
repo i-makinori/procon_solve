@@ -1,5 +1,7 @@
 (in-package #:procon)
 
+(declaim (inline vx vy point-to-vec vec-sub dxdy vec-add vec-prod vec-dot vector-to-point
+                 vector-to-line ))
 
 ;;;; struct
 
@@ -89,8 +91,8 @@
                      (square (- (vy point-vec) (y1 line)))))))
     (and (>= l1 l2)
          (= (* l1 l2)
-             (+ (* (- (x2 line) (x1 line)) (- (vx point-vec) (x1 line)))
-                (* (- (y2 line) (y1 line)) (- (vy point-vec) (y1 line))))))))
+            (+ (* (- (x2 line) (x1 line)) (- (vx point-vec) (x1 line)))
+               (* (- (y2 line) (y1 line)) (- (vy point-vec) (y1 line))))))))
 
 (defun lines-point-vec-hit-judge (line-list point-vec)
   (some
@@ -118,24 +120,8 @@
   (line (vx vector-start) (vy vector-start)
         (vx vector-delta) (vy vector-delta)))
 
-(defun in-range? (val1 val2 val-judge)
-  (if (< val1 val2)
-      (and (< val1 val-judge) (< val-judge val2))
-      (and (> val1 val-judge) (> val-judge val2))))
-  
-
-(defun vec-coord-include-detection (p1-v1 p1-v2 p2-v1 p2-v2 )
-  "p:piece, v:vector, 1:first, 2:last, dir:direction"
-  (let ((p1-v1-deg (vectors-to-angle *angle-vec-criteria* *vec-origin* p1-v1))
-        (p1-v2-deg (vectors-to-angle *angle-vec-criteria* *vec-origin* p1-v2))
-        (p2-v1-deg (vectors-to-angle *angle-vec-criteria* *vec-origin* p2-v1))
-        (p2-v2-deg (vectors-to-angle *angle-vec-criteria* *vec-origin* p2-v2)))
-    (or (in-range? p1-v1-deg p1-v2-deg p2-v1-deg)
-        (in-range? p1-v1-deg p1-v2-deg p2-v2-deg)
-        (in-range? p2-v1-deg p2-v2-deg p1-v1-deg)
-        (in-range? p2-v1-deg p2-v2-deg p1-v2-deg))))
-
 (defun angle-vectors-adjust (vecs)
+  "when vecs includes origin-vector, shift each vector-dxdy 10"
   (if (some #'(lambda (vec) (equal vec '(0 . 0)))
             vecs)
       (angle-vectors-adjust
@@ -155,17 +141,25 @@
 
 
 
+;;;; standard-error
 
+(defun line-collision-detection-error (line1 line2)
+  "standard-error refrected  line hit-judge"
+  (and (line-collision-detection line1 line2)
+       ()
+  ))
 
+(defun line-point-vec-hit-judge-error (line point-vec)
+  (let ((l1 (sqrt (+ (square (- (x2 line) (x1 line)))
+                     (square (- (y2 line) (y1 line))))))
+        (l2 (sqrt (+ (square (- (vx point-vec) (x1 line)))
+                     (square (- (vy point-vec) (y1 line)))))))
+    (and (>= l1 l2)
+         (= (* l1 l2)
+            (+ (* (- (x2 line) (x1 line)) (- (vx point-vec) (x1 line)))
+               (* (- (y2 line) (y1 line)) (- (vy point-vec) (y1 line))))))))
 
-
-
-
-
-
-
-
-
-
-
-
+(defun same-vector-angle-error (vec1 vec2)
+  (let ((angle (vectors-to-angle vec1 '(0 . 0) vec2)))
+    (or (a-d= angle *2pi*)
+        (a-d= angle 0))))

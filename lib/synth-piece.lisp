@@ -15,7 +15,7 @@
 
 (defun vdr-to-piece (vdr-list)
   (make-piece :vectors (vdr-vec-origin-shift (mapcar #'vdr-vec vdr-list))
-                     :degrees (mapcar #'vdr-deg vdr-list)))
+              :degrees (mapcar #'vdr-deg vdr-list)))
 
 (defun synthesize-piece-rule (piece1 piece2)
     (let* ((vdr-queue
@@ -41,6 +41,7 @@
 
 
 (defun remove-synth-rev (vdr-list)
+  "rev:reverse direction of list"
   (let ((vdr-synth (synthesize-vdr (car vdr-list) (rotate-nth -1 vdr-list))))
     (cond ((a-d= *2pi* (vdr-deg (car vdr-list)))
            (remove-synth-rev (cdr vdr-list)))
@@ -48,9 +49,6 @@
            (remove-synth-rev (cons vdr-synth (init (cdr vdr-list)))))
           (t vdr-list))))
       
-    
-
-
 (defun remove-synth (vdr-list &optional (s-vdr nil))
   (let ((vdr-synth (synthesize-vdr (car vdr-list) (car s-vdr))))
     (cond ((null vdr-list) s-vdr)
@@ -65,26 +63,8 @@
            (remove-synth (cdr vdr-list) (cons (car vdr-list) s-vdr))))))
 
 
-#|
-(defun remove-synth (vdr-list &optional (s-vdr '()))
-  (let ((vdr-synth (synthesize-vdr (car vdr-list) (car s-vdr))))
-    (cond ((null vdr-list) s-vdr)
-          ((a-d= *2pi* (vdr-deg (car vdr-list)))
-           (remove-synth (cdr vdr-list) s-vdr))
-          ((and vdr-synth (a-d= *2pi* (vdr-deg vdr-synth)))
-           (remove-synth (cdr vdr-list) (cdr s-vdr)))
-          (vdr-synth
-           (remove-synth (cons vdr-synth (cdr vdr-list))
-                         (cdr s-vdr)))
-          ('t
-           (remove-synth (cdr vdr-list) (cons (car vdr-list) s-vdr))))
-    ))
-|#
-
-
-
-
 (defun remove-sy-line (vdr1 vdr2)
+  "the line across origin point to last point of piece"
   (let ((remove-origin
          (append (drop vdr1 1)
                  (cons (synthesize-vdr (car vdr2) (car vdr1))

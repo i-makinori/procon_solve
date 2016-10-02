@@ -1,5 +1,6 @@
 (in-package #:procon)
 
+(declaim (inline line point x1 y1 x2 y2 square))
 
 (defun line (x1 y1 x2 y2)
   (list x1 y1 x2 y2))

@@ -24,7 +24,6 @@
              (:file "lazy")
              (:file "line")
              (:file "vector")
-             (:file "struct")
              (:file "piece")
              (:file "synth-piece")
              (:file "test")))
