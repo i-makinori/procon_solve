@@ -102,8 +102,8 @@
 
 (defun same-vector-angle (vec1 vec2)
   (let ((angle (vectors-to-angle vec1 '(0 . 0) vec2)))
-    (or (a-d= angle *2pi*)
-        (a-d= angle 0))))
+    (or (a-2pi-judge angle)
+        (a-0pi-judge angle))))
 
   
 (defun gravity-center (vectors)
@@ -143,11 +143,6 @@
 
 ;;;; standard-error
 
-(defun line-collision-detection-error (line1 line2)
-  "standard-error refrected  line hit-judge"
-  (and (line-collision-detection line1 line2)
-       ()
-  ))
 
 (defun line-point-vec-hit-judge-error (line point-vec)
   (let ((l1 (sqrt (+ (square (- (x2 line) (x1 line)))
@@ -155,11 +150,15 @@
         (l2 (sqrt (+ (square (- (vx point-vec) (x1 line)))
                      (square (- (vy point-vec) (y1 line)))))))
     (and (>= l1 l2)
-         (= (* l1 l2)
-            (+ (* (- (x2 line) (x1 line)) (- (vx point-vec) (x1 line)))
-               (* (- (y2 line) (y1 line)) (- (vy point-vec) (y1 line))))))))
+         (a2= (* l1 l2)
+              (+ (* (- (x2 line) (x1 line)) (- (vx point-vec) (x1 line)))
+                 (* (- (y2 line) (y1 line)) (- (vy point-vec) (y1 line))))))))
 
-(defun same-vector-angle-error (vec1 vec2)
-  (let ((angle (vectors-to-angle vec1 '(0 . 0) vec2)))
-    (or (a-d= angle *2pi*)
-        (a-d= angle 0))))
+(defun line-collision-detection-error (line1 line2)
+  "standard-error refrected  line hit-judge"
+  (and (line-collision-detection line1 line2)
+       (not (or (line-point-vec-hit-judge-error line1 (vec (x1 line2) (y1 line2)))
+                (line-point-vec-hit-judge-error line1 (vec (x2 line2) (y2 line2)))
+                (line-point-vec-hit-judge-error line2 (vec (x1 line1) (y1 line1)))
+                (line-point-vec-hit-judge-error line2 (vec (x2 line1) (y2 line1)))))
+       ))

@@ -52,16 +52,15 @@ angle: float(-xPI to xPI)"
 t : included"
   (let ((judged-line1 (vector-to-line (vec *-huge-num* (vy point-vec)) point-vec))
         (judged-line2 (vector-to-line (vec *huge-num*  (1+ (vy point-vec)))
-                                      (vec (+  2 (vx point-vec)) (+ 2 (vy point-vec)))))
-        )
+                                      (vec (+  2 (vx point-vec)) (+ 2 (vy point-vec))))))
     (not (some #'(lambda (line)
-                   (evenp  (length
-                            (remove nil
-                                    (mapcar #'(lambda (l)
-                                                (line-collision-detection l line))
-                                            piece-lines)))))
-               (list judged-line1 judged-line2)
-               ))))
+                   (evenp (length
+                           (remove nil
+                                   (mapcar #'(lambda (l)
+                                               (line-collision-detection l line))
+                                           piece-lines)))))
+               (list judged-line1 judged-line2)))))
+
 
 (defun point-included-in-piece (piece)
   "search each triangle included in piece,
@@ -74,22 +73,25 @@ center-deg is smaller than (pi - st-error), it's gravity-center is included in p
                      (nth n vecs)
                      (rotate-nth (+ n 1) vecs)))))
 
+(defun lines-lines-hit-judge (lines1 lines2)
+  (not (every #'(lambda (line2)
+                  (notany #'(lambda (line1)
+                              (line-collision-detection-error line1 line2))
+                          lines1))
+              lines2)))
+  
 
 (defun piece-collision-detection (piece1 piece2)
   "piece hit-judge"
   (let ((piece1-vectors (piece-vectors piece1))
         (piece2-vectors (piece-vectors piece2)))
     (let ((lines1 (map-tuple/c #'vector-to-line 2 piece1-vectors))
-          (lines2 (map-tuple/c #'vector-to-line 2 piece2-vectors))
-          )
+          (lines2 (map-tuple/c #'vector-to-line 2 piece2-vectors)))
       (or
        (point-piece-include-detection lines2 (point-included-in-piece piece1))
        (point-piece-include-detection lines1 (point-included-in-piece piece2))
-       (not (every #'(lambda (line2)
-                       (notany #'(lambda (line1)
-                                   (line-collision-detection line1 line2))
-                               lines1))
-                   lines2))))))
+       (lines-lines-hit-judge lines1 lines2)))))
+
 
 ;;;; synthesize
 
@@ -112,8 +114,8 @@ center-deg is smaller than (pi - st-error), it's gravity-center is included in p
 (defun rotate-piece (piece angle)
   (make-piece
    :vectors (mapcar #'(lambda (v) 
-                        (vec (round (- (* (vx v) (cos angle)) (* (vy v) (sin angle))))
-                             (round (+ (* (vx v) (sin angle)) (* (vy v) (cos angle ))))))
+                        (vec (- (* (vx v) (cos angle)) (* (vy v) (sin angle)))
+                             (+ (* (vx v) (sin angle)) (* (vy v) (cos angle )))))
                     (piece-vectors piece))
    :degrees (piece-degrees piece)))
 
