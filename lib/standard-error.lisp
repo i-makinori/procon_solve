@@ -3,7 +3,7 @@
 ;;;; util
 
 (defun rad-to-360 (rad)
-  (* 360 (/ rad pi)))
+  (* 180 rad (/ pi)))
 
 (defun 360-to-rad (angle)
   (* pi (/ angle 360)))
@@ -16,7 +16,7 @@
 ;;;; number 
 (defparameter *a-float* 0.0001)
 
-(defparameter *a* 2)
+(defparameter *a* 5)
 (defparameter *a/2* (/ *a* 2))
 (defparameter *a/3* (/ *a* 3))
 (defparameter *a/4* (/ *a* 4))
@@ -39,7 +39,7 @@
 
 ;;; angle
 
-(defparameter *a-deg* (360-to-rad 1)
+(defparameter *a-deg* (360-to-rad 3)
   "amount-degree standard-coefficient (standard-error)")
 (defparameter *a10-deg* (* *a-deg* 10))
 (defparameter *a5-deg* (* *a-deg* 5))
@@ -55,6 +55,6 @@
   (a-5d= angle pi)  )
 
 (defun a-2pi-judge (angle)
-  (a-10d= angle *2pi*)
+  (a-5d= angle *2pi*)
   )
 

@@ -28,7 +28,8 @@
             (add-ridden-line-point (cdr vdr-queue) (car vdr-queue)))
            (remove-sy-line
             (remove-sy-line vdr-added-line-point-vdr1 vdr-added-line-point-vdr2)))
-      (vdr-to-piece (remove-line (remove-synth-rev (remove-synth remove-sy-line ))))))
+      (if (position nil remove-sy-line) nil
+          (vdr-to-piece (remove-line (remove-synth-rev (remove-synth remove-sy-line )))))))
 
 (defun remove-line (vdr-list)
   (remove-if
@@ -70,8 +71,8 @@
                  (cons (synthesize-vdr (car vdr2) (car vdr1))
                        (reverse (cdr vdr2))))))
     (cons (synthesize-vdr (car remove-origin) (car (last remove-origin)))
-          (cdr (init remove-origin)))
-    ))
+          (cdr (init remove-origin)))))
+
 
 (defun synthesize-vdr (vdr1 vdr2)
   (if (and vdr1 vdr2

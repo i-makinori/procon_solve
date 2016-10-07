@@ -30,10 +30,10 @@
              (:file "test")))
    (:module "src"
             :components
-            ((:file "rule")
+            ((:file "repl")
+             (:file "rule")
              (:file "io")
              (:file "search")
-             (:file "profile")
              (:file "main")))
    (:module "util"
             :components

@@ -1,5 +1,6 @@
 (in-package #:procon)
 
+
 ;;;; test
 
 (defun random-vecs (&optional (num 3))
@@ -11,7 +12,7 @@
   '((10 . 10) (10 . 40) (40 . 10)))
 
 (defparameter *test-piece2*
-  '((30 . 10) (10 . 40) (30 . 20) (50 . 40.04)))
+  '((30 . 10) (10 . 40) (30 . 20) (50 . 40)))
 
 (defparameter *test-piece3*
   '((0 . 0) (20 . 20) (20 . 0)))
@@ -48,14 +49,18 @@
   '((0 . 0) (5 . 0) (10 . -5) (15 . 0) (10 . 5)
     (5 . 0) (0 . 0) (10 . -10) (20 . 0) (10 . 10)))
 
+(defparameter *test-pieces*
+  (mapcar
+   #'coord-to-piece
+   (list *test-piece1* *test-piece2* *test-piece3* *test-piece4* *test-piece5*
+         *test-piece6* *test-piece7* *test-piece8* *test-piece9* *test-piece10*
+         *test-piece11* *test-piece12*)))
+
+
 (defparameter *test-frame1*
   '((0 . 0) (60 . 0) (60 . 40) (0 . 40) (0 . 0)
     (10 . 10) (30 . 10) (50 . 30) (10 . 30)))
 
-
-(defparameter *test-pieces*
-  (list *test-piece1* *test-piece2* *test-piece3*
-        *test-piece4* *test-piece5* *test-piece6*))
 
 (defparameter *test-condi1*
   (make-piece-condition
@@ -149,6 +154,8 @@
    :point 0
    :angle 00))
 
+(defparameter *test-condi-list*
+  (list *test-condi2* *test-condi3* *test-condi4* *test-condi1*))
 
 ;;;; functions
 

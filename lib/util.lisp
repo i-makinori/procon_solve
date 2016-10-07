@@ -66,6 +66,32 @@
       xs
       (drop-not-while pred (cdr xs))))
 
+(defun safety-sort (list predicate)
+  (cond ((null list) '())
+        (t (let ((car-list (car list)))
+             (append
+              (safety-sort
+               (remove-if #'(lambda (x) (funcall predicate car-list x)) (cdr list))
+               predicate)
+              (list (car list))
+              (safety-sort
+               (remove-if-not #'(lambda (x) (funcall predicate car-list x)) (cdr list))
+               predicate) )))))
+
+
+(defun flatten (orig-list)
+    (if (eql orig-list nil)
+        nil
+        (let ((elem (car orig-list)) (resto-list (cdr orig-list)))
+            (if (listp elem)
+                (append (flatten elem) (flatten resto-list))
+                (append (cons elem nil) (flatten resto-list))))))
+
+(defun take-while (list test)
+  (and list (funcall test (car list))
+       (cons (car list) (take-while (cdr list) test))))
+
+
 ;;;; macros ;;;;;;;;;;;;;;;;;;;;
 (defmacro with-gensyms (syms &body body)
   `(let ,(mapcar #'(lambda (s)
@@ -78,6 +104,12 @@
     (dotimes (i (1+ (floor (/ len (length lst)))))
       (setq res (append lst res)))
     res))
+
+(defun cons-list-n (list &optional (n 0) (s-lis '()))
+  (cond ((null list) (reverse s-lis))
+        (t (cons-list-n (cdr list) (1+ n)
+                        (cons (cons n (car list)) s-lis)))))
+
 
 ;;; tuple
 

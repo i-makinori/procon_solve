@@ -52,7 +52,7 @@ angle: float(-xPI to xPI)"
 t : included"
   (let ((judged-line1 (vector-to-line (vec *-huge-num* (vy point-vec)) point-vec))
         (judged-line2 (vector-to-line (vec *huge-num*  (1+ (vy point-vec)))
-                                      (vec (+  2 (vx point-vec)) (+ 2 (vy point-vec))))))
+                                      (vec (+ 2 (vx point-vec)) (+ 2 (vy point-vec))))))
     (not (some #'(lambda (line)
                    (evenp (length
                            (remove nil
@@ -92,7 +92,6 @@ center-deg is smaller than (pi - st-error), it's gravity-center is included in p
        (point-piece-include-detection lines1 (point-included-in-piece piece2))
        (lines-lines-hit-judge lines1 lines2)))))
 
-
 ;;;; synthesize
 
 (defun synthesize-piece (piece1-condition piece2-condition)
@@ -102,6 +101,15 @@ center-deg is smaller than (pi - st-error), it's gravity-center is included in p
                                    refed-piece2)
         nil
         (synthesize-piece-rule refed-piece1 refed-piece2))))
+
+(defun piece-condition-collision-detection (condi1 condi2)
+  (piece-collision-detection (refrect-piece-condi condi1)
+                             (refrect-piece-condi condi2)))
+
+(defun let-synthesize-piece-condition (condi1 condi2)
+  (synthesize-piece-rule (refrect-piece-condi condi1)
+                         (refrect-piece-condi condi2)))
+
 
 ;;;; deploy
 
