@@ -30,36 +30,6 @@
   
   )
 
-;;;; candidate-file (candidate::candidate of piece-synthesies)
-(defun coord-text (coord-list)
-  (reduce #'(lambda (str1 str2)
-              (concatenate 'string str1 str2))
-          (mapcar #'(lambda (c)
-                      (format nil "~a ~a " (round (car c)) (round (cdr c))))
-                  coord-list)
-          ))
-
-
-(defun candidate-line-text (priority piece-no piece-condition)
-  (let* ((coord (piece-vectors (piece-condition-piece piece-condition)))
-         (coord-text (coord-text coord))
-         (two-side (piece-condition-two-side piece-condition))
-         (two-side-text (if two-side "T" "F"))
-         (deg (piece-condition-angle piece-condition)))
-    (format nil "~a ~a ~a/ ~a ~5$~%" priority piece-no coord-text two-side-text deg)))
-
-(defun write-candidate-file (candidate-list &optional (file-name *candidate-file*))
-  "not perfect implementation"
-  (let* ((text (reduce #'(lambda (s1 s2)
-                          (concatenate 'string s1 s2))
-                      (mapcar #'(lambda (x)
-                                  (candidate-line-text 0 0 x))
-                              candidate-list))))
-    file-name
-    (print text))
-  )
-
-
 
 
 
@@ -73,8 +43,9 @@
 
 (defun write-file (file-name text)
   (with-open-file (str file-name
-                     :direction :output
-                     :if-does-not-exist :create)
+                       :direction :output
+                       :if-does-not-exist :create
+                       :if-exists :supersede)
   (format str "~A" text)))
 
 ;;; parse-text
@@ -93,6 +64,7 @@
     (cond ((null pos) (list text))
           (t (cons (subseq text 0 pos)
                    (split-text (subseq text (1+ pos)) split-char))))))
+
 
 (defun parse-to-token (text)
   (let ((split-str (mapcar #'(lambda (s) (split-text s #\Space))

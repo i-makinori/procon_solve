@@ -103,15 +103,15 @@
           condition-list))
 
 
-(defun synth-piece-to-candidate (synth-piece-list)
+(defun synth-piece-to-candidate (synth-piece-list &optional (retry-time 0))
   "search candi date"
   (let* (;; get host-point
          (piece-list-include-host (mapcar #'synth-piece-piece synth-piece-list))
          (priority-point (prioritize-point-list piece-list-include-host))
-         (host-piece (cddr (car priority-point)))
+         (host-piece (cddr (rotate-nth retry-time priority-point)))
          (host-no (piece-synth-piece-no host-piece synth-piece-list))
          (host-condition (make-piece-condition :piece host-piece))
-         (host-candidate (list 0 host-no host-piece))
+         (host-candidate (list 0 host-no host-condition))
          (piece-list (remove host-piece piece-list-include-host :test #'equalp))
          ;; synthable-condition
          (synthable-condition (pieces-to-synthable-conditions host-condition piece-list))
@@ -127,11 +127,10 @@
                                                      synth-piece-list))
                            candidate-sort))
          (candidate (mapcar #'(lambda (condi no)
-                               (list (car condi) no (cadr condi)))
-                            candidate-sort candi-no))
-         )
-    (values host-candidate
-            candidate)))
+                                (list (car condi) no (cadr condi)))
+                            candidate-sort candi-no)))
+    (cons host-candidate
+          candidate)))
 
 (defun piece-synth-piece-no (piece synth-piece-list)
   (synth-piece-no
@@ -153,11 +152,5 @@
   (mapcar #'(lambda (x)
               (piece-to-synth-piece (coord-to-piece x)))
           (list *test-piece7* *test-piece8*)))
-
-
-
-
-
-
 
 
