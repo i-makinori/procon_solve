@@ -11,41 +11,57 @@
            (piece1-synth-piece '())
            (piece2-condition '())
            (piece2-synth-piece '())
-           (synthed-piece '())
+           ;;(synthed-piece '())
            (no '())
            )
 
 ;;;; repl
 
-(defun repl (synthed-pieces)
+(defun repl (synthed-pieces retry-time)
   " read eval print loop"
   synthed-pieces
-  (let* ((candidate-list-cons (synth-piece-to-candidate synthed-pieces))
+  (let* (;; search and change-type
+         (candidate-list-cons (synth-piece-to-candidate synthed-pieces retry-time))
          (candidate-list (cdr candidate-list-cons))
-         (host-candi (car candidate-list-cons)))
-    (write-candidate host-candi candidate-list)
-    
-  ))
+         (host-candi (car candidate-list-cons))
+         (candi-number-pair candidate-list)
+         ;; svg html
+         (do1 (write-svg host-candi candi-number-pair))
+         ;; read command
+         (do2 (progn (format t "================================================~%")))
+         (command-result 
+          (read-command-util synthed-pieces 
+                             host-candi candidate-list retry-time)))
+    (repl (car command-result) (cdr command-result))
+    ))
+
+
+(defun call-repl ()
+  (repl (mapcar #'piece-to-synth-piece (read-coord-data)) 0))
 
 ;;;read-command
-(defun read-command (&optional (file-name *command-file*))
+
+(defun read-command-util (synthed-pieces host-candi candidate retry-time)
+  (let* ((text ""))
+    (format t "input command ~% user >> ")
+    (setq text (read-line))
+    (eval-command synthed-pieces (parse-to-token text)
+                  host-candi candidate retry-time))
   )
 
 
 
 
+
+
+
+;;; write-candi-svg
+
+
 ;;; write-candi-date
 
-#|
-(defun write-candidate (host-candi candidate)
-  (write-candidate-file
-   (reduce #'append
-           (mapcar #'(lambda (candi)
-                       (list (list (car candi) (cadr host-candi) (caddr host-candi))
-                             candi))
-                   candidate))))
-|#
 
+#|
 (defun write-candidate (host-candi candidate)
   (write-candidate-file
    (reduce #'append
@@ -82,12 +98,10 @@
                                    (candidate-line-text (car x) (cadr x) (caddr x)))
                                candidate-list))))
     (write-file file-name text)
+    candidate-list
   ))
 
 
 
 
-
-
-
-
+|#

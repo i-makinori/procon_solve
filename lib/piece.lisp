@@ -11,9 +11,9 @@
   "in n-polygon. when degree-rength is not (n-2)*pi, let degree-length (n-2)*pi "
   (let* ((length (length degrees))
          (adjust-func
-          (if (a-d= (* PI (- length 2)) (reduce #'+ degrees))
-              #'(lambda (d) d)
-              #'(lambda (d) (- *2pi* d)))))
+          (if (a-10d= pi (/ (reduce #'+ degrees) (* PI (- length 2))))
+              #'(lambda (d) (- *2pi* d))
+              #'(lambda (d) d))))
     (mapcar adjust-func degrees)))
 
 (defun clock-wise-angle (vec1 vec2 vec3)
@@ -66,7 +66,7 @@ t : included"
   "search each triangle included in piece,
 center-deg is smaller than (pi - st-error), it's gravity-center is included in piece"
   (let ((n (search '(()) (piece-degrees piece)
-                   :test #'(lambda (n x) n (> (* pi 3/4) x))))
+                   :test #'(lambda (n x) n (> (* pi (/ 3.25 4)) x))))
         (vecs (piece-vectors piece)))
     (gravity-center (list
                      (rotate-nth (- n 1) vecs)
@@ -144,5 +144,25 @@ nil:turnout, t:surfece"
                            point)
      :degrees (rotate-list (piece-degrees piece) point))))
 
+;;;; util
+(defun piece-vector-rounds (piece)
+  (mapcar #'(lambda (pair)
+              (cons (round (car pair)) (round (cdr pair))))
+          (piece-vectors piece)))
 
+(defun piece2-delta-high (piece1 piece2)
+  (let* ((piece1-vectors (piece-vectors piece1))
+         (piece2-vectors (piece-vectors piece2))
+         (piece1-delta-h
+          (- (cdar (stable-sort piece1-vectors
+                         #'(lambda (v1 v2) (> (cdr v1) (cdr v2)))))
+             (cdar (stable-sort piece1-vectors
+                         #'(lambda (v1 v2) (< (cdr v1) (cdr v2)))))))
+         (piece2-delta-h
+          (- (cdar (stable-sort piece2-vectors
+                         #'(lambda (v1 v2) (> (cdr v1) (cdr v2)))))
+             (cdar (stable-sort piece2-vectors
+                         #'(lambda (v1 v2) (< (cdr v1) (cdr v2)))))))
+         )
+    (max piece1-delta-h piece2-delta-h)))
  

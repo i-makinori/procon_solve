@@ -1,16 +1,16 @@
 (in-package #:procon)
 
 
-(defparameter *coord-file* "../test/coord.txt")
-(defparameter *command-file* "../test/output.txt")
-(defparameter *candidate-file* "../test/input.txt")
+(defparameter *coord-file* "../test/pdata.txt")
+(defparameter *command-file* "../test/input.txt")
+(defparameter *candidate-file* "../test/output.txt")
 
 
 ;;;; read coordinate-file
 
 (defun list-to-piece (list)
   (labels ((pack (x-searched list searched-list)
-             (cond ((null list) searched-lnnist)
+             (cond ((null list) searched-list)
                    (x-searched (pack nil (cdr list)
                                      (cons (cons x-searched (car list)) searched-list)))
                    (t  (pack (car list) (cdr list)
@@ -18,25 +18,19 @@
     (let ((packed-list (reverse (pack nil list '()))))
       (coord-to-piece packed-list))))
 
-(defun read-coord-data(&optional (file-name *coord-file*))
+(defun read-coord-data (&optional (file-name *coord-file*))
   "read file-name, text data to piece"
-  (let ((tokens-list (remove-nil (parse-to-token (read-file file-name)))))
+  (let* ((tokens-list 
+          (remove-nil (parse-to-token (read-file file-name)))))
     (mapcar #'list-to-piece tokens-list)))
-
-
-;;;; synthesize-command-file
-(defun read-command (&optional (file-name *command-file*))
-  (let* ((text (read-file file-name))
-         (command (car (remove-nil (parse-to-token text)))))
-    command
     
-  ))
+
 
 
 ;;;; util
 
-(defun read-file (file-name)
-  (with-open-file (s file-name :direction :input)
+(defun read-file (file-name &optional (encode :shift_jis))
+  (with-open-file (s file-name :direction :input :external-format encode)
     (let ((buf (make-string (file-length s))))
       (read-sequence buf s)
       buf)))
@@ -75,5 +69,3 @@
                                 (read-from-string s)))
                         str))
             split-str)))
-
-

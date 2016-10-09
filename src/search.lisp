@@ -20,12 +20,11 @@
                    (> (cadr n) (cadr m)))))
 
 (defun prioritize-point (piece)
-  (safety-sort (cons-list-n
-                (mapcar #'(lambda (deg)
-                            (cons deg piece ))
-                        (piece-degrees piece)))
-               #'(lambda (n m)
-                   (> (cadr n) (cadr m)))))
+  (cons-list-n
+   (mapcar #'(lambda (deg)
+               (cons deg piece))
+           (piece-degrees piece))))
+
 
 
 
@@ -108,10 +107,13 @@
   (let* (;; get host-point
          (piece-list-include-host (mapcar #'synth-piece-piece synth-piece-list))
          (priority-point (prioritize-point-list piece-list-include-host))
-         (host-piece (cddr (rotate-nth retry-time priority-point)))
-         (host-no (piece-synth-piece-no host-piece synth-piece-list))
-         (host-condition (make-piece-condition :piece host-piece))
-         (host-candidate (list 0 host-no host-condition))
+
+         (host-piece-point-piece (rotate-nth retry-time  priority-point))
+         (host-piece (cddr host-piece-point-piece))
+         (host-point (car host-piece-point-piece))
+         (host-condition (make-piece-condition :piece host-piece :point host-point))
+         
+         (host-candidate host-condition)
          (piece-list (remove host-piece piece-list-include-host :test #'equalp))
          ;; synthable-condition
          (synthable-condition (pieces-to-synthable-conditions host-condition piece-list))
@@ -121,24 +123,10 @@
          ;; candidate
          (candidate-sort
           (take-while (stable-sort condition-candi #'(lambda (x y) (> (car x) (car y))))
-                      #'(lambda (candi) (>= (car candi) 2))))
-         (candi-no (mapcar #'(lambda (condi)
-                               (piece-synth-piece-no (piece-condition-piece (cadr condi))
-                                                     synth-piece-list))
-                           candidate-sort))
-         (candidate (mapcar #'(lambda (condi no)
-                                (list (car condi) no (cadr condi)))
-                            candidate-sort candi-no)))
-    (cons host-candidate
-          candidate)))
-
-(defun piece-synth-piece-no (piece synth-piece-list)
-  (synth-piece-no
-   (find-if
-    #'(lambda (sy-piece)
-        (equalp piece (synth-piece-piece sy-piece)))
-    synth-piece-list)))
-
+                      #'(lambda (candi) (>= (car candi) 3))))
+         (candidate candidate-sort))
+    (cons host-condition
+          candidate-sort)))
 
 ;;;; test
 (defparameter *test-synth-pieces*

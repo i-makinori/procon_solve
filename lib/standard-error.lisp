@@ -14,13 +14,18 @@
           (> (+ num1 ,error-val) num2))))
 
 ;;;; number 
-(defparameter *a-float* 0.0001)
+(defparameter *a-float* 0.001)
 
-(defparameter *a* 5)
-(defparameter *a/2* (/ *a* 2))
+(defparameter *a* 50)
+#|(defparameter *a/2* (/ *a* 2))
 (defparameter *a/3* (/ *a* 3))
 (defparameter *a/4* (/ *a* 4))
 (defparameter *a2* (* *a* 2) "2 * *A*")
+|#
+(defparameter *a/2* *a* )
+(defparameter *a/3* *a* )
+(defparameter *a/4*  *a*)
+(defparameter *a2*  *a* )
 
 (defparameter *a-angle-round* (360-to-rad 15))
 
@@ -39,10 +44,14 @@
 
 ;;; angle
 
-(defparameter *a-deg* (360-to-rad 3)
+(defparameter *a-deg* (360-to-rad 15)
   "amount-degree standard-coefficient (standard-error)")
+(defparameter *a10-deg* *a-deg*)
+(defparameter *a5-deg* *a-deg*)
+#|
 (defparameter *a10-deg* (* *a-deg* 10))
 (defparameter *a5-deg* (* *a-deg* 5))
+|#
 
 (def-a= a-d= *a-deg*)
 (def-a= a-10d= *a10-deg*)

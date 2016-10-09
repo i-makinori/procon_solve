@@ -31,12 +31,14 @@
    (:module "src"
             :components
             ((:file "repl")
-             (:file "search")))
+             (:file "search")
+             (:file "io")
+             (:file "command")))
    (:module "tools"
             :components
             ((:file "gui")
+             (:file "svg")
              (:file "profile")
-             (:file "io")
              (:file "main"))
    )))
 

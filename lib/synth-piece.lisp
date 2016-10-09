@@ -29,7 +29,8 @@
            (remove-sy-line
             (remove-sy-line vdr-added-line-point-vdr1 vdr-added-line-point-vdr2)))
       (if (position nil remove-sy-line) nil
-          (vdr-to-piece (remove-line (remove-synth-rev (remove-synth remove-sy-line )))))))
+          (vdr-to-piece (remove-line
+                         (remove-synth-rev (remove-synth remove-sy-line)))))))
 
 (defun remove-line (vdr-list)
   (remove-if
