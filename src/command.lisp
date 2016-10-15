@@ -17,6 +17,7 @@
            (command-error synthed-pieces host-candi candidate retry-time))
           )))
 
+
 (defun command-error (synthed-pieces host-candi candidate retry-time)
   (format t "command error ~%")
   (read-command-util synthed-pieces host-candi candidate retry-time))

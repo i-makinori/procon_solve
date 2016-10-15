@@ -15,7 +15,7 @@
 ;;;; get the most Characteristic point
 
 (defun prioritize-point-list (piece-list)
-  (safety-sort (reduce #'append (mapcar #'prioritize-point piece-list))
+  (safety-sort (remove nil (reduce #'append (mapcar #'prioritize-point piece-list)))
                #'(lambda (n m)
                    (> (cadr n) (cadr m)))))
 

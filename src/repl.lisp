@@ -43,11 +43,12 @@
 
 (defun read-command-util (synthed-pieces host-candi candidate retry-time)
   (let* ((text ""))
-    (format t "input command ~% user >> ")
-    (setq text (read-line))
-    (eval-command synthed-pieces (parse-to-token text)
-                  host-candi candidate retry-time))
-  )
+    (cond ((null candidate) (command-retry synthed-pieces retry-time))
+          (t (format t "input command ~% user >> ")
+             (setq text (read-line))
+             (eval-command synthed-pieces (parse-to-token text)
+                           host-candi candidate retry-time))
+  )))
 
 
 

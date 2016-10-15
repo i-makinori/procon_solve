@@ -48,9 +48,13 @@
     (cdr list)
     (cons (car list) (remove-nth (1- n) (cdr list)))))
 
-(defun rotate-nth (n list &optional (length nil))
-  (nth (mod n (if length length (length list)))
-      list))
+
+(defun rotate-nth (n list)
+  (let ((length (length list)))
+    (nth (mod n (cond ((zerop length) 1)
+                      (t length)))
+         list)))
+
 
 (defun append-car-last (list)
   ">> f '(1 2 3 4 5) -> (1 2 3 4 5 1)"
