@@ -14,5 +14,13 @@
   :licence "MIT"
   :description "hoge"
   :long-description "hoge"
+  :depends-on (#:mcclim
+               #:cl-json)
   :components
-  ((:file "package")))
+  ((:file "package")
+   (:file "src/structure")
+   (:file "src/io" :depends-on ("src/structure"))
+   (:file "src/gui" :depends-on ("src/structure"))
+   (:file "src/test")
+   (:file "src/main")
+   ))
