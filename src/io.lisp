@@ -28,6 +28,3 @@
          (piece-list (json-to-primirative-piece-list json)))
     piece-list))
 
-
-;;;; test / sample
-(defparameter *json-file-of-pieces* "../test/piece_sample.json")

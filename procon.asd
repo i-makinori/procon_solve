@@ -16,8 +16,13 @@
   :long-description "procon solve"
   :depends-on (#:mcclim #:cl-json)
   :components
-  ((:file "package")
-   (:file "src/structure")
+  (;; package
+   (:file "package")
+   ;; test :: samples
+   (:file "test/samples")
+   ;; src
+   (:file "src/util" :depends-on ("test/samples"))
+   (:file "src/structure" :depends-on ("src/util") )
    (:file "src/io" :depends-on ("src/structure"))
    (:file "src/gui" :depends-on ("src/structure" "src/io"))
    (:file "src/test")
