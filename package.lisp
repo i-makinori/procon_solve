@@ -1,5 +1,6 @@
 (in-package :cl-user)
 
 (defpackage :procon
-  (:use :common-lisp)
+  (:use 
+   :clim :clim-lisp :clim-sys :clim-tab-layout)
   (:export)  )

@@ -12,15 +12,14 @@
   :version "0.00"
   :maintainer ""
   :licence "MIT"
-  :description "hoge"
-  :long-description "hoge"
-  :depends-on (#:mcclim
-               #:cl-json)
+  :description "procon solve"
+  :long-description "procon solve"
+  :depends-on (#:mcclim #:cl-json)
   :components
   ((:file "package")
    (:file "src/structure")
    (:file "src/io" :depends-on ("src/structure"))
-   (:file "src/gui" :depends-on ("src/structure"))
+   (:file "src/gui" :depends-on ("src/structure" "src/io"))
    (:file "src/test")
    (:file "src/main")
    ))
