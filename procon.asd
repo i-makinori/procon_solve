@@ -20,9 +20,11 @@
    (:file "package")
    ;; test :: samples
    (:file "test/samples")
-   ;; src
+   ;; src.libs
    (:file "src/util" :depends-on ("test/samples"))
-   (:file "src/structure" :depends-on ("src/util") )
+   (:file "src/geometry" :depends-on ("src/util"))
+   (:file "src/structure" :depends-on ("src/util" "src/geometry"))
+   ;; src.application
    (:file "src/io" :depends-on ("src/structure"))
    (:file "src/gui" :depends-on ("src/structure" "src/io"))
    (:file "src/test")
