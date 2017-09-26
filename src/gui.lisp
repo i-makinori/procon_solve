@@ -11,7 +11,7 @@
 
 ;; for test
 (defparameter *test-piece-list* 
-  (take *sample-json-1-piece-list* 10))
+  (take *sample-json-1-piece-list* 100))
 
 
 
@@ -62,7 +62,8 @@
   ((gui-piece-list :initform *test-gui-piece-list*
                    :accessor gui-piece-list)
    (synth-list :initform nil :accessor synth-list)
-   (current-piece :initform nil :accessor current-piece))
+   (current-piece :initform (make-instance 'gui-piece)
+                  :accessor current-piece))
   (:panes 
    (canvas :application
            :scroll-bars t
@@ -106,18 +107,35 @@
 ;;;; display-piece-preview
 
 (defmethod display-piece-preview (frame stream)
-  (let ((current-piece (current-piece frame)))
-    (window-clear stream)
-    (draw-piece (gui-piece-piece current-piece)
-                stream)))
+  (let* (;; transform
+         (scale 2.05)
+         (delta-x 200)
+         (delta-y 100)
 
-(defun draw-piece (piece stream)
-  (let ((point-list (piece->points-consed-list piece)))
-    (when point-list
-      (do-tuple/c (p1 p2) 
-          (mapcar #'(lambda (point)
-                      (cons (* (car point) 10) 
-                            (* (cdr point) 10)))
-                  point-list)
-        (draw-line* stream (car p1) (cdr p1) (car p2) (cdr p2))))))
+         (transform (clim:compose-transformations
+                     (clim:make-translation-transformation delta-x delta-y)
+                     (clim:make-scaling-transformation scale scale))))
+
+    (window-clear stream)
+    (draw-coordinate-system stream transform)
+    (draw-piece (gui-piece-piece (current-piece frame))
+                stream
+                transform)))
+
+
+(defun draw-coordinate-system (stream transformation)
+
+  nil
+  )
+
+(defun draw-piece (piece stream transformation)
+  (draw-polygon* 
+   stream
+   (flatten 
+    (mapcar #'(lambda (point)
+                (list (rest-assoc :x point) (rest-assoc :y point)))
+            (car (rest-assoc :points piece))))
+   :filled nil
+   :transformation transformation
+    ))
   
