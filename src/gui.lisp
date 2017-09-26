@@ -7,7 +7,7 @@
   (mapcar #'(lambda (point)
               (cons (rest-assoc :x point)
                     (rest-assoc :y point)))
-          (car (rest-assoc :points piece))))
+          (car-rest-assoc :points piece)))
 
 ;; for test
 (defparameter *test-piece-list* 
@@ -65,11 +65,17 @@
    (current-piece :initform (make-instance 'gui-piece)
                   :accessor current-piece))
   (:panes 
+   ;;(interactor :interactor)
    (canvas :application
-           :scroll-bars t
-           :display-time t
            :width 400 :height 400
+           :scroll-bars t
            :display-function 'display-piece-preview)
+   (current-piece-info :application
+                       :max-height 150
+                       :display-time nil
+                       :text-style (make-text-style :sans-serif :roman :normal)
+                       :display-function #'write-piece-info)
+    
    (piece-list
     (make-pane 'list-pane
                :items nil
@@ -77,13 +83,20 @@
                :value-changed-callback 'piece-list-pane-changed)))
   (:layouts 
    (default 
-       (horizontally ()
-         (vertically (:max-width 200 :min-width nil)
-           (labelling (:label "piece-list") (scrolling () piece-list)))
-         (vertically (:min-height 450 :min-width 450)
-           (labelling (:label "canvas") canvas))))
-   (:menu-bar t)
-       ))
+       (vertically ()
+         (horizontally ()
+           (vertically (:max-width 200 :min-width nil)
+             (labelling (:label "piece-list") 
+               (scrolling () piece-list)))
+
+           (labelling (:label "piece-info")
+             (vertically ()
+               canvas
+               current-piece-info
+             )))
+         ;;interactor
+         )))
+  (:menu-bar t))
 
 (defmethod generate-panes :after (fm (frame solve-gui))
   (reset-list-pane (find-pane-named frame 'piece-list)
@@ -99,11 +112,23 @@
   ;;(format t "~&List pane ~A changed to ~S" pane value) ;; for test
 
   (setf (current-piece *application-frame*) value)
-  (display-piece-preview *application-frame*
-                         (frame-standard-output *application-frame*))
-  )
 
+  (display-piece-preview
+   (pane-frame (find-pane-named *application-frame* 'canvas))
+   (get-frame-pane *application-frame* 'canvas))
 
+  (write-piece-info
+   (pane-frame (find-pane-named *application-frame* 'current-piece-info))
+   (get-frame-pane *application-frame* 'current-piece-info)))
+
+;;;; write-piece-info
+(defmethod write-piece-info (frame stream)
+  (let ((name (gui-piece-name (current-piece frame)))
+        (piece (gui-piece-piece (current-piece frame))))
+
+    (window-clear stream)
+    (format stream "You Selected piece : ~A ~%" name)
+    (finish-output stream)))
 
 ;;;; display-piece-preview
 
