@@ -27,6 +27,7 @@
     (:synth-to ,synth-to)))
 
 
+
 ;;;; util
 (defun piece-able-states (piece)
   ;; list of piece of conversion possible.
@@ -36,6 +37,21 @@
   ;; .[poins] => all points are included in discrete point.
   )
 
+(defun piece-height (piece)
+  (let ((y-val-list 
+         (mapcar #'(lambda (point) (rest-assoc :y point))
+                 (car-rest-assoc :points piece))))
+    
+    (- (apply #'max y-val-list)
+       (apply #'min y-val-list))))
+
+(defun piece-width (piece)
+  (let ((x-val-list 
+         (mapcar #'(lambda (point) (rest-assoc :x point))
+                 (car-rest-assoc :points piece))))
+    
+    (- (apply #'max x-val-list)
+       (apply #'min x-val-list))))
 
 
 ;;;; test

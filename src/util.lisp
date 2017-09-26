@@ -7,6 +7,9 @@
 (defun rest-assoc (key key-list)
   (rest (assoc key key-list)))
 
+(defun car-rest-assoc (key key-list)
+  (car (rest (assoc key key-list))))
+
 
 ;;;; number-pair ;;;;;;;;;;;;;
 
@@ -19,6 +22,12 @@
 
 
 ;;;; list ;;;;;;;;;;;;;;;;;;;
+
+(defun upto (from to)
+  "like haskell [from,from+1..num-1,num]"
+  (declare (type integer from to))
+  (if (<= from to)
+      (cons from (upto (1+ from) to))))
 
 (defun init (list &optional searched-list)
   (if (cdr list)
@@ -35,7 +44,6 @@
       nil
       (cons (car list) (take (cdr list) (1- num)))))
 
-
 (defun drop (list num)
   (if (or (<= num 0) (null list))
       list
@@ -49,13 +57,11 @@
       (cdr list)
       (cons (car list) (remove-nth (1- num) (cdr list)))))
 
-
 (defun rotate-nth (n list)
   (let ((length (length list)))
     (nth (mod n (cond ((zerop length) 1)
                       (t length)))
          list)))
-
 
 (defun append-car-last (list)
   ">> f '(1 2 3 4 5) -> (1 2 3 4 5 1)"
@@ -82,7 +88,6 @@
               (safety-sort
                (remove-if-not #'(lambda (x) (funcall predicate car-list x)) (cdr list))
                predicate) )))))
-
 
 (defun flatten (orig-list)
   (if (eql orig-list nil)
