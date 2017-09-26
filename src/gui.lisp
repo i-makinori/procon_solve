@@ -110,10 +110,12 @@
 (defmethod display-piece-preview (frame stream)
   (let* ((medium (sheet-medium stream))
          (piece (gui-piece-piece (current-piece frame)))
+         ;; transformation
          ;; all(transform) => (width >= scale * delta-x * 0.5 )
          (delta-x (round (* 0.5 (rectangle-width (sheet-region stream)))))
          (delta-y (round (* 0.5 (rectangle-height (sheet-region stream)))))
-         (scale 1.0)
+         (scale (min (/ (* 0.95 delta-x) (piece-width piece))
+                     (/ (* 0.95 delta-y) (piece-height piece))))
 
          (transform (clim:compose-transformations
                      (clim:make-translation-transformation delta-x delta-y)
@@ -130,13 +132,22 @@
 
 
 (defun draw-coordinate-system (piece stream)
-  (let* ((pane-width (rectangle-width (sheet-region stream)))
-         (pane-height (rectangle-height (sheet-region stream))))
+  (let ((axis-length (round (* 0.95 (max (piece-width piece)
+                                         (piece-height piece))))))
     
-    (draw-line* stream (* 0.45 (- pane-width)) 0 (* 0.45 pane-width) 0
+    ;; axis-line
+    (draw-line* stream (- axis-length) 0 (* axis-length) 0
                 :ink +blue+)
-    (draw-line* stream 0 (* 0.45 (- pane-height)) 0 (* 0.45 pane-height)
-                :ink +blue+)))
+    (draw-line* stream 0 (- axis-length) 0 (* axis-length)
+                :ink +blue+)
+
+    ;; grid
+    (draw-points* 
+     stream
+     (flatten (mapcar #'(lambda (y) 
+                          (mapcar #'(lambda (x) (list x y))
+                                  (upto (- axis-length) axis-length)))
+                      (upto (- axis-length) axis-length ))))))
 
 (defun draw-piece (piece stream)
   (draw-polygon* 
