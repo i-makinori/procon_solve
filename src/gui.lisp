@@ -68,6 +68,7 @@
    (canvas :application
            :scroll-bars t
            :display-time t
+           :width 400 :height 400
            :display-function 'display-piece-preview)
    (piece-list
     (make-pane 'list-pane
@@ -79,7 +80,7 @@
        (horizontally ()
          (vertically (:max-width 200 :min-width nil)
            (labelling (:label "piece-list") (scrolling () piece-list)))
-         (vertically (:min-height 200 :min-width 200)
+         (vertically (:min-height 450 :min-width 450)
            (labelling (:label "canvas") canvas))))
    (:menu-bar t)
        ))
@@ -107,35 +108,42 @@
 ;;;; display-piece-preview
 
 (defmethod display-piece-preview (frame stream)
-  (let* (;; transform
-         (scale 2.05)
-         (delta-x 200)
-         (delta-y 100)
+  (let* ((medium (sheet-medium stream))
+         (piece (gui-piece-piece (current-piece frame)))
+         ;; all(transform) => (width >= scale * delta-x * 0.5 )
+         (delta-x (round (* 0.5 (rectangle-width (sheet-region stream)))))
+         (delta-y (round (* 0.5 (rectangle-height (sheet-region stream)))))
+         (scale 1.0)
 
          (transform (clim:compose-transformations
                      (clim:make-translation-transformation delta-x delta-y)
                      (clim:make-scaling-transformation scale scale))))
 
     (window-clear stream)
-    (draw-coordinate-system stream transform)
-    (draw-piece (gui-piece-piece (current-piece frame))
-                stream
-                transform)))
+
+    (with-drawing-options
+        (medium
+         :transformation transform)
+      (draw-coordinate-system piece stream)
+      (draw-piece piece
+                  stream))))
 
 
-(defun draw-coordinate-system (stream transformation)
+(defun draw-coordinate-system (piece stream)
+  (let* ((pane-width (rectangle-width (sheet-region stream)))
+         (pane-height (rectangle-height (sheet-region stream))))
+    
+    (draw-line* stream (* 0.45 (- pane-width)) 0 (* 0.45 pane-width) 0
+                :ink +blue+)
+    (draw-line* stream 0 (* 0.45 (- pane-height)) 0 (* 0.45 pane-height)
+                :ink +blue+)))
 
-  nil
-  )
-
-(defun draw-piece (piece stream transformation)
+(defun draw-piece (piece stream)
   (draw-polygon* 
    stream
    (flatten 
     (mapcar #'(lambda (point)
                 (list (rest-assoc :x point) (rest-assoc :y point)))
             (car (rest-assoc :points piece))))
-   :filled nil
-   :transformation transformation
-    ))
-  
+   :filled nil))
+
