@@ -1,9 +1,10 @@
 (in-package #:procon-2016)
 
 
-(defparameter *coord-file* "../test/pdata.txt")
-(defparameter *command-file* "../test/input.txt")
-(defparameter *candidate-file* "../test/output.txt")
+(defparameter *coord-file1* "test/pdata.txt")
+(defparameter *coord-file2* "test/pdata2.txt")
+(defparameter *command-file* "test/input.txt")
+(defparameter *candidate-file* "test/output.txt")
 
 
 ;;;; read coordinate-file
@@ -18,7 +19,7 @@
     (let ((packed-list (reverse (pack nil list '()))))
       (coord-to-piece packed-list))))
 
-(defun read-coord-data (&optional (file-name *coord-file*))
+(defun read-coord-data (&optional (file-name *coord-file1*))
   "read file-name, text data to piece"
   (let* ((tokens-list 
           (remove-nil (parse-to-token (read-file file-name)))))

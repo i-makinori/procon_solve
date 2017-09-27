@@ -2,7 +2,7 @@
 
 ;;;; io
 
-(defparameter *html-file* "../test/ui.html")
+(defparameter *html-file* "test/ui.html")
 
 (defun write-svg-file (text &optional (file-name *html-file*))
   (write-file file-name text))
