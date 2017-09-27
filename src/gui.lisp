@@ -167,20 +167,19 @@
 (defun draw-coordinate-system (piece stream)
   (let ((axis-length (round (* 0.95 (max (piece-width piece)
                                          (piece-height piece))))))
-    
-    ;; axis-line
-    (draw-line* stream (- axis-length) 0 (* axis-length) 0
-                :ink +blue+)
-    (draw-line* stream 0 (- axis-length) 0 (* axis-length)
-                :ink +blue+)
-
     ;; grid
     (draw-points* 
      stream
      (flatten (mapcar #'(lambda (y) 
                           (mapcar #'(lambda (x) (list x y))
                                   (upto (- axis-length) axis-length)))
-                      (upto (- axis-length) axis-length ))))))
+                      (upto (- axis-length) axis-length )))
+     :ink +black+) ; (make-rgb-color 0.2 0.2 0.2))
+    ;; axis-line
+    (draw-line* stream (- axis-length) 0 (* axis-length) 0
+                :ink +blue+)
+    (draw-line* stream 0 (- axis-length) 0 (* axis-length)
+                :ink +blue+)))
 
 (defun draw-piece (piece stream)
   (draw-polygon* 
