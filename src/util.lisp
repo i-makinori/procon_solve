@@ -23,6 +23,9 @@
 
 ;;;; list ;;;;;;;;;;;;;;;;;;;
 
+(defun concat (list)
+  (apply #'append list))
+
 (defun upto (from to)
   "like haskell [from,from+1..num-1,num]"
   (declare (type integer from to))
@@ -100,6 +103,14 @@
 (defun take-while (list test)
   (if (and list (funcall test (car list)))
       (cons (car list) (take-while (cdr list) test))))
+
+
+;;;; string-list ;;;;;;;;;;;;
+
+(defun concat-string-list-list (string-list-list)
+  (reduce 
+   #'(lambda (s1 s2) (concatenate 'string s1 s2))
+   string-list-list))
 
 ;;;; macros ;;;;;;;;;;;;;;;;;;;;
 (defmacro with-gensyms (syms &body body)

@@ -37,6 +37,13 @@
   ;; .[poins] => all points are included in discrete point.
   )
 
+
+(defun point-list->coord-sequence (piece)
+  (concat 
+   (mapcar #'(lambda (point)
+               (list (rest-assoc :x point) (rest-assoc :y point)))
+           piece)))
+
 (defun piece-height (piece)
   (let ((y-val-list 
          (mapcar #'(lambda (point) (rest-assoc :y point))
