@@ -121,8 +121,7 @@
 (defun piece-list-pane-changed (pane value) 
   (declare (type gui-piece value)
            (ignore pane))
-  ;;(format t "~&List pane ~A changed to ~S" pane value) ;; for test
-
+  
   (setf (current-piece *application-frame*) value)
 
   (display-piece-preview
@@ -158,7 +157,7 @@
            (delta-y (round (* 0.5 (rectangle-height (sheet-region stream)))))
            (scale (min (/ (- delta-x 10) (piece-width piece))
                        (/ (- delta-y 10) (piece-height piece))))
-
+           
            (transform (clim:compose-transformations
                        (clim:make-translation-transformation delta-x delta-y)
                        (clim:make-scaling-transformation scale scale))))
@@ -168,13 +167,12 @@
             (medium
              :transformation transform)
           (draw-piece piece stream)
-          (draw-coordinate-system piece stream)
-          )))))
+          (draw-coordinate-system piece stream))))))
 
 
 (defun draw-coordinate-system (piece stream)
   (let* ((axis-length (ceiling (* 0.95 (max (piece-width piece)
-                                         (piece-height piece)))))
+                                            (piece-height piece)))))
          (grid-coord-list-1dim 
           (mapcar #'(lambda (num) (* num 5))
                   (upto (floor (/ (- axis-length) 5)) (ceiling (/ axis-length 5))))))
@@ -185,8 +183,7 @@
                                            (mapcar #'(lambda (x) (list x y))
                                                    (upto (- axis-length) axis-length)))
                                        (upto (- axis-length) axis-length )))
-                      :ink +black+) ; (make-rgb-color 0.2 0.2 0.2))
-        )
+                      :ink +black+))
     
     ;; grid-line
     (draw-lines* stream
@@ -204,14 +201,14 @@
     (draw-line* stream (- axis-length) 0 (* axis-length) 0
                 :ink +blue+ :line-thickness 2)
     (draw-line* stream 0 (- axis-length) 0 (* axis-length)
-                :ink +blue+ :line-thickness 2)))
+                :ink +blue+ :line-thickness 2)
+
+    ;; origin point
+    (draw-point* stream 0 0 :ink +blue+ :line-thickness 10)))
 
 (defun draw-piece (piece stream)
   (draw-polygon* 
    stream
-   (flatten 
-    (mapcar #'(lambda (point)
-                (list (rest-assoc :x point) (rest-assoc :y point)))
-            (car (rest-assoc :points piece))))
+   (point-list->coord-sequence (car-rest-assoc :points piece))
    :filled nil :ink +green+ :line-thickness 4))
 
