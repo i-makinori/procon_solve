@@ -1,4 +1,4 @@
-(in-package #:procon)
+(in-package #:procon-2016)
 
 (declaim (inline vx vy point-to-vec vec-sub dxdy vec-add vec-prod vec-dot vector-to-point
                  vector-to-line ))

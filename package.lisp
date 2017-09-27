@@ -1,5 +1,5 @@
 (in-package :cl-user)
 
-(defpackage :procon
+(defpackage :procon-2016
   (:use :common-lisp)
-  (:export)  )
+  (:export))

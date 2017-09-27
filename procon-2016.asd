@@ -6,8 +6,8 @@
 
 
 ;; " procon-system wich doesn't use gui"
-(defsystem procon
-  :name "procon"
+(defsystem procon-2016
+  :name "procon-2016"
   :author "makinori"
   :version "0.00"
   :maintainer ""

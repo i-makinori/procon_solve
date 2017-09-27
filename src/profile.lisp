@@ -1,5 +1,5 @@
 
-(in-package #:procon)
+(in-package #:procon-2016)
 
 
 (defun profile-procon ()

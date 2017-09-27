@@ -1,4 +1,4 @@
-(in-package #:procon)
+(in-package #:procon-2016)
 
 (declaim (inline line point x1 y1 x2 y2 square))
 

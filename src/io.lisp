@@ -1,4 +1,4 @@
-(in-package #:procon)
+(in-package #:procon-2016)
 
 
 (defparameter *coord-file* "../test/pdata.txt")
