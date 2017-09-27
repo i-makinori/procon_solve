@@ -56,14 +56,15 @@
 
 (defun reset-list-pane (pane items &optional (index 0))
   ;; umm
-  (setf (climi::visible-items pane) (length items))
-  (setf (climi::list-pane-items pane :invoke-callback nil) items)
-  (setf (gadget-value pane :invoke-callback t)
-	(or (and (slot-boundp pane 'climi::value) (gadget-value pane))
-	    (let ((values (climi::generic-list-pane-item-values pane)))
-	      (if (plusp (length values))
-		  (elt values index)
-		  nil)))))
+  (when items
+    (setf (climi::visible-items pane) (length items))
+    (setf (climi::list-pane-items pane :invoke-callback nil) items)
+    (setf (gadget-value pane :invoke-callback t)
+          (or (and (slot-boundp pane 'climi::value) (gadget-value pane))
+              (let ((values (climi::generic-list-pane-item-values pane)))
+                (if (plusp (length values))
+                    (elt values index)
+                    nil))))))
 
 
 
@@ -134,35 +135,39 @@
 (defmethod write-piece-info (frame stream)
   (let ((name (gui-piece-name (current-piece frame)))
         (piece (gui-piece-piece (current-piece frame))))
+    (when piece
+      (window-clear stream)
+      
+      (format stream "piece-label : ~A ~%" name)
+      (format stream "points : ~% ~A" (piece->points-consed-list piece))
 
-    (window-clear stream)
-    (format stream "You Selected piece : ~A ~%" name)
-    (finish-output stream)))
+      (finish-output stream))))
 
 ;;;; display-piece-preview
 
 (defmethod display-piece-preview (frame stream)
-  (let* ((medium (sheet-medium stream))
-         (piece (gui-piece-piece (current-piece frame)))
-         ;; transformation
-         ;; all(transform) => (width >= scale * delta-x * 0.5 )
-         (delta-x (round (* 0.5 (rectangle-width (sheet-region stream)))))
-         (delta-y (round (* 0.5 (rectangle-height (sheet-region stream)))))
-         (scale (min (/ (* 0.95 delta-x) (piece-width piece))
-                     (/ (* 0.95 delta-y) (piece-height piece))))
+  (let ((medium (sheet-medium stream))
+        (piece (gui-piece-piece (current-piece frame))))
+    (when piece
+      (let*
+          (;; transformation
+           ;; all(transform) => (width >= scale * delta-x * 0.5 )
+           (delta-x (round (* 0.5 (rectangle-width (sheet-region stream)))))
+           (delta-y (round (* 0.5 (rectangle-height (sheet-region stream)))))
+           (scale (min (/ (* 0.95 delta-x) (piece-width piece))
+                       (/ (* 0.95 delta-y) (piece-height piece))))
 
-         (transform (clim:compose-transformations
-                     (clim:make-translation-transformation delta-x delta-y)
-                     (clim:make-scaling-transformation scale scale))))
-
-    (window-clear stream)
-
-    (with-drawing-options
-        (medium
-         :transformation transform)
-      (draw-coordinate-system piece stream)
-      (draw-piece piece
-                  stream))))
+           (transform (clim:compose-transformations
+                       (clim:make-translation-transformation delta-x delta-y)
+                       (clim:make-scaling-transformation scale scale))))
+        (window-clear stream)
+        
+        (with-drawing-options
+            (medium
+             :transformation transform)
+          (draw-piece piece stream)
+          (draw-coordinate-system piece stream)
+          )))))
 
 
 (defun draw-coordinate-system (piece stream)
