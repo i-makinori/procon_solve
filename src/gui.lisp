@@ -1,7 +1,7 @@
 
 (in-package :procon)
 
-;; GUI
+;; GUI ;;;;;;;;;;;;;;;;
 
 (defun piece->points-consed-list (piece)
   (mapcar #'(lambda (point)
@@ -45,7 +45,7 @@
 (defvar *solve-gui-state* nil)
 
 (defun run-solve-gui-test ()
-  (setf *solve-gui-state*
+  (setf *solve-gui-state* 
         (make-application-frame 'solve-gui
                                 :gui-piece-list *test-gui-piece-list*))
   (run-frame-top-level *solve-gui-state*))
@@ -71,9 +71,11 @@
 ;;;; frame
 
 (define-application-frame solve-gui ()
-  ((gui-piece-list :initform *test-gui-piece-list*
+  ((gui-piece-list :initarg :gui-piece-list
+                   :initform nil
                    :accessor gui-piece-list)
-   (synth-list :initform nil :accessor synth-list)
+   (synth-list :initform nil 
+               :accessor synth-list)
    (current-piece :initform (make-instance 'gui-piece)
                   :accessor current-piece))
   (:panes 
@@ -87,7 +89,7 @@
                        :display-time nil
                        :text-style (make-text-style :sans-serif :roman :normal)
                        :display-function #'write-piece-info)
-    
+   
    (piece-list
     (make-pane 'list-pane
                :items nil
@@ -105,7 +107,7 @@
              (vertically ()
                canvas
                current-piece-info
-             )))
+               )))
          ;;interactor
          )))
   (:menu-bar t))
@@ -126,7 +128,7 @@
   (display-piece-preview
    (pane-frame (find-pane-named *application-frame* 'canvas))
    (get-frame-pane *application-frame* 'canvas))
-
+  
   (write-piece-info
    (pane-frame (find-pane-named *application-frame* 'current-piece-info))
    (get-frame-pane *application-frame* 'current-piece-info)))
