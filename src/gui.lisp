@@ -156,8 +156,8 @@
            ;; all(transform) => (width >= scale * delta-x * 0.5 )
            (delta-x (round (* 0.5 (rectangle-width (sheet-region stream)))))
            (delta-y (round (* 0.5 (rectangle-height (sheet-region stream)))))
-           (scale (min (/ (* 0.95 delta-x) (piece-width piece))
-                       (/ (* 0.95 delta-y) (piece-height piece))))
+           (scale (min (/ (- delta-x 10) (piece-width piece))
+                       (/ (- delta-y 10) (piece-height piece))))
 
            (transform (clim:compose-transformations
                        (clim:make-translation-transformation delta-x delta-y)
@@ -173,21 +173,38 @@
 
 
 (defun draw-coordinate-system (piece stream)
-  (let ((axis-length (round (* 0.95 (max (piece-width piece)
-                                         (piece-height piece))))))
-    ;; grid
-    (draw-points* 
-     stream
-     (flatten (mapcar #'(lambda (y) 
-                          (mapcar #'(lambda (x) (list x y))
-                                  (upto (- axis-length) axis-length)))
-                      (upto (- axis-length) axis-length )))
-     :ink +black+) ; (make-rgb-color 0.2 0.2 0.2))
+  (let* ((axis-length (ceiling (* 0.95 (max (piece-width piece)
+                                         (piece-height piece)))))
+         (grid-coord-list-1dim 
+          (mapcar #'(lambda (num) (* num 5))
+                  (upto (floor (/ (- axis-length) 5)) (ceiling (/ axis-length 5))))))
+    ;; grid-point
+    (if (< axis-length 50)
+        (draw-points* stream
+                      (flatten (mapcar #'(lambda (y) 
+                                           (mapcar #'(lambda (x) (list x y))
+                                                   (upto (- axis-length) axis-length)))
+                                       (upto (- axis-length) axis-length )))
+                      :ink +black+) ; (make-rgb-color 0.2 0.2 0.2))
+        )
+    
+    ;; grid-line
+    (draw-lines* stream
+                 (flatten (mapcar #'(lambda (x) 
+                                      (list x (- axis-length) x axis-length))
+                                  grid-coord-list-1dim))
+                 :ink +gray+)
+    (draw-lines* stream
+                 (flatten (mapcar #'(lambda (y) 
+                                      (list (- axis-length) y axis-length y))
+                                  grid-coord-list-1dim))
+                 :ink +gray+)
+
     ;; axis-line
     (draw-line* stream (- axis-length) 0 (* axis-length) 0
-                :ink +blue+)
+                :ink +blue+ :line-thickness 2)
     (draw-line* stream 0 (- axis-length) 0 (* axis-length)
-                :ink +blue+)))
+                :ink +blue+ :line-thickness 2)))
 
 (defun draw-piece (piece stream)
   (draw-polygon* 
@@ -196,5 +213,5 @@
     (mapcar #'(lambda (point)
                 (list (rest-assoc :x point) (rest-assoc :y point)))
             (car (rest-assoc :points piece))))
-   :filled nil))
+   :filled nil :ink +green+ :line-thickness 4))
 
