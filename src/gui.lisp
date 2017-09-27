@@ -21,13 +21,16 @@
    (piece :initarg :piece :accessor gui-piece-piece))
   (:default-initargs :name "unnamed" :piece nil))
 
-;; for test
-(defparameter *test-gui-piece-list*
+(defun piece-list->gui-piece-list (piece-list &key (name-rule #'cons-list-n))
   (mapcar #'(lambda (pair)
               (make-instance 'gui-piece
                              :name (car pair)
                              :piece (cdr pair)))
-          (cons-list-n *test-piece-list*)))
+          (funcall name-rule piece-list)))
+
+;; for test
+(defparameter *test-gui-piece-list*
+  (piece-list->gui-piece-list *test-piece-list*))
 
 
 
@@ -107,11 +110,9 @@
   (:menu-bar t))
 
 (defmethod generate-panes :after (fm (frame solve-gui))
-  (reset-list-pane (find-pane-named frame 'piece-list)
-                   (mapcar #'(lambda (gui-piece)
-                               gui-piece)
-                           (gui-piece-list *application-frame*))))
-           
+  (reset-list-pane (find-pane-named frame 'piece-list)                   
+                   (gui-piece-list *application-frame*)))
+
 ;;;; piece-list-panel
 
 (defun piece-list-pane-changed (pane value) 
