@@ -33,10 +33,18 @@
 
 ;;;; run-app
 
+(defun run-solve-gui (piece-list)
+  (let ((frame (make-application-frame 'solve-gui
+                                       :gui-piece-list piece-list)))
+    (run-frame-top-level frame)))
+
+;; for test
 (defvar *solve-gui-state* nil)
 
-(defun run-solve-gui ()
-  (setf *solve-gui-state* (make-application-frame 'solve-gui))
+(defun run-solve-gui-test ()
+  (setf *solve-gui-state*
+        (make-application-frame 'solve-gui
+                                :gui-piece-list *test-gui-piece-list*))
   (run-frame-top-level *solve-gui-state*))
 
 
