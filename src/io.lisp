@@ -16,8 +16,14 @@
                                      (cons (cons x-searched (car list)) searched-list)))
                    (t  (pack (car list) (cdr list)
                              searched-list)))))
-    (let ((packed-list (reverse (pack nil list '()))))
-      (coord-to-piece packed-list))))
+    (let* ((packed-list (reverse (pack nil list '())))
+           (first-point (car packed-list))
+           (translate-to-origin-list 
+            (mapcar #'(lambda (point)
+                        (cons (* 100 (- (car point) (car first-point)))
+                              (* 100 (- (cdr point) (cdr first-point)))))
+                    packed-list)))
+      (coord-to-piece translate-to-origin-list))))
 
 (defun read-coord-data (&optional (file-name *coord-file1*))
   "read file-name, text data to piece"

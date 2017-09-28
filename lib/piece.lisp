@@ -11,7 +11,7 @@
   "in n-polygon. when degree-rength is not (n-2)*pi, let degree-length (n-2)*pi "
   (let* ((length (length degrees))
          (adjust-func
-          (if (a-10d= pi (/ (reduce #'+ degrees) (* PI (- length 2))))
+          (if (> pi (/ (reduce #'+ degrees) (* PI (- length 2))))
               #'(lambda (d) (- *2pi* d))
               #'(lambda (d) d))))
     (mapcar adjust-func degrees)))
@@ -66,7 +66,7 @@ t : included"
   "search each triangle included in piece,
 center-deg is smaller than (pi - st-error), it's gravity-center is included in piece"
   (let ((n (search '(()) (piece-degrees piece)
-                   :test #'(lambda (n x) n (> (* pi (/ 3.25 4)) x))))
+                   :test #'(lambda (n x) n (> pi x))))
         (vecs (piece-vectors piece)))
     (gravity-center (list
                      (rotate-nth (- n 1) vecs)

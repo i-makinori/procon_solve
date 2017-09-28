@@ -36,8 +36,8 @@
     ))
 
 
-(defun call-repl ()
-  (repl (mapcar #'piece-to-synth-piece (read-coord-data)) 0))
+(defun call-repl (&optional (file-name *coord-file1*))
+  (repl (mapcar #'piece-to-synth-piece (read-coord-data file-name)) 0))
 
 ;;;read-command
 
