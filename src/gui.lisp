@@ -9,7 +9,9 @@
                     (rest-assoc :y point)))
           (car-rest-assoc :points piece)))
 
-;; for test
+
+
+;;;; for test
 (defparameter *test-piece-list* 
   (take *sample-json-1-piece-list* 100))
 

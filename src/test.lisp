@@ -11,4 +11,3 @@
       (mapcar #'(lambda (list) 
                   (format nil "~{~a ~}~%" list))
        coord-seq-list))))
-

@@ -10,9 +10,6 @@
 ;; element =:: table=::(Id::S), Piece
 
 
-(defun point (dx dy)
-  `((:x ,dx) (:y ,dy)))
-
 (defun points (point-list)
   `(:points ,point-list))
 
@@ -29,6 +26,7 @@
 
 
 ;;;; util
+
 (defun piece-able-states (piece)
   ;; list of piece of conversion possible.
   ;; which is set of discrete points, flip overd of it, and so on.

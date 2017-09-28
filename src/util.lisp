@@ -21,6 +21,42 @@
             list)))
 
 
+;;;; degree
+
+(defun rad->360 (rad)
+  (* rad 180 (/ pi)))
+
+(defun 360->rad (deg)
+  (* deg pi (/ 180)))
+
+(defparameter 2pi (* 2 pi))
+
+
+;;;; error-rounding standard error ;;;;;;;;;;
+(defparameter *error-round-length* 0.01)
+(defparameter *error-round-deg* (rad->360 (* pi (/ 0.1  180))))
+
+
+(defun error-round-length= (length1 length2)
+  (and (< (- length1 *error-round-length*) length2)
+       (> (+ length1 *error-round-length*) length2)))
+
+
+(defun error-round-deg= (deg1 deg2)
+  (and (< (- deg1 *error-round-deg*) deg2)
+       (> (+ deg1 *error-round-deg*) deg2)))
+
+
+#| return (val||fail)
+(defun round-deg (deg)
+  
+)
+
+(defun round-lenght (length)
+  "round float value by standard error : *error-round-length*")
+|#
+
+
 ;;;; list ;;;;;;;;;;;;;;;;;;;
 
 (defun concat (list)
