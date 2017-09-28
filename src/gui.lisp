@@ -141,6 +141,7 @@
       
       (format stream "piece-label : ~A ~%" name)
       (format stream "points : ~% ~A" (piece->points-consed-list piece))
+      (format stream "~&~A~%" piece)
 
       (finish-output stream))))
 
