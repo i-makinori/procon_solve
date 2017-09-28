@@ -19,11 +19,16 @@
   (;; package
    (:file "package")
    ;; test :: samples
-   (:file "test/samples")
+   (:file "test/samples1")
+   (:file "test/samples2")
    ;; src.libs / src.structure
-   (:file "src/util" :depends-on ("test/samples"))
+   (:file "src/util" :depends-on ("test/samples1" "test/samples2"))
    (:file "src/line" :depends-on ("src/util"))
    (:file "src/vector" :depends-on ("src/util" "src/line"))
+
+   (:file "src/piece")
+   (:file "src/synth-piece")
+
    (:file "src/structure" :depends-on ("src/util" "src/line" "src/vector"))
    ;; src.synth
 
