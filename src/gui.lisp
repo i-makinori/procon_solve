@@ -3,7 +3,7 @@
 
 ;; GUI ;;;;;;;;;;;;;;;;
 
-(defun piece->points-consed-list (piece)
+(defun piece->spots-consed-list (piece)
   (mapcar #'(lambda (point)
               (cons (spot-x point)
                     (spot-y point)))
@@ -38,10 +38,15 @@
 
 ;;;; run-app
 
-(defun run-solve-gui (piece-list)
-  (let ((frame (make-application-frame 'solve-gui
-                                       :gui-piece-list piece-list)))
+(defun show-piece-list (piece-list)
+  "in CLIM GUI"
+  (let ((frame (make-application-frame 
+                'solve-gui
+                :gui-piece-list (piece-list->gui-piece-list piece-list))))
     (run-frame-top-level frame)))
+
+(defun show-piece (piece)
+  (show-piece-list (list piece)))
 
 ;; for test
 (defvar *solve-gui-state* nil)
@@ -142,7 +147,8 @@
       (window-clear stream)
       
       (format stream "piece-label : ~A ~%" name)
-      (format stream "points : ~% ~A" (piece->points-consed-list piece))
+      (format stream "spots : ~% ~A" (piece->spots-consed-list piece))
+      (format stream "~%~%~%")
       (format stream "~&~A~%" piece)
 
       (finish-output stream))))
