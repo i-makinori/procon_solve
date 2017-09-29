@@ -2,14 +2,10 @@
 
 ;;;; utils ;;;;;;;;;;;;;
 
+;;;; hoge constant ;;;;;;;;;;
 
-;;;; key-list
-(defun rest-assoc (key key-list)
-  (rest (assoc key key-list)))
-
-(defun car-rest-assoc (key key-list)
-  (car (rest (assoc key key-list))))
-
+(defparameter *huge-num* 100000000)
+(defparameter *-huge-num* (- *huge-num*))
 
 ;;;; number-pair ;;;;;;;;;;;;;
 
@@ -55,6 +51,14 @@
 (defun round-lenght (length)
   "round float value by standard error : *error-round-length*")
 |#
+
+
+;;;; key-list
+(defun rest-assoc (key key-list)
+  (rest (assoc key key-list)))
+
+(defun car-rest-assoc (key key-list)
+  (car (rest (assoc key key-list))))
 
 
 ;;;; list ;;;;;;;;;;;;;;;;;;;

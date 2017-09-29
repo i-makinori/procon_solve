@@ -119,10 +119,10 @@
 
 ;; util
 
-(defun vector-to-point (vec)
-  (point (car vec) (cdr vec)))
+(defun vector-to-point (vec) "ok(?)"
+  (point (vx vec) (vy vec)))
 
-(defun vectortor-to-line (vector-start vector-delta)
+(defun vector-to-line (vector-start vector-delta)
   (line (vx vector-start) (vy vector-start)
         (vx vector-delta) (vy vector-delta)))
 
@@ -135,7 +135,7 @@
                vecs))
       vecs))
 
-(defun vectors-to-angle (vec1 vec2 vec3)
+(defun vectors-to-angle (vec1 vec2 vec3) "ok"
   (let ((adjust-vecs (angle-vectors-adjust (list vec1 vec2 vec3))))
     (angle (vector-to-point (nth 0 adjust-vecs))
            (vector-to-point (nth 1 adjust-vecs))

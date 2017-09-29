@@ -1,13 +1,13 @@
 (in-package #:procon)
 
-
+#|
 (defstruct piece16-
   (vectors '())
   (degrees '()))
+|#
 
 
-
-(defun degree-adjust (degrees)
+(defun degree-adjust (degrees) ;;ok
   "in n-polygon. when degree-rength is not (n-2)*pi, let degree-length (n-2)*pi "
   (let* ((length (length degrees))
          (adjust-func
@@ -16,7 +16,7 @@
               #'(lambda (d) d))))
     (mapcar adjust-func degrees)))
 
-(defun clock-wise-angle (vec1 vec2 vec3)
+(defun clock-wise-angle (vec1 vec2 vec3) ;;ok
   "vec1 from to vec2"
   (let ((angle (vectors-to-angle vec1 vec2 vec3)))
     (if (> angle 0) angle
