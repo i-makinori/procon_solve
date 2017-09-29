@@ -1,59 +1,90 @@
+
 (in-package :procon)
 
 ;;;; data-structure
 
-;; Piece ::= {points::[Point], synth-from::Synth||Nil, synth-to::Synth||Nil}
+;; Piece ::= {spots::[Spot], synth-from::Synth||Nil, synth-to::Synth||Nil}
 ;; Synth ::= {Piece, direction::((+1||-1)::=::Bool), synth-from::Rotate-Ord}
-;; Point ::= x::Int, y::Int
+;; Spot ::= x::Int, y::Int
 
 ;; in hashtable, 
 ;; element =:: table=::(Id::S), Piece
 
+#|
+(defun spots (spot-list)
+  `(:spots ,spot-list))
 
-(defun points (point-list)
-  `(:points ,point-list))
-
-(defun synth (piece direction synth-from-order-of-point)
+(defun synth (piece direction synth-from-order-of-spot)
   `((:piece ,piece)
     (:direction ,direction)
-    (:synth-from ,synth-from-order-of-point)))
+    (:synth-from ,synth-from-order-of-spot)))
 
-(defun piece (points synth-from synth-to)
-  `((:points ,points)
+(defun piece (spots synth-from synth-to)
+  `((:spots ,spots)
     (:synth-from ,synth-from)
     (:synth-to ,synth-to)))
+|#
 
+#|
+(defstruct (spots (:conc-name spots-))
+  spots)
+
+(defun spots (spot-list)
+  "make-spots"
+  (make-spots :spots spot-list))
+|#
+
+(defstruct (synth
+             (:conc-name synth-))
+  piece direction synth-from)
+
+(defun synth (piece direction synth-from-order-of-spot)
+  "make-synth"
+  (make-synth 
+   :piece piece
+   :direction direction
+   :synth-from synth-from-order-of-spot))
+
+(defstruct (piece 
+             (:conc-name piece-))
+  spots synth-from synth-to)
+
+(defun piece (spots synth-from synth-to)
+  "make-piece"
+  (make-piece :spots spots
+              :synth-from synth-from
+              :synth-to synth-to))
 
 
 ;;;; util
 
 (defun piece-able-states (piece)
   ;; list of piece of conversion possible.
-  ;; which is set of discrete points, flip overd of it, and so on.
+  ;; which is set of discrete spots, flip overd of it, and so on.
   ;;
-  ;; (rotate(points) => [points]) 
-  ;; .[poins] => all points are included in discrete point.
+  ;; (rotate(spots) => [spots]) 
+  ;; .[poins] => all spots are included in discrete spot.
   )
 
 
-(defun point-list->coord-sequence (piece)
+(defun spot-list->coord-sequence (piece)
   (concat 
-   (mapcar #'(lambda (point)
-               (list (rest-assoc :x point) (rest-assoc :y point)))
+   (mapcar #'(lambda (spot)
+               (list (spot-x spot) (spot-y spot)))
            piece)))
 
 (defun piece-height (piece)
   (let ((y-val-list 
-         (mapcar #'(lambda (point) (rest-assoc :y point))
-                 (car-rest-assoc :points piece))))
+         (mapcar #'(lambda (spot) (spot-y spot))
+                 (piece-spots piece))))
     
     (- (apply #'max y-val-list)
        (apply #'min y-val-list))))
 
 (defun piece-width (piece)
   (let ((x-val-list 
-         (mapcar #'(lambda (point) (rest-assoc :x point))
-                 (car-rest-assoc :points piece))))
+         (mapcar #'(lambda (spot) (spot-x spot))
+                 (piece-spots piece))))
     
     (- (apply #'max x-val-list)
        (apply #'min x-val-list))))

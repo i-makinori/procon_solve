@@ -2,6 +2,7 @@
 
 
 ;;;; test
+#|
 
 (defun random-vecs (&optional (num 3))
   (mapcar #'(lambda (x) x
@@ -167,3 +168,4 @@
             :point 13
             :two-side T))
           *test-condi12*)))
+|#

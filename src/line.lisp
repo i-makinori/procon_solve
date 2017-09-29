@@ -5,21 +5,38 @@
 
 
 
-;;;; structure point
-(defun point (x y)
+;;;; structure spot
+#|
+(defun spot (x y)
   `((:x ,x) (:y ,y)))
 
-(defun p-x (point)
-  "point-x"
-  (car-rest-assoc :x point))
+(defun spot-x (spot)
+  "spot-x"
+  (car-rest-assoc :x spot))
 
-(defun p-y (point)
-  "point-y"
-  (car-rest-assoc :y point))
+(defun spot-y (spot)
+  "spot-y"
+  (car-rest-assoc :y spot))
+|#
 
+(defstruct (spot
+             (:conc-name spot-))
+  x y)
+
+(defun spot (x y)
+  (make-spot :x x :y y))
+
+#|
+(defun spot-x (spot)
+  (spot-spot-x spot))
+
+(defun spot-y (spot)
+  (spot-spot-y spot))
+|#
 
 ;;;; structure line
   
+#|
 (defun line (x1 y1 x2 y2)
   `((:x1 ,x1) (:y1 ,y1)
     (:x2 ,x2) (:y2 ,y2)))
@@ -35,20 +52,43 @@
 
 (defun line-y2 (line)
   (car-rest-assoc :y2 line))
+|#
 
+(defstruct (piece-line
+             (:conc-name line-))
+  x1 y1 x2 y2)
 
-(defun 2point->line (p1 p2)
-  (line (p-x p1) (p-y p1) (p-x p2) (p-y p2)))
+(defun line (x1 y1 x2 y2)
+  "make-spot-line"
+  (make-piece-line 
+   :x1 x1 :y1 y1 :x2 x2 :y2 y2))
 
-(defun line->2point (line)
-  (values (point (line-x1 line) (line-y1 line)) (point (line-x2 line) (line-y2 line))))
+#|
+(defun line-x1 (line)
+  (spot-line-x1 line))
+
+(defun line-y1 (line)
+  (spot-line-y1 line))
+
+(defun line-x2 (line)
+  (spot-line-x2 line))
+
+(defun line-y2 (line)
+  (spot-line-y2 line))
+|#
+
+(defun 2spot->line (p1 p2)
+  (line (spot-x p1) (spot-y p1) (spot-x p2) (spot-y p2)))
+
+(defun line->2spot (line)
+  (values (spot (line-x1 line) (line-y1 line)) (spot (line-x2 line) (line-y2 line))))
 
 
 
 ;;;; tests
-(defparameter *test-point1* (point 10 20))
-(defparameter *test-point2* (point 60 80))
-(defparameter *test-point3* (point -40 10))
+(defparameter *test-spot1* (spot 10 20))
+(defparameter *test-spot2* (spot 60 80))
+(defparameter *test-spot3* (spot -40 10))
 
 (defparameter *test-line1* (line 10 20 20 20))
 (defparameter *test-line2* (line 20 20 20 10))
@@ -69,17 +109,17 @@
 
 
 (defun distance (p1 p2)
-  (sqrt (+ (square (- (p-x p1) (p-x p2)))
-           (square (- (p-y p1) (p-y p2))))))
+  (sqrt (+ (square (- (spot-x p1) (spot-x p2)))
+           (square (- (spot-y p1) (spot-y p2))))))
 
 
-(defun coordinate-to-dir (start-point end-point)
-  (atan (- (p-x end-point) (p-x start-point)) 
-        (- (p-y end-point) (p-y start-point))))
+(defun coordinate-to-dir (start-spot end-spot)
+  (atan (- (spot-x end-spot) (spot-x start-spot)) 
+        (- (spot-y end-spot) (spot-y start-spot))))
 
 (defun line-center (line)
-  (point (/ (+ (line-x1 line) (line-x2 line)) 2)
-         (/ (+ (line-y1 line) (line-y2 line)) 2)))
+  (spot (/ (+ (line-x1 line) (line-x2 line)) 2)
+        (/ (+ (line-y1 line) (line-y2 line)) 2)))
 
 (defun line-equal (line1 line2)
   (or (equal line1 line2)
@@ -94,12 +134,12 @@
 
 ;;;; search
 
-(defun adjacent (point adj-points)
-  (list point adj-points))
+(defun adjacent (spot adj-spots)
+  (list spot adj-spots))
 
-(defun find-next (point graph-lines)
+(defun find-next (spot graph-lines)
   (mapcar #'caadr
-          (remove-if-not #'(lambda (x) (equalp (car x) point)) graph-lines)))
+          (remove-if-not #'(lambda (x) (equalp (car x) spot)) graph-lines)))
 
 
 
@@ -107,39 +147,39 @@
   (apply #'append
          (mapcar #'(lambda (line)
                      (multiple-value-bind (p1 p2)
-                         (line->2point line)
+                         (line->2spot line)
                        (list (adjacent p1 (list p2))
                              (adjacent p2 (list p1)))))
                  lines)))
 
-(defun angle (start-point center-point end-point)
-  (let ((st-angle (coordinate-to-dir start-point center-point))
-        (ed-angle (coordinate-to-dir end-point center-point)))
+(defun angle (start-spot center-spot end-spot)
+  (let ((st-angle (coordinate-to-dir start-spot center-spot))
+        (ed-angle (coordinate-to-dir end-spot center-spot)))
     (- st-angle ed-angle (if (< st-angle ed-angle) (* -2 PI) 0))))
 
 (defmacro func-angle (name func)
-  `(defun ,name (before-point center-point next-points)
-     (if (null next-points)
+  `(defun ,name (before-spot center-spot next-spots)
+     (if (null next-spots)
          nil
          (reduce #'(lambda (x y)
-                     (if (,func (angle before-point center-point x)
-                                (angle before-point center-point y))
+                     (if (,func (angle before-spot center-spot x)
+                                (angle before-spot center-spot y))
                          x y))
-                 next-points))))
+                 next-spots))))
   
 (func-angle min-angle <)
 (func-angle max-angle >)
 
-(defun dfs (lines now-point ago-point goal-point path)
+(defun dfs (lines now-spot ago-spot goal-spot path)
   (cond
-    ((equalp now-point goal-point) (reverse (cons now-point path)))
-    ((null now-point) nil)
+    ((equalp now-spot goal-spot) (reverse (cons now-spot path)))
+    ((null now-spot) nil)
     (t (let ((next-lines (remove-if #'(lambda (adj)
-                                        (equalp (car adj) now-point))
+                                        (equalp (car adj) now-spot))
                                     lines )))
          (dfs next-lines
-              (max-angle ago-point now-point (find-next now-point lines))
-              now-point goal-point (cons now-point path))))))
+              (max-angle ago-spot now-spot (find-next now-spot lines))
+              now-spot goal-spot (cons now-spot path))))))
 
 
 (defun call-search+ (lines &optional (paths '()))
@@ -153,11 +193,11 @@
         (call-search+ next-lines
                      (cons (car consed-path) (cons (cdr consed-path ) paths))))))
 
-(defun points-angle (path &optional (angle nil))
+(defun spots-angle (path &optional (angle nil))
   (cond
-    ((null angle) (points-angle (append  (last path) path (list (car path))) 0))
+    ((null angle) (spots-angle (append  (last path) path (list (car path))) 0))
     ((null (cddr path)) angle)
-    (t (points-angle (cdr path)
+    (t (spots-angle (cdr path)
                      (+ angle (angle (car path) (cadr path) (caddr path)))))))
 
 
@@ -165,14 +205,14 @@
   (remove-if
    #'(lambda (path)
        (or (null path)
-           (> (/ (points-angle path) (length path))
+           (> (/ (spots-angle path) (length path))
               (/ PI 3) )))
    (call-search+ lines)))
              
 
 (defun search-2path (graph-lines line)
   (multiple-value-bind (p1 p2)
-      (line->2point line)
+      (line->2spot line)
     (values
      (dfs graph-lines p2 p1 p1 '())
      (dfs graph-lines p1 p2 p2 '()))))

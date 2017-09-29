@@ -16,9 +16,16 @@
 
 (defun json-to-primirative-piece-list (json-data)
   (let ((piece-list-json (rest (assoc :sy json-data))))
-    (mapcar #'(lambda (primirative-piece-json)
-               (piece (rest (assoc :points primirative-piece-json)) nil nil))
-            piece-list-json)))
+    ;;(print piece-list-json)
+    (mapcar 
+     #'(lambda (primirative-piece-json)
+         (make-piece
+          :spots (mapcar 
+                   #'(lambda (json-point)
+                       (spot (rest (assoc :x json-point))
+                             (rest (assoc :y json-point))))
+                   (rest (assoc :points primirative-piece-json)))))
+     piece-list-json)))
 
 
 

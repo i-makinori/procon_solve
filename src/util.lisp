@@ -54,12 +54,14 @@
 
 
 ;;;; key-list
+
+#|
 (defun rest-assoc (key key-list)
   (rest (assoc key key-list)))
 
 (defun car-rest-assoc (key key-list)
   (car (rest (assoc key key-list))))
-
+|#
 
 ;;;; list ;;;;;;;;;;;;;;;;;;;
 

@@ -18,11 +18,9 @@
   :components
   (;; package
    (:file "package")
-   ;; test :: samples
-   (:file "test/samples1")
-   (:file "test/samples2")
+
    ;; src.libs / src.structure
-   (:file "src/util" :depends-on ("test/samples1" "test/samples2"))
+   (:file "src/util" )
    (:file "src/line" :depends-on ("src/util"))
    (:file "src/vector" :depends-on ("src/util" "src/line"))
 
@@ -30,16 +28,22 @@
    (:file "src/synth-piece")
 
    (:file "src/structure" :depends-on ("src/util" "src/line" "src/vector"))
+
+   ;; test :: samples
+   (:file "test/samples1")
+   (:file "test/samples2")
+
    ;; src.synth
 
    ;; src.search
    
    ;; src.application
    (:file "src/io" :depends-on ("src/structure"))
+   
    (:file "src/gui" :depends-on ("src/structure" "src/io"))
    ;; decrim
-
+   #|
    ;; app
    (:file "src/test")
-   (:file "src/main")
+   (:file "src/main")|#
    ))

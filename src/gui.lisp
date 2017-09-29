@@ -5,15 +5,15 @@
 
 (defun piece->points-consed-list (piece)
   (mapcar #'(lambda (point)
-              (cons (rest-assoc :x point)
-                    (rest-assoc :y point)))
-          (car-rest-assoc :points piece)))
+              (cons (spot-x point)
+                    (spot-y point)))
+          (piece-spots piece)))
 
 
 
 ;;;; for test
 (defparameter *test-piece-list* 
-  (take *sample-json-1-piece-list* 100))
+  (take *test-piece-list1* 100))
 
 
 
@@ -212,6 +212,6 @@
 (defun draw-piece (piece stream)
   (draw-polygon* 
    stream
-   (point-list->coord-sequence (car-rest-assoc :points piece))
+   (spot-list->coord-sequence (piece-spots piece))
    :filled nil :ink +green+ :line-thickness 4))
 

@@ -6,6 +6,18 @@
 
 ;;;; struct
 
+(defstruct (piece-deg 
+             (:conc-name deg-))
+  deg)
+
+(defun deg (deg)
+  "(degree::velue)->piece-deg"
+  (make-piece-deg :deg deg))
+  
+
+;;;; defines
+
+#|
 (defun vec (dx dy)
   `((:dx ,dx) (:dy ,dy)))
 
@@ -15,31 +27,23 @@
 (defun dimension (dimension)
   "length, how long is it"
   `(:dimensions ,dimension))
+|#
 
+(defstruct (piece-vec (:conc-name))
+  vx vy)
 
-;;;; test
-(defparameter *test-vec1* (vec 10 20))
-(defparameter *test-vec2* (vec 60 80))
-(defparameter *test-vec3* (vec -40 10))
-
-;;;; defines
-
-(defun dist (vec1 vec2)
-  (sqrt (+ (expt (car (dxdy vec1 vec2)) 2)
-           (expt (cdr (dxdy vec1 vec2)) 2))))
-
-(defun vector-dist (vec)
-  (sqrt (+ (expt (vx vec) 2)
-           (expt (vy vec) 2))))
-
+(defun vec (dx dy)
+  "make-piece-vec"
+  (make-piece-vec :vx dx :vy dy))
+#|
 (defun vx (vec)
-  (car-rest-assoc :dx vec))
+  (piece-vec-dx vec))
 
 (defun vy (vec)
-  (car-rest-assoc :dy vec))
-
+  (piece-vec-dy vec))
+|#
 (defun point-to-vec (point)
-  (vec (p-x point) (p-y point)))
+  (vec (spot-x point) (spot-y point)))
 
 (defun dxdy (vec1 vec2)
   (vec (- (vx vec2) (vx vec1))
@@ -75,7 +79,25 @@
 (defparameter *vec-origin*
   (vec 0 0))
 
+
+
+;;;; test
+(defparameter *test-vec1* (vec 10 20))
+(defparameter *test-vec2* (vec 60 80))
+(defparameter *test-vec3* (vec -40 10))
+
+
+
 ;;;; functions
+
+(defun dist (vec1 vec2)
+  (sqrt (+ (expt (car (dxdy vec1 vec2)) 2)
+           (expt (cdr (dxdy vec1 vec2)) 2))))
+
+(defun vector-dist (vec)
+  (sqrt (+ (expt (vx vec) 2)
+           (expt (vy vec) 2))))
+
 
 (defun line-collision-detection (line1 line2)
   "line hit-judge"
