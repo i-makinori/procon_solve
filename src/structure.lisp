@@ -21,14 +21,21 @@
    :synth-from synth-from-order-of-spot))
 
 (defstruct (piece (:conc-name piece-))
-  spots synth-from synth-to)
+  spots degrees synth-from synth-to)
 
-(defun piece (spots synth-from synth-to)
+(defun piece (spots degrees synth-from synth-to)
   "make-piece"
   (make-piece :spots spots
+              :degrees degrees
               :synth-from synth-from
               :synth-to synth-to))
 
+(defun spots->piece (spots)
+  (let ((degrees (degree-adjust
+                  (map-tuple/c #'clock-wise-angle 3
+                               (rotate-list (spots->vecs spots) -1)))))
+    (piece
+     spots degrees nil nil)))
 
 ;;;; util
 

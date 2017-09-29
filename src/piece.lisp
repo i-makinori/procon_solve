@@ -1,10 +1,10 @@
 (in-package #:procon)
 
-#|
+
 (defstruct piece16-
   (vectors '())
   (degrees '()))
-|#
+
 
 
 (defun degree-adjust (degrees)
@@ -37,22 +37,22 @@
 ;;;; state
 (defstruct piece16--condition 
   "piece16- : piece16-,
-piece16--point : num(0 to x)
+piece16--spot : num(0 to x)
 two-side : (T:surface, nil:back),
 angle: float(-xPI to xPI)"
   (piece16- '())
-  (point 0)
+  (spot 0)
   (two-side 't)
   (angle 0))
 
 
 ;; hit-judge
-(defun point-piece16--include-detection (piece16--lines point-vec)
+(defun spot-piece16--include-detection (piece16--lines spot-vec)
   "nil : not-included
 t : included"
-  (let ((judged-line1 (vector-to-line (vec *-huge-num* (vy point-vec)) point-vec))
-        (judged-line2 (vector-to-line (vec *huge-num*  (1+ (vy point-vec)))
-                                      (vec (+ 2 (vx point-vec)) (+ 2 (vy point-vec))))))
+  (let ((judged-line1 (vector-to-line (vec *-huge-num* (vy spot-vec)) spot-vec))
+        (judged-line2 (vector-to-line (vec *huge-num*  (1+ (vy spot-vec)))
+                                      (vec (+ 2 (vx spot-vec)) (+ 2 (vy spot-vec))))))
     (not (some #'(lambda (line)
                    (evenp (length
                            (remove nil
@@ -62,7 +62,7 @@ t : included"
                (list judged-line1 judged-line2)))))
 
 
-(defun point-included-in-piece16- (piece16-)
+(defun spot-included-in-piece16- (piece16-)
   "search each triangle included in piece16-,
 center-deg is smaller than (pi - st-error), it's gravity-center is included in piece16-"
   (let ((n (search '(()) (piece16--degrees piece16-)
@@ -88,8 +88,8 @@ center-deg is smaller than (pi - st-error), it's gravity-center is included in p
     (let ((lines1 (map-tuple/c #'vector-to-line 2 piece16-1-vectors))
           (lines2 (map-tuple/c #'vector-to-line 2 piece16-2-vectors)))
       (or
-       (point-piece16--include-detection lines2 (point-included-in-piece16- piece16-1))
-       (point-piece16--include-detection lines1 (point-included-in-piece16- piece16-2))
+       (spot-piece16--include-detection lines2 (spot-included-in-piece16- piece16-1))
+       (spot-piece16--include-detection lines1 (spot-included-in-piece16- piece16-2))
        (lines-lines-hit-judge lines1 lines2)))))
 
 ;;;; synthesize
@@ -116,7 +116,7 @@ center-deg is smaller than (pi - st-error), it's gravity-center is included in p
 (defun refrect-piece16--condi (piece16--condi)
   (rotate-piece16-
    (turn-orver-piece16-
-    (origin-shift (piece16--condition-piece16- piece16--condi) (piece16--condition-point piece16--condi))
+    (origin-shift (piece16--condition-piece16- piece16--condi) (piece16--condition-spot piece16--condi))
     (piece16--condition-two-side piece16--condi)) (piece16--condition-angle piece16--condi)))
 
 (defun rotate-piece16- (piece16- angle)
@@ -136,13 +136,13 @@ nil:turnout, t:surfece"
        :degrees (piece16--degrees piece16-)
        )))
 
-(defun origin-shift (piece16- point)
-  (let ((new-origin (nth point (piece16--vectors piece16-))))
+(defun origin-shift (piece16- spot)
+  (let ((new-origin (nth spot (piece16--vectors piece16-))))
     (make-piece16-
      :vectors (rotate-list (mapcar #'(lambda (p) (vec-sub p new-origin))
                                    (piece16--vectors piece16-))
-                           point)
-     :degrees (rotate-list (piece16--degrees piece16-) point))))
+                           spot)
+     :degrees (rotate-list (piece16--degrees piece16-) spot))))
 
 ;;;; util
 (defun piece16--vector-rounds (piece16-)

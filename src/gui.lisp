@@ -147,7 +147,13 @@
       (window-clear stream)
       
       (format stream "piece-label : ~A ~%" name)
-      (format stream "spots : ~% ~A" (piece->spots-consed-list piece))
+      (format stream "spots, deg : (x, y, deg) ... ~% ")
+      (format stream " ~A~%" 
+              (mapcar #'(lambda (spot deg)
+                          (list (spot-x spot)
+                                (spot-y spot)
+                                (round (rad->360 deg))))
+                      (piece-spots piece) (piece-degrees piece)))
       (format stream "~%~%~%")
       (format stream "~&~A~%" piece)
 

@@ -21,10 +21,21 @@
   "make-piece-vec"
   (make-piece-vec :vx dx :vy dy))
 
-;;;; functions
+;;;; convert
 
-(defun point-to-vec (point)
-  (vec (spot-x point) (spot-y point)))
+(defun spot->vec (spot)
+  (vec (spot-x spot) (spot-y spot)))
+
+(defun vec->spot (vec)
+  (spot (vx vec) (vy vec)))
+
+(defun spots->vecs (spot-list)
+  (mapcar #'spot->vec spot-list))
+
+(defun vecs->spots (vector-list)
+  (mapcar #'vec->spot vector-list))
+
+;;;; functions
 
 (defun dxdy (vec1 vec2)
   (vec (- (vx vec2) (vx vec1))
@@ -61,7 +72,6 @@
   (vec 0 0))
 
 
-
 ;;;; test
 (defparameter *test-vec1* (vec 10 20))
 (defparameter *test-vec2* (vec 60 80))
@@ -93,20 +103,20 @@
       (and (< (* tc td) 0)
            (< (* ta tb) 0)))))
 
-(defun line-point-vec-hit-judge (line point-vec)
+(defun line-spot-vec-hit-judge (line spot-vec)
   (let ((l1 (sqrt (+ (square (- (line-x2 line) (line-x1 line)))
                      (square (- (line-y2 line) (line-y1 line))))))
-        (l2 (sqrt (+ (square (- (vx point-vec) (line-x1 line)))
-                     (square (- (vy point-vec) (line-y1 line)))))))
+        (l2 (sqrt (+ (square (- (vx spot-vec) (line-x1 line)))
+                     (square (- (vy spot-vec) (line-y1 line)))))))
     (and (>= l1 l2)
          (= (* l1 l2)
-            (+ (* (- (line-x2 line) (line-x1 line)) (- (vx point-vec) (line-x1 line)))
-               (* (- (line-y2 line) (line-y1 line)) (- (vy point-vec) (line-y1 line))))))))
+            (+ (* (- (line-x2 line) (line-x1 line)) (- (vx spot-vec) (line-x1 line)))
+               (* (- (line-y2 line) (line-y1 line)) (- (vy spot-vec) (line-y1 line))))))))
 
-(defun lines-point-vec-hit-judge (line-list point-vec)
+(defun lines-spot-vec-hit-judge (line-list spot-vec)
   (some
    #'(lambda (line)
-       (line-point-vec-hit-judge line point-vec))
+       (line-spot-vec-hit-judge line spot-vec))
    line-list))
 
 (defun same-vector-angle (vec1 vec2)
@@ -122,8 +132,9 @@
 
 ;; util
 
-(defun vector-to-point (vec) "ok(?)"
-       (point (vx vec) (vy vec)))
+(defun vector-to-spot (vec)
+  "ok(?)"
+  (spot (vx vec) (vy vec)))
 
 (defun vector-to-line (vector-start vector-delta)
   (line (vx vector-start) (vy vector-start)
@@ -138,11 +149,12 @@
                vecs))
       vecs))
 
-(defun vectors-to-angle (vec1 vec2 vec3) "ok"
-       (let ((adjust-vecs (angle-vectors-adjust (list vec1 vec2 vec3))))
-         (angle (vector-to-point (nth 0 adjust-vecs))
-                (vector-to-point (nth 1 adjust-vecs))
-                (vector-to-point (nth 2 adjust-vecs)))))
+(defun vectors-to-angle (vec1 vec2 vec3)
+  "ok"
+  (let ((adjust-vecs (angle-vectors-adjust (list vec1 vec2 vec3))))
+    (angle (vector-to-spot (nth 0 adjust-vecs))
+           (vector-to-spot (nth 1 adjust-vecs))
+           (vector-to-spot (nth 2 adjust-vecs)))))
 
 (defun vector-angle (vec)
   (vectors-to-angle *angle-vec-criteria* *vec-origin* vec))
@@ -153,21 +165,21 @@
 ;;;; standard-error
 
 
-(defun line-point-vec-hit-judge-error (line point-vec)
+(defun line-spot-vec-hit-judge-error (line spot-vec)
   (let ((l1 (sqrt (+ (square (- (line-x2 line) (line-x1 line)))
                      (square (- (line-y2 line) (line-y1 line))))))
-        (l2 (sqrt (+ (square (- (vx point-vec) (line-x1 line)))
-                     (square (- (vy point-vec) (line-y1 line)))))))
+        (l2 (sqrt (+ (square (- (vx spot-vec) (line-x1 line)))
+                     (square (- (vy spot-vec) (line-y1 line)))))))
     (and (>= l1 l2)
          (error-round-length=
           (* l1 l2)
-          (+ (* (- (line-x2 line) (line-x1 line)) (- (vx point-vec) (line-x1 line)))
-             (* (- (line-y2 line) (line-y1 line)) (- (vy point-vec) (line-y1 line))))))))
+          (+ (* (- (line-x2 line) (line-x1 line)) (- (vx spot-vec) (line-x1 line)))
+             (* (- (line-y2 line) (line-y1 line)) (- (vy spot-vec) (line-y1 line))))))))
 
 (defun line-collision-detection-error (line1 line2)
   "standard-error refrected  line hit-judge"
   (and (line-collision-detection line1 line2)
-       (not (or (line-point-vec-hit-judge-error line1 (vec (line-x1 line2) (line-y1 line2)))
-                (line-point-vec-hit-judge-error line1 (vec (line-x2 line2) (line-y2 line2)))
-                (line-point-vec-hit-judge-error line2 (vec (line-x1 line1) (line-y1 line1)))
-                (line-point-vec-hit-judge-error line2 (vec (line-x2 line1) (line-y2 line1)))))))
+       (not (or (line-spot-vec-hit-judge-error line1 (vec (line-x1 line2) (line-y1 line2)))
+                (line-spot-vec-hit-judge-error line1 (vec (line-x2 line2) (line-y2 line2)))
+                (line-spot-vec-hit-judge-error line2 (vec (line-x1 line1) (line-y1 line1)))
+                (line-spot-vec-hit-judge-error line2 (vec (line-x2 line1) (line-y2 line1)))))))
