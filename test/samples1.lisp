@@ -3,6 +3,9 @@
 ;;;; samples ;;;;;;;;;;;;;;;;;
 
 ;;;; sampel-json-file
+;; sample json of synth and piece
+;; https://github.com/nnct-jo-ken/procon2017_kyogi_server/wiki/piece-synth-in-JSON
+
 (defparameter *json-file-of-piecess1* "test/piece_sample.json")
 
 
@@ -19,7 +22,6 @@
                            (list (spot-x spot) (spot-y spot)))
                        spot-list)))
    (mapcar #'piece-spots piece-list)))
-
 
 
 

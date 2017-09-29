@@ -6,28 +6,13 @@
 
 ;;;; struct
 
-(defstruct (piece-deg 
-             (:conc-name deg-))
+(defstruct (piece-deg (:conc-name deg-))
   deg)
 
 (defun deg (deg)
   "(degree::velue)->piece-deg"
   (make-piece-deg :deg deg))
-  
 
-;;;; defines
-
-#|
-(defun vec (dx dy)
-  `((:dx ,dx) (:dy ,dy)))
-
-(defun deg (deg)
-  `(:deg ,deg))
-
-(defun dimension (dimension)
-  "length, how long is it"
-  `(:dimensions ,dimension))
-|#
 
 (defstruct (piece-vec (:conc-name))
   vx vy)
@@ -35,13 +20,9 @@
 (defun vec (dx dy)
   "make-piece-vec"
   (make-piece-vec :vx dx :vy dy))
-#|
-(defun vx (vec)
-  (piece-vec-dx vec))
 
-(defun vy (vec)
-  (piece-vec-dy vec))
-|#
+;;;; functions
+
 (defun point-to-vec (point)
   (vec (spot-x point) (spot-y point)))
 
@@ -142,7 +123,7 @@
 ;; util
 
 (defun vector-to-point (vec) "ok(?)"
-  (point (vx vec) (vy vec)))
+       (point (vx vec) (vy vec)))
 
 (defun vector-to-line (vector-start vector-delta)
   (line (vx vector-start) (vy vector-start)
@@ -158,10 +139,10 @@
       vecs))
 
 (defun vectors-to-angle (vec1 vec2 vec3) "ok"
-  (let ((adjust-vecs (angle-vectors-adjust (list vec1 vec2 vec3))))
-    (angle (vector-to-point (nth 0 adjust-vecs))
-           (vector-to-point (nth 1 adjust-vecs))
-           (vector-to-point (nth 2 adjust-vecs)))))
+       (let ((adjust-vecs (angle-vectors-adjust (list vec1 vec2 vec3))))
+         (angle (vector-to-point (nth 0 adjust-vecs))
+                (vector-to-point (nth 1 adjust-vecs))
+                (vector-to-point (nth 2 adjust-vecs)))))
 
 (defun vector-angle (vec)
   (vectors-to-angle *angle-vec-criteria* *vec-origin* vec))

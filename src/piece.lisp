@@ -7,7 +7,7 @@
 |#
 
 
-(defun degree-adjust (degrees) ;;ok
+(defun degree-adjust (degrees)
   "in n-polygon. when degree-rength is not (n-2)*pi, let degree-length (n-2)*pi "
   (let* ((length (length degrees))
          (adjust-func
@@ -16,7 +16,7 @@
               #'(lambda (d) d))))
     (mapcar adjust-func degrees)))
 
-(defun clock-wise-angle (vec1 vec2 vec3) ;;ok
+(defun clock-wise-angle (vec1 vec2 vec3) 
   "vec1 from to vec2"
   (let ((angle (vectors-to-angle vec1 vec2 vec3)))
     (if (> angle 0) angle
@@ -98,17 +98,17 @@ center-deg is smaller than (pi - st-error), it's gravity-center is included in p
   (let ((refed-piece16-1 (refrect-piece16--condi piece16-1-condition))
         (refed-piece16-2 (refrect-piece16--condi piece16-2-condition)))
     (if (piece16--collision-detection refed-piece16-1
-                                   refed-piece16-2)
+                                      refed-piece16-2)
         nil
         (synthesize-piece16--rule refed-piece16-1 refed-piece16-2))))
 
 (defun piece16--condition-collision-detection (condi1 condi2)
   (piece16--collision-detection (refrect-piece16--condi condi1)
-                             (refrect-piece16--condi condi2)))
+                                (refrect-piece16--condi condi2)))
 
 (defun let-synthesize-piece16--condition (condi1 condi2)
   (synthesize-piece16--rule (refrect-piece16--condi condi1)
-                         (refrect-piece16--condi condi2)))
+                            (refrect-piece16--condi condi2)))
 
 
 ;;;; deploy

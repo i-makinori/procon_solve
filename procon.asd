@@ -39,11 +39,9 @@
    
    ;; src.application
    (:file "src/io" :depends-on ("src/structure"))
-   
    (:file "src/gui" :depends-on ("src/structure" "src/io"))
    ;; decrim
-   #|
    ;; app
    (:file "src/test")
-   (:file "src/main")|#
+   (:file "src/main")
    ))

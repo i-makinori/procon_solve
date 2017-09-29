@@ -10,32 +10,7 @@
 ;; in hashtable, 
 ;; element =:: table=::(Id::S), Piece
 
-#|
-(defun spots (spot-list)
-  `(:spots ,spot-list))
-
-(defun synth (piece direction synth-from-order-of-spot)
-  `((:piece ,piece)
-    (:direction ,direction)
-    (:synth-from ,synth-from-order-of-spot)))
-
-(defun piece (spots synth-from synth-to)
-  `((:spots ,spots)
-    (:synth-from ,synth-from)
-    (:synth-to ,synth-to)))
-|#
-
-#|
-(defstruct (spots (:conc-name spots-))
-  spots)
-
-(defun spots (spot-list)
-  "make-spots"
-  (make-spots :spots spot-list))
-|#
-
-(defstruct (synth
-             (:conc-name synth-))
+(defstruct (synth (:conc-name synth-))
   piece direction synth-from)
 
 (defun synth (piece direction synth-from-order-of-spot)
@@ -45,8 +20,7 @@
    :direction direction
    :synth-from synth-from-order-of-spot))
 
-(defstruct (piece 
-             (:conc-name piece-))
+(defstruct (piece (:conc-name piece-))
   spots synth-from synth-to)
 
 (defun piece (spots synth-from synth-to)
@@ -88,9 +62,3 @@
     
     (- (apply #'max x-val-list)
        (apply #'min x-val-list))))
-
-
-;;;; test
-;; sample json of synth and piece
-;; https://github.com/nnct-jo-ken/procon2017_kyogi_server/wiki/piece-synth-in-JSON
-

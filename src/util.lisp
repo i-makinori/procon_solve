@@ -2,12 +2,12 @@
 
 ;;;; utils ;;;;;;;;;;;;;
 
-;;;; hoge constant ;;;;;;;;;;
+;;;; hoge constant 
 
 (defparameter *huge-num* 100000000)
 (defparameter *-huge-num* (- *huge-num*))
 
-;;;; number-pair ;;;;;;;;;;;;;
+;;;; number-pair 
 
 (defun number-pair (list &optional (initial-value 0))
   (let ((val initial-value))
@@ -28,7 +28,7 @@
 (defparameter 2pi (* 2 pi))
 
 
-;;;; error-rounding standard error ;;;;;;;;;;
+;;;; error-rounding standard error 
 (defparameter *error-round-length* 0.01)
 (defparameter *error-round-deg* (rad->360 (* pi (/ 0.1  180))))
 
@@ -46,24 +46,14 @@
 #| return (val||fail)
 (defun round-deg (deg)
   
-)
+  )
 
 (defun round-lenght (length)
   "round float value by standard error : *error-round-length*")
 |#
 
 
-;;;; key-list
-
-#|
-(defun rest-assoc (key key-list)
-  (rest (assoc key key-list)))
-
-(defun car-rest-assoc (key key-list)
-  (car (rest (assoc key key-list))))
-|#
-
-;;;; list ;;;;;;;;;;;;;;;;;;;
+;;;; list 
 
 (defun concat (list)
   (apply #'append list))
@@ -147,14 +137,15 @@
       (cons (car list) (take-while (cdr list) test))))
 
 
-;;;; string-list ;;;;;;;;;;;;
+;;;; string-list 
 
 (defun concat-string-list-list (string-list-list)
   (reduce 
    #'(lambda (s1 s2) (concatenate 'string s1 s2))
    string-list-list))
 
-;;;; macros ;;;;;;;;;;;;;;;;;;;;
+
+;;;; macros 
 (defmacro with-gensyms (syms &body body)
   `(let ,(mapcar #'(lambda (s)
                      `(,s (gensym)))
@@ -193,6 +184,7 @@
                         (reverse acc))
                     (reverse acc))))
     (f lst nil)))
+
 
 ;;;; rotate-list tuple
 
