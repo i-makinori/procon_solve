@@ -14,6 +14,12 @@
   (make-spot :x x :y y))
 
 
+;; ceonvert 
+(defun cons->spot (cons)
+  "cons : (x . y) form"
+  (spot (car cons) (cdr cons)))
+
+
 ;;;; structure line
 
 (defstruct (piece-line (:conc-name line-))
