@@ -135,6 +135,7 @@
       (window-clear stream)
       
       (format stream "piece-label : ~A ~%" name)
+      (format stream "is-frame :  ~A ~%" (piece-is-frame piece))
       (format stream "spots deg : (x y deg) ~% ~A" 
               (mapcar #'(lambda (spot deg)
                           (list (spot-x spot) (spot-y spot) (round (rad->360 deg))))
@@ -157,7 +158,7 @@
 (defmethod display-piece-preview (frame stream)
   (let ((medium (sheet-medium stream))
         (piece (gui-piece-piece (current-piece frame))))
-    (when piece
+    (when (and piece (piece-spots piece))
       (let*
           (;; transformation
            ;; all(transform) => (width >= scale * delta-x * 0.5 )
