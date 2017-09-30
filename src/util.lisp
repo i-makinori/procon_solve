@@ -44,11 +44,12 @@
 
 (defun regarded-to-maybe-integer (real-num)
   "real-num -> maybe interger.
-if (error of real-num < *standard-error* ) than (round real-num) else nil(=fail)"
+if (error of real-num < *standard-error*) than Just (round real-num) else nothing(=fail)"
   (multiple-value-bind (int-num error-num) 
       (round real-num)
     (if (> *error-round-length* error-num)
-        int-num)))
+        (just int-num)
+        (nothing))))
 
 #| return (val||fail)
 (defun round-deg (deg))
