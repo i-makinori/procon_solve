@@ -42,7 +42,7 @@
   (and (< (- deg1 *error-round-deg*) deg2)
        (> (+ deg1 *error-round-deg*) deg2)))
 
-(defun maybe-regard-integer (real-num)
+(defun regarded-to-maybe-integer (real-num)
   "real-num -> maybe interger.
 if (error of real-num < *standard-error* ) than (round real-num) else nil(=fail)"
   (multiple-value-bind (int-num error-num) 
