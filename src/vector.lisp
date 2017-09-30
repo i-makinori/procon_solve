@@ -164,6 +164,11 @@
     (if (> angle 0) angle
         (+ PI angle))))
 
+(defun rotate-vec (vector degree)
+  "2d rotation marrix"
+  (vec (- (* (vx vector) (cos degree)) (* (vy vector) (sin degree)))
+       (+ (* (vx vector) (sin degree)) (* (vy vector) (cos degree)))))
+
 
 ;;;; standard-error
 
