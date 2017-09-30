@@ -19,6 +19,10 @@
   "cons : (x . y) form"
   (spot (car cons) (cdr cons)))
 
+(defun spot->list (spot)
+  " = (list (spot-x spot) (spot-y spot))
+deal with list as spot"
+  (list (spot-x spot) (spot-y spot)))
 
 ;;;; structure line
 

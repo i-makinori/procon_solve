@@ -24,8 +24,8 @@
    (:file "src/line" :depends-on ("src/util"))
    (:file "src/vector" :depends-on ("src/util" "src/line"))
 
-   (:file "src/piece")
-   (:file "src/synth-piece")
+   ;;(:file "src/piece")
+   ;;(:file "src/synth-piece")
 
    (:file "src/structure" :depends-on ("src/util" "src/line" "src/vector"))
 

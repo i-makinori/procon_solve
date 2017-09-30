@@ -3,7 +3,6 @@
 
 ;; GUI ;;;;;;;;;;;;;;;;
 
-
 ;;;; gui-piece
 (defclass gui-piece ()
   ((name :initarg :name :accessor gui-piece-name)
@@ -218,5 +217,5 @@
 (defun draw-piece (piece stream)
   (draw-polygon* 
    stream
-   (spot-list->coord-sequence (piece-spots piece))
+   (flatten (mapcar #'spot->list (piece-spots piece)))
    :filled nil :ink +green+ :line-thickness 4))

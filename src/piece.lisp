@@ -7,20 +7,7 @@
 
 
 
-(defun degree-adjust (degrees)
-  "in n-polygon. when degree-rength is not (n-2)*pi, let degree-length (n-2)*pi "
-  (cond ((error-round-deg= pi
-                           (/ (reduce #'+ degrees) (- (length degrees) 2)))
-         degrees)
-        (t 
-         (mapcar #'(lambda (deg) (- 2pi deg)) degrees))))
 
-(defun clock-wise-angle (vec1 vec2 vec3) 
-  "vec1 from to vec2"
-  (let ((angle (vectors-to-angle vec1 vec2 vec3)))
-    (if (> angle 0) angle
-        (+ PI angle)
-        )))
 
 (defun coord-to-piece16- (coordinates)
   (let* ((vectors (mapcar #'(lambda (c1) (dxdy (car coordinates) c1)) coordinates))

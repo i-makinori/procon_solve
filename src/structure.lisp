@@ -37,6 +37,7 @@
     (piece
      spots degrees nil nil)))
 
+
 ;;;; util
 
 (defun piece-able-states (piece)
@@ -48,11 +49,16 @@
   )
 
 
-(defun spot-list->coord-sequence (piece)
-  (concat 
-   (mapcar #'(lambda (spot)
-               (list (spot-x spot) (spot-y spot)))
-           piece)))
+(defun degree-adjust (degrees)
+  "in n-polygon. when degree-rength is not (n-2)*pi, let degree-length (n-2)*pi "
+  (cond ((error-round-deg= pi
+                           (/ (reduce #'+ degrees) (- (length degrees) 2)))
+         degrees)
+        (t (mapcar #'(lambda (deg) (- 2pi deg)) degrees))))
+
+
+
+;;;; some function
 
 (defun piece-height (piece)
   (let ((y-val-list 

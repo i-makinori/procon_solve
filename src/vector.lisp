@@ -35,6 +35,13 @@
 (defun vecs->spots (vector-list)
   (mapcar #'vec->spot vector-list))
 
+(defun vector-to-spot (vec)
+  (spot (vx vec) (vy vec)))
+
+(defun vector-to-line (vector-start vector-delta)
+  (line (vx vector-start) (vy vector-start)
+        (vx vector-delta) (vy vector-delta)))
+
 ;;;; functions
 
 (defun dxdy (vec1 vec2)
@@ -130,15 +137,7 @@
     (vec (/ (reduce #'+ (mapcar #'vx vectors)) length)
          (/ (reduce #'+ (mapcar #'vy vectors)) length))))
 
-;; util
-
-(defun vector-to-spot (vec)
-  "ok(?)"
-  (spot (vx vec) (vy vec)))
-
-(defun vector-to-line (vector-start vector-delta)
-  (line (vx vector-start) (vy vector-start)
-        (vx vector-delta) (vy vector-delta)))
+;;;; vector<->angle
 
 (defun angle-vectors-adjust (vecs)
   "when vecs includes origin-vector, shift each vector-dxdy 10"
@@ -159,11 +158,14 @@
 (defun vector-angle (vec)
   (vectors-to-angle *angle-vec-criteria* *vec-origin* vec))
 
-
+(defun clock-wise-angle (vec1 vec2 vec3) 
+  "vec1 from to vec2"
+  (let ((angle (vectors-to-angle vec1 vec2 vec3)))
+    (if (> angle 0) angle
+        (+ PI angle))))
 
 
 ;;;; standard-error
-
 
 (defun line-spot-vec-hit-judge-error (line spot-vec)
   (let ((l1 (sqrt (+ (square (- (line-x2 line) (line-x1 line)))
