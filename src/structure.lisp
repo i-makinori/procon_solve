@@ -3,7 +3,7 @@
 
 ;;;; data-structure
 
-;; Piece ::= {spots::[Spot], synth-from::Synth||Nil, synth-to::Synth||Nil}
+;; Piece ::= {spots::[Spot], degrees::[Float], is-frame::Bool, synth-from::Synth||Nil, synth-to::Synth||Nil}
 ;; Synth ::= {Piece, direction::((+1||-1)::=::Bool), synth-from::Rotate-Ord}
 ;; Spot ::= x::Int, y::Int
 
@@ -21,12 +21,13 @@
    :synth-from synth-from-order-of-spot))
 
 (defstruct (piece (:conc-name piece-))
-  spots degrees synth-from synth-to)
+  spots degrees is-frame synth-from synth-to)
 
-(defun piece (spots degrees synth-from synth-to)
+(defun piece (spots degrees is-frame synth-from synth-to)
   "make-piece"
   (make-piece :spots spots
               :degrees degrees
+              :is-frame is-frame
               :synth-from synth-from
               :synth-to synth-to))
 
@@ -35,7 +36,7 @@
                   (map-tuple/c #'clock-wise-angle 3
                                (rotate-list (spots->vecs spots) -1)))))
     (piece
-     spots degrees nil nil)))
+     spots degrees nil nil nil)))
 
 
 ;;;; util
