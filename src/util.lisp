@@ -93,14 +93,6 @@ if (error of real-num < *standard-error*) than Just (round real-num) else nothin
            (nothing)
            (progn ,@body)))))
 
-(defun test ()
-  ;; expand theme
-  (let ((hoge (+ 10))
-        (fuga 20))
-    (if (some #'nothing-p (list hoge fuga))
-        (nothing)
-        (progn 'body))))
-
 
 ;;;; Maybe
 
@@ -137,18 +129,12 @@ if (error of real-num < *standard-error*) than Just (round real-num) else nothin
   (maybe-return maybe-a))
 
 (defmacro let-maybe (maybes-of-binding &body body)
+  "let form.  if all bindings are just form, do ,@body, else (nothing)"
   `(mapcar #'(lambda (maybe)
                maybe
                )
            ,maybes-of-binding))
 
-
-#|
-(defmacro call-when-all-just ((func &body body))
-  `(cond ((every #'maybe-just-p (list ,@body))
-          (apply #',func ,`(mapcar #'maybe-return (list ,@body))))
-         (t (nothing))))
-|#
 
 ;;;; abstruct function
 (defun id (val)
