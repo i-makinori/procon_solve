@@ -54,6 +54,36 @@ if (error of real-num < *standard-error* ) than (round real-num) else nil(=fail)
 (defun round-deg (deg))
 |#
 
+;;;; maybe
+
+(defun nothing () 
+  "Maybe - Nothing(=Failure)"
+  ;; f:failure
+  '@maybe-nothing)
+
+(defun just (a) 
+  ;; t:sucess, true
+  "Maybe - Just a"
+  (cons '@maybe-just a))
+
+(defun is-nothing (maybe)
+  (eq maybe (nothing)))
+
+(defun is-just (maybe)
+  (and (consp maybe)
+       (eq (car maybe) '@maybe-just)))
+
+(defun maybe-return (a)
+  (if (eq a (nothing)) 
+      (nothing) 
+      a))
+
+(defmacro call-when-all-just ((func &body body))
+  `(if (some #'is-nothing (list ,@body))
+       (nothing)
+       (,func ,@body)))
+
+
 ;;;; abstruct function
 (defun id (val)
   val)
