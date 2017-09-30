@@ -3,19 +3,6 @@
 
 ;; GUI ;;;;;;;;;;;;;;;;
 
-(defun piece->spots-consed-list (piece)
-  (mapcar #'(lambda (point)
-              (cons (spot-x point)
-                    (spot-y point)))
-          (piece-spots piece)))
-
-
-
-;;;; for test
-(defparameter *test-piece-list* 
-  (take *test-piece-list1* 100))
-
-
 
 ;;;; gui-piece
 (defclass gui-piece ()
@@ -32,7 +19,7 @@
 
 ;; for test
 (defparameter *test-gui-piece-list*
-  (piece-list->gui-piece-list *test-piece-list*))
+  (piece-list->gui-piece-list *test-piece-list1*))
 
 
 
@@ -123,6 +110,7 @@
   (reset-list-pane (find-pane-named frame 'piece-list)                   
                    (gui-piece-list *application-frame*)))
 
+
 ;;;; piece-list-panel
 
 (defun piece-list-pane-changed (pane value) 
@@ -139,6 +127,7 @@
    (pane-frame (find-pane-named *application-frame* 'current-piece-info))
    (get-frame-pane *application-frame* 'current-piece-info)))
 
+
 ;;;; write-piece-info
 (defmethod write-piece-info (frame stream)
   (let ((name (gui-piece-name (current-piece frame)))
@@ -147,19 +136,24 @@
       (window-clear stream)
       
       (format stream "piece-label : ~A ~%" name)
-      (format stream "spots, deg : (x, y, deg) ... ~% ")
-      (format stream " ~A~%" 
+      (format stream "spots deg : (x y deg) ~% ~A" 
               (mapcar #'(lambda (spot deg)
-                          (list (spot-x spot)
-                                (spot-y spot)
-                                (round (rad->360 deg))))
+                          (list (spot-x spot) (spot-y spot) (round (rad->360 deg))))
                       (piece-spots piece) (piece-degrees piece)))
-      (format stream "~%~%~%")
-      (format stream "~&~A~%" piece)
+      ;;(format stream "~%~%~%")
+      ;;(format stream "~&~A~%" piece)
 
       (finish-output stream))))
 
+
 ;;;; display-piece-preview
+
+(defclass canvas 
+    (standard-extended-input-stream
+     basic-pane
+     permanent-medium-sheet-output-mixin)
+  ())
+
 
 (defmethod display-piece-preview (frame stream)
   (let ((medium (sheet-medium stream))
@@ -226,4 +220,3 @@
    stream
    (spot-list->coord-sequence (piece-spots piece))
    :filled nil :ink +green+ :line-thickness 4))
-
