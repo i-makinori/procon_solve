@@ -30,7 +30,7 @@
 
 ;;;; error-rounding standard error 
 (defparameter *error-round-length* 0.01)
-(defparameter *error-round-deg* (rad->360 (* pi (/ 0.1  180))))
+(defparameter *error-round-deg* (rad->360 (* pi (/ 0.01  180))))
 
 
 (defun error-round-length= (length1 length2)
@@ -42,14 +42,16 @@
   (and (< (- deg1 *error-round-deg*) deg2)
        (> (+ deg1 *error-round-deg*) deg2)))
 
+(defun maybe-regard-integer (real-num)
+  "real-num -> maybe interger.
+if (error of real-num < *standard-error* ) than (round real-num) else nil(=fail)"
+  (multiple-value-bind (int-num error-num) 
+      (round real-num)
+    (if (> *error-round-length* error-num)
+        int-num)))
 
 #| return (val||fail)
-(defun round-deg (deg)
-  
-  )
-
-(defun round-lenght (length)
-  "round float value by standard error : *error-round-length*")
+(defun round-deg (deg))
 |#
 
 ;;;; abstruct function
