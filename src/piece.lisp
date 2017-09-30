@@ -9,12 +9,11 @@
 
 (defun degree-adjust (degrees)
   "in n-polygon. when degree-rength is not (n-2)*pi, let degree-length (n-2)*pi "
-  (let* ((length (length degrees))
-         (adjust-func
-          (if (> pi (/ (reduce #'+ degrees) (* PI (- length 2))))
-              #'(lambda (d) (- *2pi* d))
-              #'(lambda (d) d))))
-    (mapcar adjust-func degrees)))
+  (cond ((error-round-deg= pi
+                           (/ (reduce #'+ degrees) (- (length degrees) 2)))
+         degrees)
+        (t 
+         (mapcar #'(lambda (deg) (- 2pi deg)) degrees))))
 
 (defun clock-wise-angle (vec1 vec2 vec3) 
   "vec1 from to vec2"
