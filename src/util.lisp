@@ -55,28 +55,68 @@ if (error of real-num < *standard-error*) than Just (round real-num) else nothin
 (defun round-deg (deg))
 |#
 
-;;;; maybe
+
+;;;; Nothing 
 
 (defun nothing () 
   "Maybe - Nothing(=Failure)"
   ;; f:failure
-  '@maybe-nothing)
+  '@nothing)
+
+(defun failure ()
+  (nothing))
+
+(defun nothing-p (var)
+  (eq var (nothing)))
+
+(defun nothing=>nil (var)
+  (if (eq var (nothing)) nil var))
+
+(defun nil=>nothing (var)
+  (if (null var) (nothing) var))
+
+#|
+(defmacro call-when-non-nothing ((func &body body))
+  `(if (some #'is-nothing (list ,@body))
+       (nothing)
+       (,func ,@body)))
+|#
+
+(defmacro let-unless-body-bind-no-nothng (bindings &body body)
+  "let form.  only when there is no-nothings in bindings, do ,@body, else (nothing)"
+  (let ((bindings-names 
+         `,(mapcar #'(lambda (bind)
+                       (car bind))
+                   bindings)))
+    `(let ,bindings
+       (if (some #'nothing-p (list ,@bindings-names))
+           (nothing)
+           (progn ,@body)))))
+
+(defun test ()
+  ;; expand theme
+  (let ((hoge (+ 10))
+        (fuga 20))
+    (if (some #'nothing-p (list hoge fuga))
+        (nothing)
+        (progn 'body))))
+
+
+;;;; Maybe
+
 
 (defun just (a) 
   ;; t:sucess, true
   "Maybe - Just a"
-  (cons '@maybe-just a))
+  (cons '@just a))
 
-(defun maybe-nothing-p (maybe)
-  (eq maybe (nothing)))
-
-(defun maybe-just-p (maybe)
-  (and (consp maybe)
-       (eq (car maybe) '@maybe-just)))
+(defun just-p (just-var)
+  (and (consp just-var)
+       (eq (car just-var) '@just)))
 
 (defun maybe-p (a)
-  (or (is-just a) 
-      (is-nothing a)))
+  (or (just-p a) 
+      (nothing-p a)))
 
 (define-condition maybe-data-type-error (simple-error) (data)
   (:report (lambda (c s)
@@ -89,13 +129,19 @@ if (error of real-num < *standard-error*) than Just (round real-num) else nothin
          (cdr maybe-a))
         (t (nothing))))
 
-(defmacro call-when-non-nothing ((func &body body))
-  `(if (some #'is-nothing (list ,@body))
-       (nothing)
-       (,func ,@body)))
+(defun maybe-nothing=>nil (maybe)
+  (cond ((eq (nothing) maybe) nil)
+        (t (maybe-return maybe))))
 
 (defun m-ret (maybe-a)
   (maybe-return maybe-a))
+
+(defmacro let-maybe (maybes-of-binding &body body)
+  `(mapcar #'(lambda (maybe)
+               maybe
+               )
+           ,maybes-of-binding))
+
 
 #|
 (defmacro call-when-all-just ((func &body body))
