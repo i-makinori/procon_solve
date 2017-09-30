@@ -52,6 +52,9 @@
   "round float value by standard error : *error-round-length*")
 |#
 
+;;;; abstruct function
+(defun id (val)
+  val)
 
 ;;;; list 
 
@@ -224,3 +227,4 @@
           ((< ,len ,num))
        (destructuring-bind ,params (subseq ,rest 0 ,num)
          ,@body))))
+
