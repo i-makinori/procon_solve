@@ -66,7 +66,6 @@ if (error of real-num < *standard-error* ) than (round real-num) else nil(=fail)
   "Maybe - Just a"
   (cons '@maybe-just a))
 
-
 (defun maybe-nothing-p (maybe)
   (eq maybe (nothing)))
 
@@ -78,29 +77,30 @@ if (error of real-num < *standard-error* ) than (round real-num) else nil(=fail)
   (or (is-just a) 
       (is-nothing a)))
 
-
-(defun maybe-return (a)
-  (if (eq a (nothing)) 
-      (nothing) 
-      (cdr a)))
-
 (define-condition maybe-data-type-error (simple-error) (data)
   (:report (lambda (c s)
              (format s "Maybe-data-type:difference : ~A" c))))
 
+(defun maybe-return (maybe-a)
+  (cond ((not (maybe-p maybe-a)) 
+         (error 'maybe-data-type-error))
+        ((maybe-just-p maybe-a) 
+         (cdr maybe-a))
+        (t (nothing))))
 
+(defmacro call-when-non-nothing ((func &body body))
+  `(if (some #'is-nothing (list ,@body))
+       (nothing)
+       (,func ,@body)))
+
+(defun m-ret (maybe-a)
+  (maybe-return maybe-a))
+
+#|
 (defmacro call-when-all-just ((func &body body))
   `(cond ((every #'maybe-just-p (list ,@body))
           (apply #',func ,`(mapcar #'maybe-return (list ,@body))))
          (t (nothing))))
-
-#|
-(defmacro call-when-all-not-nothing ((func &body body))
-  `(cond ((not (every #'maybe-p (list ,@body)))
-          (error (make-condition 'maybe-data-type-error)))
-         ((some #'maybe-nothing-p (list ,@body))
-          (nothing))
-         (t (,func ,@`(mapcar #'maybe-return ,body)))))
 |#
 
 ;;;; abstruct function
