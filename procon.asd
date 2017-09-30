@@ -28,6 +28,7 @@
    ;;(:file "src/synth-piece")
 
    (:file "src/structure" :depends-on ("src/util" "src/line" "src/vector"))
+   (:file "src/synth" :depends-on ("src/util" "src/structure"))
 
    ;; test :: samples
    (:file "test/samples1")
