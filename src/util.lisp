@@ -85,8 +85,7 @@ if (error of real-num < *standard-error*) than Just (round real-num) else nothin
 (defmacro let-unless-body-bind-no-nothng (bindings &body body)
   "let form.  only when there is no-nothings in bindings, do ,@body, else (nothing)"
   (let ((bindings-names 
-         `,(mapcar #'(lambda (bind)
-                       (car bind))
+         `,(mapcar #'(lambda (bind) (car bind))
                    bindings)))
     `(let ,bindings
        (if (some #'nothing-p (list ,@bindings-names))
@@ -95,7 +94,6 @@ if (error of real-num < *standard-error*) than Just (round real-num) else nothin
 
 
 ;;;; Maybe
-
 
 (defun just (a) 
   ;; t:sucess, true
@@ -142,56 +140,11 @@ if (error of real-num < *standard-error*) than Just (round real-num) else nothin
              (nothing)
              (progn ,@body))))))
 
-
-(defun test2 ()
-  (let ((hoge (maybe-return (maybe-func 20)))
-        (fuga (maybe-return (just (+ 20 5)))))
-    (if (some #'nothing-p (list hoge fuga))
-        (nothing)
-        (progn 
-          ;; body
-          (print fuga) (print hoge)
-          (print "do") (+ 2 3 4) 'things))))
-
-#|
-(let-maybe
-            ((hoge (maybe-func 20))
-             (fuga (just (+ 20 5))))
-          ;; body
-          (print fuga) (print hoge))
-|#
-
-(defun maybe-func (hoge)
-  hoge
-  (if (> (random 1.00) 0.5)
-      (just (random 1.00))
-      (nothing)))
-
-
-#|
-(let-maybe
-    ((hoge (maybe-func 20))
-     (fuga (just (+ 20 5))))
-  ;; body
-  (print fuga) (print (+ hoge 10)) ;; automatic retutned
-  (print "do") (+ 2 3 4) 'things)
-|#
-
-(defun test ()
-  ;; expand theme
-  (let ((hoge (maybe-func 20))
-        (fuga (just (+ 20 5))))
-    (if (every #'just-p (list hoge fuga))
-        (progn 
-          ;; body
-          (print fuga) (print hoge)
-          (print "do") (+ 2 3 4) 'things)
-        (nothing)
-        )))
               
 ;;;; abstruct function
 (defun id (val)
   val)
+
 
 ;;;; list 
 
