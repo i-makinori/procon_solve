@@ -38,29 +38,49 @@ which can intepret special synth"
 ;;;; function 
 (defun synth->maybe-piece (synth-from synth-to)
   (let* 
-      ((piece1 (synth-piece synth-from))
-       (piece1-spots (piece-spots piece1))
-       (piece1-degs (piece-degrees piece1))
-       
-       (piece2 (synth-piece synth-to))
-       (piece2-spots (piece-spots piece2))
-       (piece2-degs (piece-degrees piece2))
-       
-       (angle2 (vector-angle (spot->vec (rotate-nth (synth-synth-from synth-to)
-                                                    piece2-spots))
-       ))
+      ((easy-piece-from (synth->easy-piece synth-from))
+       (easy-piece-to (synth->easy-piece synth-to))
        
        
        )
-
-    angle2
     #|
     (piece
      '() '() '()
      synth1 synth2))
     |#
-
     ))
+
+
+#|
+(defun rotate-piece (piece angle)
+  (make-piece
+   :vectors (mapcar #'(lambda (v) 
+                        (vec (- (* (vx v) (cos angle)) (* (vy v) (sin angle)))
+                             (+ (* (vx v) (sin angle)) (* (vy v) (cos angle )))))
+                    (piece-vectors piece))
+   :degrees (piece-degrees piece)))
+
+(defun turn-orver-piece (piece two-side)
+  "turn orver in y-axis 
+nil:turnout, t:surfece"
+  (if two-side piece
+      (make-piece 
+       :vectors (mapcar #'(lambda (v) (vec (- (vx v)) (vy v))) (piece-vectors piece))
+       :degrees (piece-degrees piece)
+       )))
+|#
+
+(defun maybe-easy-piece-by-rotate (degree easy-piece)
+  )
+
+(defun maybe-turn-over-piece (easy-piece)
+  )
+
+(defun easy-piece-include-detectuon (easy-piece-from easy-piece-to)
+  )
+
+(defun easy-piece-collision-detection (easy-piece1 easy-piece2)
+  )
 
 (defun synth->easy-piece (synth)
   "synth -> synth
