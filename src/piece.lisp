@@ -3,6 +3,9 @@
 
 ;;;; piece
 
+(defparameter *nil-piece* 
+  (piece nil nil nil nil nil))
+
 (defparameter *zero-piece* nil)
 
 (defparameter *its-frame* T)
