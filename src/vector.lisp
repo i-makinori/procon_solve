@@ -72,6 +72,10 @@
   (- (* (vx vec1) (vy vec2))
      (* (vx vec2) (vy vec1))))
 
+(defun vec= (vec1 vec2)
+  (and (= (vx vec1) (vx vec2))
+       (= (vy vec1) (vy vec2))))
+
 (defparameter *angle-vec-criteria*
   (vec 0 10))
 
@@ -135,9 +139,9 @@
    line-list))
 
 (defun same-vector-angle (vec1 vec2)
-  (let ((angle (vectors-to-angle vec1 '(0 . 0) vec2)))
+  (let ((angle (vectors-to-angle vec1 (vec 0 0) vec2)))
     (or (error-round-deg= 2pi angle)
-        (error-round-deg= 2pi angle))))
+        (error-round-deg= 0 angle))))
 
 
 (defun gravity-center (vectors)
@@ -153,10 +157,10 @@
 
 (defun angle-vectors-adjust (vecs)
   "when vecs includes origin-vector, shift each vector-dxdy 10"
-  (if (some #'(lambda (vec) (equal vec '(0 . 0)))
+  (if (some #'(lambda (vec) (equal vec (vec 0 0)))
             vecs)
       (angle-vectors-adjust
-       (mapcar #'(lambda (vec) (vec-add '(10 . 10) vec))
+       (mapcar #'(lambda (vec) (vec-add (vec 10 10) vec))
                vecs))
       vecs))
 

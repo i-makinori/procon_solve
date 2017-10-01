@@ -51,9 +51,11 @@ if (error of real-num < *standard-error*) than Just (round real-num) else nothin
         (just int-num)
         (nothing))))
 
-#| return (val||fail)
-(defun round-deg (deg))
-|#
+(defun 2pi-judge-contain-error (its-about-2pi)
+  (error-round-deg= 2pi its-about-2pi))
+
+(defun pi-judge-contain-error (its-about-pi)
+  (error-round-deg= pi its-about-pi))
 
 
 ;;;; Nothing 

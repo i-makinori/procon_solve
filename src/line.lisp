@@ -56,6 +56,11 @@ deal with list as spot"
 
 
 ;;;; lib
+
+(defun spot= (spot1 spot2)
+  (and (= (spot-x spot1) (spot-x spot2))
+       (= (spot-y spot1) (spot-y spot2))))
+
 (defun cons-if-not-nil (se1 se2)
   (if se1 
       (cons se1 se2)
