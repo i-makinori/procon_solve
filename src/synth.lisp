@@ -1,8 +1,9 @@
 
 (in-package :procon)
 
-
 ;;;; synth-piece ;;;;;;;;;;;;;;;;
+
+;;;; struct 
 
 (defparameter *plus* +1 "synth direction to +")
 (defparameter *minus* -1 "synth direction to -")
@@ -17,8 +18,6 @@
    :direction direction
    :synth-from synth-from-order-of-spot))
 
-
-;;;; struct 
 
 (defstruct (easy-piece (:conc-name epiece-))
   spots degrees is-frame)
@@ -40,6 +39,11 @@ which can intepret special synth"
          (epiece-is-frame easy-piece)
          nil nil))
 
+(defun piece->easy-piece (piece)
+  (easy-piece (piece-spots piece)
+              (piece-degrees piece)
+              (piece-is-frame piece)))
+
 (defun piece-from--easy-piece+synth+synth (easy-piece synth-from synth-to)
   ;; should to maybe
   (piece (epiece-spots easy-piece)
@@ -48,44 +52,110 @@ which can intepret special synth"
          synth-from synth-to))
 
 
-(defun piece->easy-piece (piece)
-  (easy-piece (piece-spots piece)
-              (piece-degrees piece)
-              (piece-is-frame piece)))
-
 
 ;;;; function 
-(defun synth->maybe-piece (synth-from synth-to)
-  (let* 
-      ((epiece-from (synth->easy-piece synth-from))
-       (epiece-to (synth->easy-piece synth-to))
-       )
-    #|
-    (piece '() '() '() synth1 synth2))
-    |#
+
+(defun maybe-synthesize-piece (synth1 synth2)
+  (let-maybe ((easy-piece-cons
+               (synthesize-able?--also--maybe-consed-easy-piece synth1 synth2)))
+    (show-easy-piece-list (list (car easy-piece-cons) (cdr easy-piece-cons)))
+    ;;(piece-from--easy-piece+synth+synth)
     ))
+                      
+
+;;;; synthesizeable
+
+(defun synthesize-able?-easy-piece (easy-piece-from easy-piece-to)
+  (let ((collision (easy-piece-collision-detection easy-piece-from easy-piece-to))
+        (include (easy-piece-include-detectuon easy-piece-from easy-piece-to))
+        (frame-p (or (epiece-is-frame easy-piece-from)
+                     (epiece-is-frame easy-piece-to))))
+    (cond (collision nil)
+          ((and include frame-p) t)
+          ((and (not include) (not frame-p)) t)
+          (t nil))))
 
 
-(defun easy-piece-include-detectuon (easy-piece-from easy-piece-to)
-  )
+(defun synthesize-able?--also--maybe-consed-easy-piece (synth1 synth2)
+  (let-maybe 
+      ((deployed-piece-list1 (synth+synth->maybe-deployed-easy-piece-list synth1 synth2))
+       (deployed-piece2 (just (synth->easy-piece synth2))))
+    (let-maybe
+        ((deployed-piece1 (just-*-nil=>nothng 
+                           (car (remove-if-not
+                                 #'(lambda (epiece) (synthesize-able?-easy-piece
+                                                     epiece deployed-piece2))
+                                 deployed-piece-list1)))))
+      (just (cons deployed-piece1 deployed-piece2)))))
+
+
+;;;; collision detection
+
+(defun easy-piece->line-list (easy-piece)
+  (map-tuple/c #'vector-to-line 2 
+               (spots->vecs (epiece-spots easy-piece))))
+
+
+(defun easy-piece-include-detectuon (easy-piece1 easy-piece2)
+  "piece16- hit-judge"
+  (let ((lines1 (easy-piece->line-list easy-piece1))
+        (lines2 (easy-piece->line-list easy-piece2)))
+    (or
+     (spot-vec-include?-in-piece-line-list 
+      lines2 (spot-include?-in-easy-piece easy-piece1))
+     (spot-vec-include?-in-piece-line-list
+      lines1 (spot-include?-in-easy-piece easy-piece2)))))
+
+
+(defun spot-vec-include?-in-piece-line-list (piece-line-list spot-vec)
+  "nil : not-included
+t : included"
+  (let ((judged-line1 (vector-to-line (vec *-huge-num* (vy spot-vec)) 
+                                      spot-vec))
+        (judged-line2 (vector-to-line (vec *huge-num*  (1+ (vy spot-vec)))
+                                      (vec (+ 2 (vx spot-vec)) (+ 2 (vy spot-vec))))))
+    (not (some #'(lambda (line) 
+                   (evenp (length (remove nil
+                                          (mapcar #'(lambda (l)
+                                                      (line-collision-detection l line))
+                                                  piece-line-list)))))
+               (list judged-line1 judged-line2)))))
+
+
+(defun spot-include?-in-easy-piece (easy-piece)
+  "search each triangle included in easy-piece,
+center-deg is smaller than (pi - st-error), it's gravity-center is included in piece16"
+  (let ((n (search '(()) (epiece-degrees easy-piece)
+                   :test #'(lambda (n x) n (> pi x))))
+        (vecs (spots->vecs (epiece-spots easy-piece))))
+    (gravity-center (list
+                     (rotate-nth (- n 1) vecs)
+                     (nth n vecs)
+                     (rotate-nth (+ n 1) vecs)))))
 
 (defun easy-piece-collision-detection (easy-piece1 easy-piece2)
-  )
+  "nil=>not hit, T=>hit"
+  (let ((lines1 (easy-piece->line-list easy-piece1))
+        (lines2 (easy-piece->line-list easy-piece2)))
+    (lines-lines-hit-judge lines1 lines2)))
 
-
+(defun lines-lines-hit-judge (lines1 lines2)
+  (not (every #'(lambda (line2)
+                  (notany #'(lambda (line1)
+                              (line-collision-detection-error line1 line2))
+                          lines1))
+              lines2)))
 
 
 ;;;; maybe deploy by synth
 
-(defun synth+synth->maybe-easy-piece-list (synth-from synth-to)
+(defun synth+synth->maybe-deployed-easy-piece-list (synth-from synth-to)
   "deploy maybe easy-piece-list to coordinate matrix"
   (let* ((easy-piece-from (synth->easy-piece synth-from))
          (easy-piece-to (synth->easy-piece synth-to))
          (degree-synth-to (vector-angle (spot->vec (nth 1 (epiece-spots easy-piece-to))))))
     (transform-to-maybe-easy-piece-list
-     easy-piece-from degree-synth-to
-     )))
-
+     easy-piece-from degree-synth-to)))
 
 (defun transform-to-maybe-easy-piece-list (easy-piece next-angle)
   "deploy maybe easy-piece-list to coordinate matrix"
@@ -105,7 +175,6 @@ which can intepret special synth"
                 turn-over-epiece-list rotate-degree-list)))
     (list-of-maybe->maybe-list
      (remove *nothing* maybe-rotated-epiece-list))))
-
 
 (defun maybe-easy-piece-by-rotate (easy-piece angle)
   (let-maybe
@@ -150,31 +219,7 @@ which can intepret special synth"
      (piece-is-frame piece))))
 
 
-
-
 ;;;; test
-
-;; ref : *test-piece-for-synth1* *test-piece-for-synth2*
-(defparameter *test-synth1* 
-  (synth *test-piece-for-synth1* *plus* 5))
-
-(defparameter *test-synth2*
-  (synth *test-piece-for-synth2* *minus* 4))
-
-
-(defparameter *test-piece-n*
-  (spots->piece (list (spot 0 0) (spot 10 0) (spot 10 10) (spot 0 10))))
-
-(defparameter *test-synth-n1*
-  (synth *test-piece-n* *plus* 0))
-
-(defparameter *test-synth-n2*
-  (synth *test-piece-n* *plus* 0))
-
-
-(defparameter *test-synthed-piece*
-  (synth->maybe-piece *test-synth1* *test-synth2*))
-
 
 (defparameter *test-easy-piece1*
   (piece->easy-piece *test-piece1*))
@@ -183,14 +228,41 @@ which can intepret special synth"
   (piece->easy-piece (nth 2 *test-piece-list1*)))
 
 
+(defparameter *test-synth1* 
+  (synth *test-piece-for-synth1* *plus* 5))
+
+(defparameter *test-synth2*
+  (synth *test-piece-for-synth2* *minus* 5))
+
+
+(defparameter *test-piece-n1*
+  (spots->piece (list (spot 0 0) (spot 10 0) (spot 10 10) (spot 0 10))))
+
+(defparameter *test-piece-n2*
+  (let ((piece (spots->piece (list (spot 0 0) (spot 10 0) (spot 10 20) (spot 0 20)))))
+    (piece (piece-spots piece)
+           (piece-degrees piece)
+           t nil nil)))
+
+(defparameter *test-synth-n1*
+  (synth *test-piece-n1* *plus* 3))
+
+(defparameter *test-synth-n2*
+  (synth *test-piece-n2* *minus* 2))
+
+
+
 ;;;; call gui
 
 (defun show-easy-piece-list (easy-piece-list)
   (show-piece-list 
    (mapcar #'easy-piece->piece easy-piece-list)))
 
-
 (defun show-maybe-easy-piece (maybe-easy-piece)
   "<ex> (show-maybe-easy-piece (maybe-easy-piece-by-rotate *TEST-EASY-PIECE1* (* pi 0.5)))"
   (let-maybe ((easy-piece maybe-easy-piece))
     (show-piece (easy-piece->piece easy-piece))))
+
+(defun show-maybe-consed-easy-piece (maybe-consed-easy-piece)
+  (let-maybe ((easy-piece-list maybe-consed-easy-piece))
+    (show-easy-piece-list (list (car easy-piece-list) (cdr easy-piece-list)))))
