@@ -79,6 +79,14 @@
   (vec 0 0))
 
 
+(defun real-num-vec->maybe-vec-of-int (vector)
+  "standard-errored vec"
+  (let-maybe
+      ((vx (real-num->maybe-integer (vx vector)))
+       (vy (real-num->maybe-integer (vy vector))))
+    (vec vx vy)))
+
+
 ;;;; test
 (defparameter *test-vec1* (vec 10 20))
 (defparameter *test-vec2* (vec 60 80))
