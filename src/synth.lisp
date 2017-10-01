@@ -1,7 +1,22 @@
 
 (in-package :procon)
 
+
 ;;;; synth-piece ;;;;;;;;;;;;;;;;
+
+(defparameter plus +1 "synth direction to +")
+(defparameter minus -1 "synth direction to -")
+
+(defstruct (synth (:conc-name synth-))
+  piece direction synth-from)
+
+(defun synth (piece direction synth-from-order-of-spot)
+  "make-synth"
+  (make-synth 
+   :piece piece
+   :direction direction
+   :synth-from synth-from-order-of-spot))
+
 
 ;;;; struct 
 
@@ -28,11 +43,6 @@ which can intepret special synth"
          (easy-piece-degrees easy-piece)
          (easy-piece-is-frame easy-piece)
          synth-from synth-to))
-
-;;;; params 
-
-(defparameter plus +1)
-(defparameter minus -1)
 
 
 ;;;; function 

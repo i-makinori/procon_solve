@@ -10,6 +10,16 @@ Makinori Ikegami <maau3p@gmail.com>
 
 # memos
 
+## data-structure
+```
+Piece ::= {spots::[Spot], degrees::[Float], is-frame::Bool, synth-from::Synth||Nil, synth-to::Synth||Nil}
+Synth ::= {Piece, direction::((+1||-1)::=::Bool), synth-from::Rotate-Ord}
+Spot ::= x::Int, y::Int
+
+in hashtable, 
+element =:: table=::(Id::S), Piece
+```
+
 ## coordinate-system
 
 - point

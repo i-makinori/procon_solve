@@ -24,11 +24,11 @@
    (:file "src/line" :depends-on ("src/util"))
    (:file "src/vector" :depends-on ("src/util" "src/line"))
 
-   ;;(:file "src/piece")
-   ;;(:file "src/synth-piece")
+   ;; piece-16
+   ;; synth-piece
 
-   (:file "src/structure" :depends-on ("src/util" "src/line" "src/vector"))
-   (:file "src/synth" :depends-on ("src/util" "src/structure"))
+   (:file "src/piece" :depends-on ("src/util" "src/line" "src/vector"))
+   (:file "src/synth" :depends-on ("src/util" "src/piece"))
 
    ;; test :: samples
    (:file "test/samples1")
@@ -39,8 +39,8 @@
    ;; src.search
    
    ;; src.application
-   (:file "src/io" :depends-on ("src/structure"))
-   (:file "src/gui" :depends-on ("src/structure" "src/io"))
+   (:file "src/io")
+   (:file "src/gui")
    ;; decrim
    ;; app
    (:file "src/test")
