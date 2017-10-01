@@ -3,8 +3,8 @@
 
 ;;;; piece
 
-(defparameter plus +1)
-(defparameter minus -1)
+(defparameter *its-frame* T)
+(defparameter *its-piece* nil)
 
 (defstruct (piece (:conc-name piece-))
   spots degrees is-frame synth-from synth-to)
