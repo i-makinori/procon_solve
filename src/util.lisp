@@ -63,6 +63,8 @@ if (error of real-num < *standard-error*) than Just (round real-num) else nothin
   ;; f:failure
   '@nothing)
 
+(defparameter *nothing* (nothing))
+
 (defun failure ()
   (nothing))
 
@@ -140,6 +142,14 @@ if (error of real-num < *standard-error*) than Just (round real-num) else nothin
              (nothing)
              (progn ,@body))))))
 
+(defun list-of-maybe->maybe-list (list-of-maybe)
+  "[Maybe a] -> Maybe [a] (= Just [a]||nothng)  
+if (all just-p list) then (just list) else (nothing)."
+  (let ((next-list (mapcar #'maybe-return list-of-maybe)))
+    (if (find *nothing* next-list) 
+        (nothing)
+        (just next-list)
+  )))
               
 ;;;; abstruct function
 (defun id (val)
