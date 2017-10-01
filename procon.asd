@@ -26,8 +26,8 @@
 
    ;; piece-16
    ;; synth-piece
-
-   (:file "src/piece" :depends-on ("src/util" "src/line" "src/vector"))
+   (:file "src/synthesize")
+   (:file "src/piece")
 
 
    ;; test :: samples

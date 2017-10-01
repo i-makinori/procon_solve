@@ -58,10 +58,88 @@ which can intepret special synth"
 (defun maybe-synthesize-piece (synth1 synth2)
   (let-maybe ((easy-piece-cons
                (synthesize-able?--also--maybe-consed-easy-piece synth1 synth2)))
-    (show-easy-piece-list (list (car easy-piece-cons) (cdr easy-piece-cons)))
-    ;;(piece-from--easy-piece+synth+synth)
-    ))
+    ;;(show-easy-piece-list (list (car easy-piece-cons) (cdr easy-piece-cons)))
+    (let* ((easy-piece (synthesize-syntesizeable-easy-piece
+                        (car easy-piece-cons) (cdr easy-piece-cons)))
+           (is-frame (or (piece-is-frame (synth-piece synth1))
+                         (piece-is-frame (synth-piece synth2)))))
+      (piece (epiece-spots easy-piece)
+             (epiece-degrees easy-piece)
+             is-frame synth1 synth2
+    
+    ))))
                       
+;;;; synthesize 
+
+
+(defun synthesize-syntesizeable-easy-piece (able-easy-piece1 able-easy-piece2)
+  (let* (;; vdr way. maybe in synthesize.lisp
+         (easy-piece (synthesize-easy-piece-rule able-easy-piece1 able-easy-piece2))
+         ;; csd-way.
+         (csd-list (mapcar #'cons
+                           (epiece-spots easy-piece)
+                           (epiece-degrees easy-piece)))
+         (list1 (remove-n-pi-degree (crush-if-serial-of-same-spot csd-list)))
+         (list2 (remove-n-pi-degree (crush-if-serial-of-same-spot list1)))
+         (vdr-adjust (adjust-vdr-line list2)))
+         ;; 
+    (if (>= 2 (length vdr-adjust))
+        (piece->easy-piece *nil-piece*)
+        (easy-piece (mapcar #'car vdr-adjust)
+                    (mapcar #'cdr vdr-adjust)
+                    nil))))
+
+;;;; csd synthesize 
+
+;; adjusts of synthesize by vdr
+;; csd-list : Consed-Spots-Degree-list
+(labels
+
+    ((c-spot (spot-degree)
+       (car spot-degree))
+     (c-deg (spot-degree)
+       (cdr spot-degree)))
+
+  (let ((n-pi-degree (mapcar #'(lambda (n) (* pi n))
+                             (upto 0 10))))
+    (defun remove-n-pi-degree (csd-list)
+      (remove-if #'(lambda (csd)
+                     (find-if #'(lambda (deg) (error-round-deg= (c-deg csd) deg))
+                              n-pi-degree))
+                 csd-list)))
+  
+  (defun crush-if-serial-of-same-spot (csd-list)
+    (reduce
+     #'(lambda (list csd)
+         (cond ((null list) (list csd))
+               ((spot= (c-spot csd) (c-spot (car list)))
+                (cons (cons (c-spot csd) (+ (c-deg csd) (c-deg (car list))))
+                      (cdr list)))
+               (t (cons csd list))))
+     csd-list :initial-value '()))
+
+  (defun adjust-vdr-line (csd-list &optional path)
+    "csd-list : consed-spots-degree-list"
+    (cond 
+      ((null (cdr csd-list)) (append csd-list path))
+      ((null path) (adjust-vdr-line (cdr csd-list) (list (car csd-list))))
+      ((spot= (c-spot (car path)) (c-spot (cadr csd-list)))
+       (adjust-vdr-line-aux (cdr csd-list) path (c-deg (car csd-list))))
+      (t (adjust-vdr-line (cdr csd-list) (cons (car csd-list) path)))))
+
+  (defun adjust-vdr-line-aux (csd-list1 csd-list2 ago-cons)
+    (cond 
+      ((null csd-list1) csd-list2)
+      ((null csd-list2) csd-list1)
+      ((spot= (c-spot (car csd-list1))
+              (c-spot (car csd-list2)))
+       (adjust-vdr-line-aux (cdr csd-list1) (cdr csd-list2)
+                            (cons (c-spot csd-list1) 
+                                  (+ (c-deg (car csd-list1)) (c-deg (car csd-list2))))))
+      (t (append csd-list1 (list ago-cons) csd-list2))))
+  )
+          
+  
 
 ;;;; synthesizeable
 
@@ -232,23 +310,23 @@ center-deg is smaller than (pi - st-error), it's gravity-center is included in p
   (synth *test-piece-for-synth1* *plus* 5))
 
 (defparameter *test-synth2*
-  (synth *test-piece-for-synth2* *minus* 5))
+  (synth *test-piece-for-synth2* *minus* 4))
 
 
 (defparameter *test-piece-n1*
   (spots->piece (list (spot 0 0) (spot 10 0) (spot 10 10) (spot 0 10))))
 
 (defparameter *test-piece-n2*
-  (let ((piece (spots->piece (list (spot 0 0) (spot 10 0) (spot 10 20) (spot 0 20)))))
+  (let ((piece (spots->piece (list (spot 0 0) (spot 0 20) (spot 10 20) (spot 20 0)))))
     (piece (piece-spots piece)
            (piece-degrees piece)
            t nil nil)))
 
 (defparameter *test-synth-n1*
-  (synth *test-piece-n1* *plus* 3))
+  (synth *test-piece-n1* *plus* 1))
 
 (defparameter *test-synth-n2*
-  (synth *test-piece-n2* *minus* 2))
+  (synth *test-piece-n2* *minus* 0))
 
 
 
