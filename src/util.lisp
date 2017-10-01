@@ -117,25 +117,78 @@ if (error of real-num < *standard-error*) than Just (round real-num) else nothin
 (defun maybe-return (maybe-a)
   (cond ((not (maybe-p maybe-a)) 
          (error 'maybe-data-type-error))
-        ((maybe-just-p maybe-a) 
+        ((just-p maybe-a) 
          (cdr maybe-a))
         (t (nothing))))
 
-(defun maybe-nothing=>nil (maybe)
-  (cond ((eq (nothing) maybe) nil)
-        (t (maybe-return maybe))))
+(defun just-*-nil=>nothng (var)
+  "var => Maybe var (= Just var|Nothng). && (var==nil)=>Nothing"
+  (cond (var (just var))
+        (t (nothing))))
 
-(defun m-ret (maybe-a)
-  (maybe-return maybe-a))
-
-(defmacro let-maybe (maybes-of-binding &body body)
+(defmacro let-maybe (bindings-of-maybe &body body)
   "let form.  if all bindings are just form, do ,@body, else (nothing)"
-  `(mapcar #'(lambda (maybe)
-               maybe
-               )
-           ,maybes-of-binding))
+  (let ((bindings-names
+         `,(mapcar #'(lambda (bind)  (car bind))
+                   bindings-of-maybe))
+        (bindings-funcs
+         `,(mapcar #'(lambda (bind) `(maybe-return ,(cadr bind)))
+                   bindings-of-maybe)))
+    (let ((next-bindings 
+           `,(mapcar #'list bindings-names bindings-funcs)))
+      `(let
+           ,next-bindings
+         (if (some #'nothing-p (list ,@bindings-names))
+             (nothing)
+             (progn ,@body))))))
 
 
+(defun test2 ()
+  (let ((hoge (maybe-return (maybe-func 20)))
+        (fuga (maybe-return (just (+ 20 5)))))
+    (if (some #'nothing-p (list hoge fuga))
+        (nothing)
+        (progn 
+          ;; body
+          (print fuga) (print hoge)
+          (print "do") (+ 2 3 4) 'things))))
+
+#|
+(let-maybe
+            ((hoge (maybe-func 20))
+             (fuga (just (+ 20 5))))
+          ;; body
+          (print fuga) (print hoge))
+|#
+
+(defun maybe-func (hoge)
+  hoge
+  (if (> (random 1.00) 0.5)
+      (just (random 1.00))
+      (nothing)))
+
+
+#|
+(let-maybe
+    ((hoge (maybe-func 20))
+     (fuga (just (+ 20 5))))
+  ;; body
+  (print fuga) (print (+ hoge 10)) ;; automatic retutned
+  (print "do") (+ 2 3 4) 'things)
+|#
+
+(defun test ()
+  ;; expand theme
+  (let ((hoge (maybe-func 20))
+        (fuga (just (+ 20 5))))
+    (if (every #'just-p (list hoge fuga))
+        (progn 
+          ;; body
+          (print fuga) (print hoge)
+          (print "do") (+ 2 3 4) 'things)
+        (nothing)
+        )))
+              
 ;;;; abstruct function
 (defun id (val)
   val)
