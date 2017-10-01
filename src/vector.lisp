@@ -84,7 +84,7 @@
   (let-maybe
       ((vx (real-num->maybe-integer (vx vector)))
        (vy (real-num->maybe-integer (vy vector))))
-    (vec vx vy)))
+    (just (vec vx vy))))
 
 
 ;;;; test
