@@ -39,7 +39,7 @@ which can intepret special synth"
          (epiece-degrees easy-piece)
          (epiece-is-frame easy-piece)
          nil nil))
-         
+
 (defun piece-from--easy-piece+synth+synth (easy-piece synth-from synth-to)
   ;; should to maybe
   (piece (epiece-spots easy-piece)
@@ -58,12 +58,10 @@ which can intepret special synth"
 (defun synth->maybe-piece (synth-from synth-to)
   (let* 
       ((epiece-from (synth->easy-piece synth-from))
-       (epiece-to (synth->easy-piece synth-to))       
+       (epiece-to (synth->easy-piece synth-to))
        )
     #|
-    (piece
-     '() '() '()
-     synth1 synth2))
+    (piece '() '() '() synth1 synth2))
     |#
     ))
 
@@ -79,58 +77,34 @@ which can intepret special synth"
 
 ;;;; maybe deploy by synth
 
-(defun synth+synth->maybe-easy-piece (synth-from synth-to)
-  ;; transform = rotate . turnover . origin-shift
-  (let* 
-      ((easy-piece-from (synth->easy-piece synth-from))
-       (easy-piece-to (synth->easy-piece synth-to))
-       ;;turn
-       (turn-over-epiece-list
-        (mapcar #'(lambda (is-turn) (turn-orver-easy-piece easy-piece-from is-turn))
-                (list t nil)))
-       ;; rotate
-       (degree-synth-to (vector-angle (spot->vec (nth 1 (epiece-spots easy-piece-to)))))
-       (rotate-degree-list
-        (mapcar #'(lambda (easy-piece)
-                    (vector-angle (spot->vec (nth 1 (epiece-spots easy-piece)))))
-                turn-over-epiece-list))
-       (maybe-rotate-epiece-list
-        (mapcar #'(lambda (easy-piece deg)
-                    (maybe-rotate-easy-piece easy-piece 
-                                             (- degree-synth-to deg )))
-                turn-over-epiece-list rotate-degree-list))
-       ;; transform
-       (transformed-maybe-epiece (nil=>nothing (car (remove *nothing*
-                                                           maybe-rotate-epiece-list))))
-       (transformed-list maybe-rotate-epiece-list))
-    (transform-to-maybe-easy-piece-list 
+(defun synth+synth->maybe-easy-piece-list (synth-from synth-to)
+  "deploy maybe easy-piece-list to coordinate matrix"
+  (let* ((easy-piece-from (synth->easy-piece synth-from))
+         (easy-piece-to (synth->easy-piece synth-to))
+         (degree-synth-to (vector-angle (spot->vec (nth 1 (epiece-spots easy-piece-to))))))
+    (transform-to-maybe-easy-piece-list
      easy-piece-from degree-synth-to
-    )))
+     )))
 
 
 (defun transform-to-maybe-easy-piece-list (easy-piece next-angle)
-    ;; transform = rotate . turnover . origin-shift
+  "deploy maybe easy-piece-list to coordinate matrix"
+  ;; transform = rotate . turnover . origin-shift
   (let* 
-      (;;turn
-       (turn-over-epiece-list
+      ((turn-over-epiece-list
         (mapcar #'(lambda (is-turn) (turn-orver-easy-piece easy-piece is-turn))
                 (list t nil)))
-       ;; rotate
        (rotate-degree-list
         (mapcar #'(lambda (easy-piece)
                     (vector-angle (spot->vec (nth 1 (epiece-spots easy-piece)))))
                 turn-over-epiece-list))
-       (maybe-rotate-epiece-list
+       (maybe-rotated-epiece-list
         (mapcar #'(lambda (easy-piece deg)
-                    (maybe-rotate-easy-piece easy-piece 
-                                             (- next-angle deg )))
-                turn-over-epiece-list rotate-degree-list))
-       ;; transform
-       (transformed-maybe-epiece (nil=>nothing (car (remove *nothing*
-                                                           maybe-rotate-epiece-list))))
-       (transformed-list maybe-rotate-epiece-list))
-     transformed-list
-  ))
+                    (maybe-easy-piece-by-rotate easy-piece 
+                                                (- next-angle deg )))
+                turn-over-epiece-list rotate-degree-list)))
+    (list-of-maybe->maybe-list
+     (remove *nothing* maybe-rotated-epiece-list))))
 
 
 (defun maybe-easy-piece-by-rotate (easy-piece angle)
@@ -194,7 +168,7 @@ which can intepret special synth"
 (defparameter *test-synth-n1*
   (synth *test-piece-n* *plus* 0))
 
-(defparameter *test-synt-n2*
+(defparameter *test-synth-n2*
   (synth *test-piece-n* *plus* 0))
 
 
@@ -214,7 +188,7 @@ which can intepret special synth"
 (defun show-easy-piece-list (easy-piece-list)
   (show-piece-list 
    (mapcar #'easy-piece->piece easy-piece-list)))
-                        
+
 
 (defun show-maybe-easy-piece (maybe-easy-piece)
   "<ex> (show-maybe-easy-piece (maybe-easy-piece-by-rotate *TEST-EASY-PIECE1* (* pi 0.5)))"

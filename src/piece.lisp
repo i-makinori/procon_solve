@@ -3,11 +3,6 @@
 
 ;;;; piece
 
-(defparameter *nil-piece* 
-  (piece nil nil nil nil nil))
-
-(defparameter *zero-piece* nil)
-
 (defparameter *its-frame* T)
 (defparameter *its-piece* nil)
 
@@ -28,6 +23,12 @@
                                (rotate-list (spots->vecs spots) -1)))))
     (piece
      spots degrees nil nil nil)))
+
+;; parameters
+(defparameter *nil-piece* 
+  (piece nil nil nil nil nil))
+
+(defparameter *zero-piece* nil)
 
 
 ;;;; util

@@ -28,7 +28,7 @@
    ;; synth-piece
 
    (:file "src/piece" :depends-on ("src/util" "src/line" "src/vector"))
-   (:file "src/synth" :depends-on ("src/util" "src/piece"))
+
 
    ;; test :: samples
    (:file "test/samples1")
@@ -42,6 +42,9 @@
    (:file "src/io")
    (:file "src/gui")
    ;; decrim
+
+   (:file "src/synth" :depends-on ("src/util" "src/piece"))
+
    ;; app
    (:file "src/test")
    (:file "src/main")
