@@ -216,7 +216,15 @@
     (draw-point* stream 0 0 :ink +blue+ :line-thickness 10)))
 
 (defun draw-piece (piece stream)
-  (draw-polygon* 
-   stream
-   (flatten (mapcar #'spot->list (piece-spots piece)))
-   :filled nil :ink +green+ :line-thickness 4))
+  (let ((fill-color 
+         (if (piece-is-frame piece)
+             (make-rgb-color 1.0 0.5 0.5)
+             (make-rgb-color 0.5 0.5 1.0))))
+    (draw-polygon* 
+     stream
+     (flatten (mapcar #'spot->list (piece-spots piece)))
+     :filled t :ink fill-color :line-thickness 4)
+    (draw-polygon* 
+     stream
+     (flatten (mapcar #'spot->list (piece-spots piece)))
+     :filled nil :ink +green+ :line-thickness 4)))

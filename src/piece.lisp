@@ -3,6 +3,8 @@
 
 ;;;; piece
 
+(defparameter *zero-piece* nil)
+
 (defparameter *its-frame* T)
 (defparameter *its-piece* nil)
 
@@ -43,6 +45,22 @@
          degrees)
         (t (mapcar #'(lambda (deg) (- 2pi deg)) degrees))))
 
+(defun piece-area (piece)
+  (let ((spots (spots->vecs (piece-spots piece))))
+    (reduce #'+ (map-tuple/c #'2vector->area
+                             2 spots))))
+
+(defun bad-piece-list->piece-list (bad-piece-list)
+  "bad-piece-list :: [piece] && not contain frame-piece"
+  (let* ((sorted-pieces (safety-sort 
+                         bad-piece-list 
+                         #'(lambda (p1 p2) (> (piece-area p1) (piece-area p2)))))
+         (bad-frame-piece (car sorted-pieces))
+         (frame-piece (piece (piece-spots bad-frame-piece)
+                             (mapcar #'(lambda (deg) (- 2pi deg))
+                                     (piece-degrees bad-frame-piece))
+                             t nil nil)))
+    (cons frame-piece (cdr sorted-pieces))))
 
 
 ;;;; some function

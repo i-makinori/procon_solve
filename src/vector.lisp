@@ -145,6 +145,10 @@
     (vec (/ (reduce #'+ (mapcar #'vx vectors)) length)
          (/ (reduce #'+ (mapcar #'vy vectors)) length))))
 
+(defun 2vector->area (vec1 vec2)
+  (* 0.5 (abs (- (* (vx vec1) (vy vec2))
+                 (* (vy vec1) (vx vec2))))))
+
 ;;;; vector<->angle
 
 (defun angle-vectors-adjust (vecs)
