@@ -141,7 +141,7 @@
                           (list (spot-x spot) (spot-y spot) (round (rad->360 deg))))
                       (piece-spots piece) (piece-degrees piece)))
       ;;(format stream "~%~%~%")
-      ;;(format stream "~&~A~%" piece)
+      (format stream "~&~A~%" piece)
 
       (finish-output stream))))
 
@@ -185,6 +185,7 @@
          (grid-coord-list-1dim 
           (mapcar #'(lambda (num) (* num 5))
                   (upto (floor (/ (- axis-length) 5)) (ceiling (/ axis-length 5))))))
+
     ;; grid-point
     (if (< axis-length 50)
         (draw-points* stream
@@ -215,6 +216,25 @@
     ;; origin point
     (draw-point* stream 0 0 :ink +blue+ :line-thickness 10)))
 
+#|
+(defun draw-childs-pieces (piece stream)
+  (let-maybe
+      ((sy-from (just-*-nil=>nothng (piece-synth-from piece)))
+       (sy-to (just-*-nil=>nothng (piece-synth-to piece))))
+    (let-maybe 
+        ((easy-piece-cons 
+          (synthesize-able?--also--maybe-consed-easy-piece sy-from sy-to)))
+      (draw-polygon* stream
+                     (flatten (mapcar #'spot->list (epiece-spots (car easy-piece-cons))))
+                     :filled nil :ink +gray+ :line-thickness 2)
+      (draw-polygon* stream
+                     (flatten (mapcar #'spot->list (epiece-spots (cdr easy-piece-cons))))
+                     :filled nil :ink +gray+ :line-thickness 2)
+      (draw-childs-pieces (synth-piece sy-from) stream)
+      (draw-childs-pieces (synth-piece sy-to) stream)
+      )))  
+|#
+
 (defun draw-piece (piece stream)
   (let ((fill-color 
          (if (piece-is-frame piece)
@@ -227,4 +247,5 @@
     (draw-polygon* 
      stream
      (flatten (mapcar #'spot->list (piece-spots piece)))
-     :filled nil :ink +green+ :line-thickness 4)))
+     :filled nil :ink +green+ :line-thickness 4)
+    (draw-childs-pieces piece stream)))
