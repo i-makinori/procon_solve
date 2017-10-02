@@ -152,6 +152,8 @@ if (all just-p list) then (just list) else (nothing)."
         (nothing)
         (just next-list)
   )))
+
+
               
 ;;;; abstruct function
 (defun id (val)

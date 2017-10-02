@@ -35,15 +35,16 @@
    (:file "test/samples2")
 
    ;; src.synth
+   (:file "src/synth")
 
    ;; src.search
+   (:file "src/search")
    
    ;; src.application
    (:file "src/io")
    (:file "src/gui")
    ;; decrim
 
-   (:file "src/synth" :depends-on ("src/util" "src/piece"))
 
    ;; app
    (:file "src/test")
