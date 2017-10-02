@@ -63,25 +63,24 @@ which can intepret special synth"
                         (car easy-piece-cons) (cdr easy-piece-cons)))
            (is-frame (or (piece-is-frame (synth-piece synth1))
                          (piece-is-frame (synth-piece synth2)))))
-      (piece (epiece-spots easy-piece)
-             (epiece-degrees easy-piece)
-             is-frame synth1 synth2
-    
-    ))))
+      (just 
+       (piece (epiece-spots easy-piece) (epiece-degrees easy-piece)
+              is-frame synth1 synth2)))))
                       
 ;;;; synthesize 
 
 
 (defun synthesize-syntesizeable-easy-piece (able-easy-piece1 able-easy-piece2)
   (let* (;; vdr way. maybe in synthesize.lisp
-         (easy-piece (synthesize-easy-piece-rule able-easy-piece1 able-easy-piece2))
+         (easy-piece-d (synthesize-easy-piece-rule able-easy-piece1 able-easy-piece2))
+         (easy-piece (if easy-piece-d easy-piece-d 
+                         (piece->easy-piece *nil-piece*)))
          ;; csd-way.
          (csd-list (mapcar #'cons
                            (epiece-spots easy-piece)
                            (epiece-degrees easy-piece)))
-         (list1 (remove-n-pi-degree (crush-if-serial-of-same-spot csd-list)))
-         (list2 (remove-n-pi-degree (crush-if-serial-of-same-spot list1)))
-         (vdr-adjust (adjust-vdr-line list2)))
+         (list1 (vdr-adjust1 csd-list))
+         (vdr-adjust list1))
          ;; 
     (if (>= 2 (length vdr-adjust))
         (piece->easy-piece *nil-piece*)
@@ -89,56 +88,57 @@ which can intepret special synth"
                     (mapcar #'cdr vdr-adjust)
                     nil))))
 
+(defun test ()
+  (show-piece-list (synthesize-piece-list-all *test-piece1* *test-piece1*)))
+
+
+
 ;;;; csd synthesize 
 
 ;; adjusts of synthesize by vdr
 ;; csd-list : Consed-Spots-Degree-list
 (labels
-
     ((c-spot (spot-degree)
        (car spot-degree))
      (c-deg (spot-degree)
        (cdr spot-degree)))
 
-  (let ((n-pi-degree (mapcar #'(lambda (n) (* pi n))
-                             (upto 0 10))))
-    (defun remove-n-pi-degree (csd-list)
-      (remove-if #'(lambda (csd)
-                     (find-if #'(lambda (deg) (error-round-deg= (c-deg csd) deg))
-                              n-pi-degree))
-                 csd-list)))
+  #|
+  (defun vdr-adjust (list)
+    ;; its too slow :: O((2*n)^2)
+    (let ((adjust (vdr-adjust1 (vdr-adjust2 list))))
+      ;; length form
+      ))
+
+  (defun vdr-adjust1 (list &optional path)
+    (cond ((null (cdr list)) (cons (car list) path))
+          ((null path)
+           (vdr-adjust1 (cdr list) (cons (car list) path)))
+          ((spot= (c-spot (car list)) (c-spot (car path)))
+           (vdr-adjust1 (cddr list) (cdr path)))
+          (t
+           (vdr-adjust1 (cdr list) (cons (car list) path)))))
+  |#
+
+  (defun vdr-adjust1 (list &optional path)
+    (cond ((null (cdr list)) (cons (car list) path))
+          ((null path)
+           (vdr-adjust1 (cdr list) (cons (car list) path)))
+          ((spot= (c-spot (car list)) (c-spot (car path)))
+           (print "hoge")
+           (vdr-adjust1 (vdr-adjust2 (cdr list) path)))
+          (t
+           (vdr-adjust1 (cdr list) (cons (car list) path)))))
   
-  (defun crush-if-serial-of-same-spot (csd-list)
-    (reduce
-     #'(lambda (list csd)
-         (cond ((null list) (list csd))
-               ((spot= (c-spot csd) (c-spot (car list)))
-                (cons (cons (c-spot csd) (+ (c-deg csd) (c-deg (car list))))
-                      (cdr list)))
-               (t (cons csd list))))
-     csd-list :initial-value '()))
-
-  (defun adjust-vdr-line (csd-list &optional path)
-    "csd-list : consed-spots-degree-list"
-    (cond 
-      ((null (cdr csd-list)) (append csd-list path))
-      ((null path) (adjust-vdr-line (cdr csd-list) (list (car csd-list))))
-      ((spot= (c-spot (car path)) (c-spot (cadr csd-list)))
-       (adjust-vdr-line-aux (cdr csd-list) path (c-deg (car csd-list))))
-      (t (adjust-vdr-line (cdr csd-list) (cons (car csd-list) path)))))
-
-  (defun adjust-vdr-line-aux (csd-list1 csd-list2 ago-cons)
-    (cond 
-      ((null csd-list1) csd-list2)
-      ((null csd-list2) csd-list1)
-      ((spot= (c-spot (car csd-list1))
-              (c-spot (car csd-list2)))
-       (adjust-vdr-line-aux (cdr csd-list1) (cdr csd-list2)
-                            (cons (c-spot csd-list1) 
-                                  (+ (c-deg (car csd-list1)) (c-deg (car csd-list2))))))
-      (t (append csd-list1 (list ago-cons) csd-list2))))
+  (defun vdr-adjust2 (list &optional path)
+    (cond ((null (cdr list)) (cons (car list) path))
+          ((null (car list)) 
+           (vdr-adjust2 (cdr list) (cons (car list) path)))
+          ((not (spot= (c-spot (car list)) (c-spot (cadr list))))
+           (vdr-adjust2 (cdr list) (cons (car list) path)))
+          (t 
+           (vdr-adjust2 (cons (car path) (cddr list)) (cdr path)))))
   )
-          
   
 
 ;;;; synthesizeable
