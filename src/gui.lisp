@@ -74,7 +74,7 @@
   (:panes 
    ;;(interactor :interactor)
    (canvas :application
-           :width 400 :height 400
+           :width 600 :height 400
            :scroll-bars t
            :display-function 'display-piece-preview)
    (current-piece-info :application
@@ -141,7 +141,7 @@
                           (list (spot-x spot) (spot-y spot) (round (rad->360 deg))))
                       (piece-spots piece) (piece-degrees piece)))
       ;;(format stream "~%~%~%")
-      (format stream "~&~A~%" piece)
+      ;;(format stream "~&~A~%" piece)
 
       (finish-output stream))))
 
@@ -216,7 +216,7 @@
     ;; origin point
     (draw-point* stream 0 0 :ink +blue+ :line-thickness 10)))
 
-#|
+
 (defun draw-childs-pieces (piece stream)
   (let-maybe
       ((sy-from (just-*-nil=>nothng (piece-synth-from piece)))
@@ -233,7 +233,7 @@
       (draw-childs-pieces (synth-piece sy-from) stream)
       (draw-childs-pieces (synth-piece sy-to) stream)
       )))  
-|#
+
 
 (defun draw-piece (piece stream)
   (let ((fill-color 
