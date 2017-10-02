@@ -150,9 +150,12 @@ if (all just-p list) then (just list) else (nothing)."
   (let ((next-list (mapcar #'maybe-return list-of-maybe)))
     (if (find *nothing* next-list) 
         (nothing)
-        (just next-list)
-  )))
+        (just next-list))))
 
+(defun return-list-remove-nothing (list-of-maybe)
+  "[Maybe a] -> [a]"
+  (maybe-return (list-of-maybe->maybe-list
+                 (remove *nothing* list-of-maybe))))
 
               
 ;;;; abstruct function
