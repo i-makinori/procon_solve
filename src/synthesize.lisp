@@ -130,15 +130,7 @@
 
 (defun vdr-to-vdr-queue (vdr1 vdr2 &key (flag nil) (time 0))
   "let direction of round correct"
-  (if (same-vector-angle (vdr-vec (cadr vdr1)) (vdr-vec (cadr vdr2)))
-                                        ;same-v-ang :: include std-error
-      (cons vdr1 vdr2)
-      (cond ((>= time 3) (error "vdr-to-vdr-queue error"))
-            (flag (vdr-to-vdr-queue vdr1 (cons (car vdr2) (reverse (cdr vdr2)))
-                                    :flag nil :time (1+ time)))
-            (t (vdr-to-vdr-queue (cons (car vdr1) (reverse (cdr vdr1))) vdr2
-                                 :flag t :time (1+ time))))))
-
+  (cons vdr1 vdr2))
 
 (defun easy-piece-to-vdr (easy-piece)
   (mapcar #'(lambda (vec deg) (make-vdr :vec vec :deg deg))
