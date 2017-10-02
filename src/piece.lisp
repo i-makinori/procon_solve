@@ -25,8 +25,13 @@
      spots degrees nil nil nil)))
 
 ;; parameters
-(defparameter *nil-piece* 
+(defparameter *nil-piece*
   (piece nil nil nil nil nil))
+
+(defun is-nil-piece (piece)
+  (>= 2 (length (piece-spots piece)))
+  ;;(null (piece-spots piece)))
+  )
 
 (defparameter *zero-piece* nil)
 
@@ -41,6 +46,12 @@
   ;; .[poins] => all spots are included in discrete spot.
   )
 
+
+(defun piece->piece-s-not-frame-piece (piece)
+  "ret-piece.is-frame <- not piece.is-frame"
+  (piece (piece-spots piece) (piece-degrees piece)
+         (not (piece-is-frame piece))
+         (piece-synth-from piece) (piece-synth-to piece)))
 
 (defun degree-adjust (degrees)
   "in n-polygon. when degree-rength is not (n-2)*pi, let degree-length (n-2)*pi "
