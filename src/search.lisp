@@ -17,18 +17,64 @@
    #'(lambda (consed)
        (synth piece (car consed) (cdr consed)))
    (zip-list (list *plus* *minus*)
-             (upto 0 (1- (length (piece-spots piece))))
-   )))
+             (upto 0 (1- (length (piece-spots piece)))))))
 
-(defun synth+piece->synthesizeable-list (synth piece)
+(defun synth+synth-list->synthesizeable-list (synth synth-list)
   (list-of-maybe->maybe-list
    (remove *nothing* 
            (mapcar #'(lambda (synth2)
-               (synthesize-able?--also--maybe-consed-easy-piece 
-                synth synth2))
-           (piece->ability-synth-list piece)))))
+                       (synthesize-able?--also--maybe-consed-easy-piece 
+                        synth synth2))
+               synth-list))))
 
-;;(show-easy-piece-list (mapcar #'cdr (maybe-return (synth+piece->synthesizeable-list *test-synth-n1* *test-piece1*))))
+(defun synth+piece->synthesizeable-list (synth piece)
+  (synth+synth-list->synthesizeable-list
+   synth (piece->ability-synth-list piece)))
+
+(defun synth+piece->synthesizeable-list-test ()
+  ;; test
+  (let ((test-synth *test-synth-n1*)
+        (test-piece *test-piece1*))
+    (let-maybe
+        ((synthesizeable-list 
+          (synth+piece->synthesizeable-list test-synth test-piece)))
+      (format t "~&show synthesizeable list~%")
+      (show-easy-piece-list
+       (cons (synth->easy-piece test-synth)
+             (mapcar #'cdr synthesizeable-list)))
+      (format t "~&show synthed list~%")
+      (show-easy-piece-list
+       (mapcar #'(lambda (sy-able-cons)
+                   (synthesize-syntesizeable-easy-piece 
+                    (car sy-able-cons) (cdr sy-able-cons)))
+               synthesizeable-list)))))
+
+(defun synthesize-piece-list-all (piece1 piece2)
+  (let* ((list-maybe
+          (mapcar #'(lambda (consed)
+                      (maybe-synthesize-piece (car consed) (cdr consed)))
+                  (zip-list (piece->ability-synth-list piece1)
+                            (piece->ability-synth-list piece2)))))
+    ;; (synthesize-piece-list-all *test-piece-n1* *test-piece-n1*)
+    ;; (synthesize-piece-list-all *test-piece1* *test-piece1*)
+    (return-list-remove-nothing list-maybe)))
+
+
+
+
+(defun equivalent-piece (piece1 piece2)  
+  )
+
+(defun piece-shape= (piece1 piece2)
+  ;; if it is scheme, i could write this more clearly...
+  (let ((piece-list (synthesize-piece-list-all piece1 piece2)))
+    ;;(print piece-list)
+
+    (if (find-if #'is-nil-piece
+                 piece-list)
+        t nil)
+    )
+  )
 
 ;;;; tree
 (defun when-cons-car (test-var)
