@@ -1,6 +1,7 @@
 
 (in-package #:procon)
 
+;;;; search
 
 (defun piece->flatten-primirative-piece-synth (piece)
   (flatten-tree-func-test 
@@ -10,6 +11,24 @@
                           (synth-piece (piece-synth-from piec))))
    piece))
 
+
+(defun piece->ability-synth-list (piece)
+  (mapcar
+   #'(lambda (consed)
+       (synth piece (car consed) (cdr consed)))
+   (zip-list (list *plus* *minus*)
+             (upto 0 (1- (length (piece-spots piece))))
+   )))
+
+(defun synth+piece->synthesizeable-list (synth piece)
+  (list-of-maybe->maybe-list
+   (remove *nothing* 
+           (mapcar #'(lambda (synth2)
+               (synthesize-able?--also--maybe-consed-easy-piece 
+                synth synth2))
+           (piece->ability-synth-list piece)))))
+
+;;(show-easy-piece-list (mapcar #'cdr (maybe-return (synth+piece->synthesizeable-list *test-synth-n1* *test-piece1*))))
 
 ;;;; tree
 (defun when-cons-car (test-var)

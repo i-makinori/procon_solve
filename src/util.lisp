@@ -243,6 +243,10 @@ if (all just-p list) then (just list) else (nothing)."
   (if (and list (funcall test (car list)))
       (cons (car list) (take-while (cdr list) test))))
 
+(defun zip-list (list1 list2)
+  " [a] -> [b] -> [(a, b)] "
+  (concat (mapcar #'(lambda (v1) (mapcar #'(lambda (v2) (cons v1 v2)) list2))
+                  list1)))
 
 ;;;; string-list 
 
