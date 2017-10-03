@@ -21,6 +21,8 @@
    (:module "util"
             :components
             ((:file "util")
+             (:file "maybe-nothing")
+             (:file "tree")
              (:file "line")
              (:file "vector")))
    (:module "lib"

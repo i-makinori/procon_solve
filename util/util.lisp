@@ -2,6 +2,9 @@
 
 ;;;; utils ;;;;;;;;;;;;;
 
+
+
+
 ;;;; hoge constant 
 
 (defparameter *huge-num* 100000000)
@@ -9,12 +12,6 @@
 
 ;;;; number-pair 
 
-(defun number-pair (list &optional (initial-value 0))
-  (let ((val initial-value))
-    (mapcar #'(lambda (x)
-                (setq val (1+ val))
-                (cons (- val 1) x))
-            list)))
 
 
 ;;;; degree
@@ -58,109 +55,23 @@ if (error of real-num < *standard-error*) than Just (round real-num) else nothin
   (error-round-deg= pi its-about-pi))
 
 
-;;;; Nothing 
-
-(defun nothing () 
-  "Maybe - Nothing(=Failure)"
-  ;; f:failure
-  '@nothing)
-
-(defparameter *nothing* (nothing))
-
-(defun failure ()
-  (nothing))
-
-(defun nothing-p (var)
-  (eq var (nothing)))
-
-(defun nothing=>nil (var)
-  (if (eq var (nothing)) nil var))
-
-(defun nil=>nothing (var)
-  (if (null var) (nothing) var))
-
-#|
-(defmacro call-when-non-nothing ((func &body body))
-  `(if (some #'is-nothing (list ,@body))
-       (nothing)
-       (,func ,@body)))
-|#
-
-(defmacro let-unless-body-bind-no-nothng (bindings &body body)
-  "let form.  only when there is no-nothings in bindings, do ,@body, else (nothing)"
-  (let ((bindings-names 
-         `,(mapcar #'(lambda (bind) (car bind))
-                   bindings)))
-    `(let ,bindings
-       (if (some #'nothing-p (list ,@bindings-names))
-           (nothing)
-           (progn ,@body)))))
-
-
-;;;; Maybe
-
-(defun just (a) 
-  ;; t:sucess, true
-  "Maybe - Just a"
-  (cons '@just a))
-
-(defun just-p (just-var)
-  (and (consp just-var)
-       (eq (car just-var) '@just)))
-
-(defun maybe-p (a)
-  (or (just-p a) 
-      (nothing-p a)))
-
-(define-condition maybe-data-type-error (simple-error) (data)
-  (:report (lambda (c s)
-             (format s "Maybe-data-type:difference : ~A" c))))
-
-(defun maybe-return (maybe-a)
-  (cond ((not (maybe-p maybe-a)) 
-         (error 'maybe-data-type-error))
-        ((just-p maybe-a) 
-         (cdr maybe-a))
-        (t (nothing))))
-
-(defun just-*-nil=>nothng (var)
-  "var => Maybe var (= Just var|Nothng). && (var==nil)=>Nothing"
-  (cond (var (just var))
-        (t (nothing))))
-
-(defmacro let-maybe (bindings-of-maybe &body body)
-  "let form.  if all bindings are just form, do ,@body, else (nothing)"
-  (let ((bindings-names
-         `,(mapcar #'(lambda (bind)  (car bind))
-                   bindings-of-maybe))
-        (bindings-funcs
-         `,(mapcar #'(lambda (bind) `(maybe-return ,(cadr bind)))
-                   bindings-of-maybe)))
-    (let ((next-bindings 
-           `,(mapcar #'list bindings-names bindings-funcs)))
-      `(let
-           ,next-bindings
-         (if (some #'nothing-p (list ,@bindings-names))
-             (nothing)
-             (progn ,@body))))))
-
-(defun list-of-maybe->maybe-list (list-of-maybe)
-  "[Maybe a] -> Maybe [a] (= Just [a]||nothng)  
-if (all just-p list) then (just list) else (nothing)."
-  (let ((next-list (mapcar #'maybe-return list-of-maybe)))
-    (if (find *nothing* next-list) 
-        (nothing)
-        (just next-list))))
-
-(defun return-list-remove-nothing (list-of-maybe)
-  "[Maybe a] -> [a]"
-  (maybe-return (list-of-maybe->maybe-list
-                 (remove *nothing* list-of-maybe))))
 
               
 ;;;; abstruct function
+
+(defun show-param (indent name var)
+  (format t "~&~V@{  ~}~A :: ~A~%" indent name var)
+  var)
+
 (defun id (val)
   val)
+
+(defun when-cons-car (test-var)
+  (if (consp test-var) (car test-var) test-var))
+
+(defun when-cons-cdr (test-var)
+  (if (consp test-var) (cdr test-var) nil))
+
 
 
 ;;;; list 
@@ -183,6 +94,13 @@ if (all just-p list) then (just list) else (nothing)."
   (let ((n (mod rotate-times (length list))))
     (append (drop list n) (take list n))
     ))
+
+(defun number-pair (list &optional (initial-value 0))
+  (let ((val initial-value))
+    (mapcar #'(lambda (x)
+                (setq val (1+ val))
+                (cons (- val 1) x))
+            list)))
 
 (defun take (list num)
   (if (or (<= num 0) (null list))
