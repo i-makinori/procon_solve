@@ -61,9 +61,11 @@
         (t (mapcar #'(lambda (deg) (- 2pi deg)) degrees))))
 
 (defun piece-area (piece)
-  (let ((spots (spots->vecs (piece-spots piece))))
-    (reduce #'+ (map-tuple/c #'2vector->area
-                             2 spots))))
+  (abs (* 0.5 (reduce #'+ 
+                      (map-tuple #'(lambda (s1 s2) (* (- (spot-x s1) (spot-x s2))
+                                                      (+ (spot-y s1) (spot-y s2))))
+                                 2 (piece-spots piece))))))
+
 
 (defun bad-piece-list->piece-list (bad-piece-list)
   "bad-piece-list :: [piece] && not contain frame-piece"
