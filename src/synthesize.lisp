@@ -96,9 +96,8 @@
   (cond ((func-r-list-car #'(lambda (vdr1 vdr2) (vec= (vdr-vec vdr1) (vdr-vec vdr2)))
                           vdr-list--rlist)
          (remove-vdrs 
-          (make-r-list
-           (func-r-list-car #'when-same-vdr-vec  vdr-list--rlist)
-           (r-list-cdr vdr-list--rlist)))
+          (make-r-list (func-r-list-car #'when-same-vdr-vec  vdr-list--rlist)
+                       (r-list-cdr vdr-list--rlist)))
         (t vdr-list--rlist))
          
          
