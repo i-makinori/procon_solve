@@ -299,38 +299,6 @@ center-deg is smaller than (pi - st-error), it's gravity-center is included in p
      (piece-is-frame piece))))
 
 
-;;;; test
-
-(defparameter *test-easy-piece1*
-  (piece->easy-piece *test-piece1*))
-
-(defparameter *test-easy-piece2*
-  (piece->easy-piece (nth 2 *test-piece-list1*)))
-
-
-(defparameter *test-synth1* 
-  (synth *test-piece-for-synth1* *plus* 5))
-
-(defparameter *test-synth2*
-  (synth *test-piece-for-synth2* *minus* 4))
-
-
-(defparameter *test-piece-n1*
-  (spots->piece (list (spot 0 0) (spot 10 0) (spot 10 10) (spot 0 10))))
-
-(defparameter *test-piece-n2*
-  (let ((piece (spots->piece (list (spot 0 0) (spot 0 20) (spot 10 20) (spot 20 0)))))
-    (piece (piece-spots piece)
-           (piece-degrees piece)
-           t nil nil)))
-
-(defparameter *test-synth-n1*
-  (synth *test-piece-n1* *plus* 1))
-
-(defparameter *test-synth-n2*
-  (synth *test-piece-n2* *minus* 0))
-
-
 
 ;;;; call gui
 

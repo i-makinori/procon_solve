@@ -16,9 +16,6 @@
                              :piece (cdr pair)))
           (funcall name-rule piece-list)))
 
-;; for test
-(defparameter *test-gui-piece-list*
-  (piece-list->gui-piece-list *test-piece-list1*))
 
 
 
@@ -33,16 +30,6 @@
 
 (defun show-piece (piece)
   (show-piece-list (list piece)))
-
-;; for test
-(defvar *solve-gui-state* nil)
-
-(defun run-solve-gui-test ()
-  (setf *solve-gui-state* 
-        (make-application-frame 'solve-gui
-                                :gui-piece-list *test-gui-piece-list*))
-  (run-frame-top-level *solve-gui-state*))
-
 
 
 ;;;; clim-util

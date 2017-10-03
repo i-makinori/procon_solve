@@ -18,35 +18,33 @@
   :components
   (;; package
    (:file "package")
-
-   ;; src.libs / src.structure
-   (:file "src/util" )
-   (:file "src/line" :depends-on ("src/util"))
-   (:file "src/vector" :depends-on ("src/util" "src/line"))
-
-   ;; piece-16
-   ;; synth-piece
-   (:file "src/synthesize")
-   (:file "src/piece")
-
-
-   ;; test :: samples
-   (:file "test/samples1")
-   (:file "test/samples2")
-
-   ;; src.synth
-   (:file "src/synth")
-
-   ;; src.search
-   (:file "src/search")
-   
-   ;; src.application
-   (:file "src/io")
-   (:file "src/gui")
-   ;; decrim
-
-
-   ;; app
-   (:file "src/test")
-   (:file "src/main")
+   (:module "util"
+            :components
+            ((:file "util")
+             (:file "line")
+             (:file "vector")))
+   (:module "lib"
+            :components
+            (;; piece
+             (:file "piece")
+             ;; synth
+             (:file "synth")
+             (:file "synthesize")
+             ;; search 1-move / search lib
+             ))
+   (:module "src"
+            :components
+            (;; search answer
+             (:file "search")
+             ;; application
+             (:file "io")
+             (:file "gui")
+             ;; decrim
+             ;; app
+             (:file "test")
+             (:file "main")))
+   (:module "test"
+            :components
+            ((:file "samples1")
+             (:file "samples2")))
    ))
