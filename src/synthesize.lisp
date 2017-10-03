@@ -2,104 +2,137 @@
 
 ;;;; synthesize ;;;;;;;;;;;;;;;;
 
-;;;; structure 
+#|
+(defun synthesize-easy-piece-rule (easy-piece1 easy-piece2)
+  (let* ((hoge))
+    hoge
+    ))
 
-;; vdr :: Vector-Degree-|:S:|
-(defun vdr (vec deg)
-  (cons vec deg))
-
-(defun vdr-vec (vdr)
-  (car vdr))
-
-(defun vdr-deg (vdr)
-  (cdr vdr))
-
-
-;; Rotation list
-
-(defun rotation-list (list- list+ &optional fai)
-  (list fai list- list+))
-
-(defun make-r-list (list- list+ &optional fai)
-  (rotation-list list- list+ fai))
-
-(defun r-list-fai (rlist)
-  (car rlist))
-
-(defun r-list- (rlist)
-  (cadr rlist))
-
-(defun r-list+ (rlist)
-  (caddr rlist))
-
-(defun r-hole (rlist)
-  (make-r-list (reverse (r-list+ rlist))
-               (reverse (r-list- rlist))
-               (rlist-fai rlist)))
-
-(defun r-list-cdr (rlist)
-  (make-r-list  (cdr (r-list- rlist))
-                (cdr (r-list+ rlist))
-                (r-list-fai rlist)))
-
-(defun func-r-list-car (func rlist)
-  (funcall func
-           (car (r-list- rlist))
-           (car (r-list+ rlist))))
-           
-(defun r-list->list (rlist)
-  ;; undefined
+(defun easy-piece->vdr-list (easy-piece1 easy-piece2)
+  
   )
+|#
 
-(defparameter *test-rlist1*
-  (rotation-list (reverse '(1 2 3 4 5)) '(6 7 8 9 10) 100))
 
-;;;; functions 
+(defstruct vdr
+  (vec (vec 0 0))
+  (deg 0))
 
-(defun easy-piece-to-vdr-list (easy-piece)
-  (mapcar #'vdr 
-          (spots->vecs (epiece-spots easy-piece))
-          (epiece-degrees easy-piece)))
+(defun vdr-vec-origin-shift (vdr-vecs)
+  (let ((first-vec (car vdr-vecs)))
+    (mapcar #'(lambda (vdc)
+                (vec-sub  vdc first-vec))
+            vdr-vecs)))
 
+(defun vdr-to-easy-piece (vdr-list)
+  (easy-piece (vecs->spots (vdr-vec-origin-shift (mapcar #'vdr-vec vdr-list)))
+              (mapcar #'vdr-deg vdr-list)
+              nil))
 
 (defun synthesize-easy-piece-rule (easy-piece1 easy-piece2)
-  (let* ((vdr-list1 (easy-piece-to-vdr-list easy-piece1))
-         (vdr-list2 (easy-piece-to-vdr-list easy-piece2))
-         ;;
-         (vdr-list1-add-line-point
-          (add-ridden-line-point vdr-list1 vdr-list2))
-         (vdr-list2-add-line-point
-          (add-ridden-line-point vdr-list2 vdr-list1))
-         ;;
-         (rlist (make-r-list vdr-list1-add-line-point
-                             vdr-list2-add-line-point)))
-    (remove-vdrs rlist)))
+  (let* ((vdr-queue
+          (vdr-to-vdr-queue
+           (easy-piece-to-vdr easy-piece1)
+           (easy-piece-to-vdr easy-piece2)))
+         (vdr-added-line-point-vdr1
+          (add-ridden-line-point (car vdr-queue) (cdr vdr-queue)))
+         (vdr-added-line-point-vdr2
+          (add-ridden-line-point (cdr vdr-queue) (car vdr-queue)))
+         (remove-sy-line
+          (remove-sy-line vdr-added-line-point-vdr1 vdr-added-line-point-vdr2)))
+    (if (position nil remove-sy-line) nil
+        (vdr-to-easy-piece (remove-line
+                            (remove-synth-rev (remove-synth remove-sy-line)))))))
+
+(defun remove-line (vdr-list)
+  (remove-if
+   #'(lambda (vdr) (pi-judge-contain-error (vdr-deg vdr)))
+   vdr-list)
+  )
+
+(defun remove-round (vdr-list)
+  (remove-if #'(lambda (vdr) (2pi-judge-contain-error (vdr-deg vdr))) vdr-list))
 
 
-;;;; remove points
+(defun remove-synth-rev (vdr-list)
+  "rev:reverse direction of list"
+  (let ((vdr-synth (synthesize-vdr (car vdr-list) (rotate-nth -1 vdr-list))))
+    (cond ((2pi-judge-contain-error (vdr-deg (car vdr-list)))
+           (remove-synth-rev (cdr vdr-list)))
+          (vdr-synth
+           (remove-synth-rev (cons vdr-synth (init (cdr vdr-list)))))
+          (t vdr-list))))
 
-(defun n-pi-test (deg)
-  "deg = n * pi => t"
-  (error-round-deg= 0 (mod deg pi)))
-  
+(defun remove-synth (vdr-list &optional (s-vdr nil))
+  (let ((vdr-synth (synthesize-vdr (car vdr-list) (car s-vdr))))
+    (cond ((null vdr-list) s-vdr)
+          ((2pi-judge-contain-error (vdr-deg (car vdr-list)))
+           (remove-synth (cdr vdr-list) s-vdr))
+          ((and vdr-synth (2pi-judge-contain-error (vdr-deg vdr-synth)))
+           (remove-synth (cdr vdr-list) (cdr s-vdr)))
+          (vdr-synth
+           (remove-synth (cons vdr-synth (cdr vdr-list))
+                         (cdr s-vdr)))
+          ('t
+           (remove-synth (cdr vdr-list) (cons (car vdr-list) s-vdr))))))
 
-(defun when-same-vdr-vec (vdr1 vdr2)
-  (let ((deg+deg (+ (vdr-deg vdr1) (vdr-deg vdr2)))
-        (vec (vdr-vec vdr1))) ;; = (vdr-vec vdr2)
-    (if (n-pi-test deg+deg) nil 
-        (vdr vec deg+deg))))
-        
 
-(defun remove-vdrs (vdr-list--rlist)
-  "rlist([vdr]) -> rlist([vdr])"
-  (print vdr-list--rlist)
-  (cond ((func-r-list-car #'(lambda (vdr1 vdr2) (vec= (vdr-vec vdr1) (vdr-vec vdr2)))
-                          vdr-list--rlist)
-         (remove-vdrs 
-          (make-r-list (func-r-list-car #'when-same-vdr-vec  vdr-list--rlist)
-                       (r-list-cdr vdr-list--rlist)))
-        (t vdr-list--rlist))
-         
-         
+(defun remove-sy-line (vdr1 vdr2)
+  "the line across origin point to last point of piece16-"
+  (let ((remove-origin
+         (append (drop vdr1 1)
+                 (cons (synthesize-vdr (car vdr2) (car vdr1))
+                       (reverse (cdr vdr2))))))
+    (cons (synthesize-vdr (car remove-origin) (car (last remove-origin)))
+          (cdr (init remove-origin)))))
 
-)))
+
+(defun synthesize-vdr (vdr1 vdr2)
+  (if (and vdr1 vdr2
+           (vec= (vdr-vec vdr1) (vdr-vec vdr2)))
+      (make-vdr :vec (vec-prod (vec-add (vdr-vec vdr1) (vdr-vec vdr2))
+                               (vec 1/2 1/2))
+                :deg (+ (vdr-deg vdr1) (vdr-deg vdr2)))))
+
+(defun add-ridden-line-point-adjust (vdr-list &optional (s-vdr-list '()))
+  (cond ((null (cdr vdr-list)) s-vdr-list)
+        ((or (null s-vdr-list)
+             (not (vec= (vdr-vec (car vdr-list)) (vdr-vec (cadr vdr-list)))))
+         (add-ridden-line-point-adjust
+          (cdr vdr-list) (cons (car vdr-list) s-vdr-list)))
+        (t (add-ridden-line-point-adjust (cdr vdr-list) s-vdr-list))))
+
+
+(defun add-ridden-line-point (vdr1 vdr2 &optional (s-vdr 'F))
+  ;; rewrite-able to reduce form 
+  (cond ((null (cdr vdr1)) (reverse
+                            (add-ridden-line-point-adjust (append-car-last
+                                                           (reverse s-vdr)))))
+        ((eq 'F s-vdr) (add-ridden-line-point (append-car-last vdr1) vdr2 nil))
+        ('t (let ((this-point-vec (vdr-vec (car vdr1)))
+                  (next-point-vec (vdr-vec (cadr vdr1))))
+              (add-ridden-line-point
+               (cdr vdr1) vdr2
+               (append
+                (mapcar #'(lambda (p)
+                            (make-vdr :vec (vdr-vec p)
+                                      :deg  pi))
+                        (remove-if-not
+                         #'(lambda (p)
+                             (and (not (vec= (vdr-vec p) this-point-vec))
+                                  (not (vec= (vdr-vec p) next-point-vec))
+                                  (line-spot-vec-hit-judge-error
+                                   (vector-to-line this-point-vec next-point-vec)
+                                   (vdr-vec p))))
+                         vdr2))
+                (list (car vdr1)) s-vdr ))))))
+
+
+(defun vdr-to-vdr-queue (vdr1 vdr2 &key (flag nil) (time 0))
+  "let direction of round correct"
+  (cons vdr1 vdr2))
+
+(defun easy-piece-to-vdr (easy-piece)
+  (mapcar #'(lambda (vec deg) (make-vdr :vec vec :deg deg))
+          (spots->vecs (epiece-spots easy-piece))
+          (epiece-degrees easy-piece)))
