@@ -17,21 +17,6 @@
           (funcall name-rule piece-list)))
 
 
-
-
-;;;; run-app
-
-(defun show-piece-list (piece-list)
-  "in CLIM GUI"
-  (let ((frame (make-application-frame 
-                'solve-gui
-                :gui-piece-list (piece-list->gui-piece-list piece-list))))
-    (run-frame-top-level frame)))
-
-(defun show-piece (piece)
-  (show-piece-list (list piece)))
-
-
 ;;;; clim-util
 
 (defun reset-list-pane (pane items &optional (index 0))
@@ -45,7 +30,6 @@
                 (if (plusp (length values))
                     (elt values index)
                     nil))))))
-
 
 
 ;;;; frame

@@ -33,14 +33,16 @@
              (:file "synth")
              (:file "synthesize")
              ;; search 1-move / search lib
-             ))
+             (:file "search-util")))
    (:module "src"
             :components
             (;; search answer
              (:file "search")
              ;; application
              (:file "io")
+             ;; gui
              (:file "gui")
+             (:file "run-gui")
              ;; decrim
              ;; app
              (:file "test")

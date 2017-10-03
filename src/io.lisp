@@ -30,6 +30,7 @@
 
 
 (defun read-primirative-pieces-list-from-json-file! (filename)
+  ;; (read-primirative-pieces-list-from-json-file! *json-file-of-piecess1*)
   (let* ((file-str (file-get-contents! filename))
          (json (json-str-to-json file-str))
          (piece-list (json-to-primirative-piece-list json)))

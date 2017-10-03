@@ -2,13 +2,6 @@
 
 ;;;; samples ;;;;;;;;;;;;;;;;;
 
-;;;; sampel-json-file
-;; sample json of synth and piece
-;; https://github.com/nnct-jo-ken/procon2017_kyogi_server/wiki/piece-synth-in-JSON
-
-(defparameter *json-file-of-piecess1* "test/piece_sample.json")
-
-
 ;;;; generate test by json-file
 ;; for example,
 ;; REPL > (piece-list->piece-list-func-form (read-primirative-pieces-list-from-json-file! *json-file-of-piecess1*))
@@ -29,7 +22,7 @@
 
 (defparameter *test-piece1*
   (spots->piece  (list (spot 0 0) (spot 26 0) (spot 26 5) (spot 18 5) 
-                           (spot 18 17) (spot 15 24) (spot 10 24) (spot 4 20) (spot 0 20))))
+                       (spot 18 17) (spot 15 24) (spot 10 24) (spot 4 20) (spot 0 20))))
 
 
 (defparameter *test-piece-list1*

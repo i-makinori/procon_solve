@@ -2,21 +2,21 @@
 
 ;;;; synthesize ;;;;;;;;;;;;;;;;
 
-#|
-(defun synthesize-easy-piece-rule (easy-piece1 easy-piece2)
-  (let* ((hoge))
-    hoge
-    ))
-
-(defun easy-piece->vdr-list (easy-piece1 easy-piece2)
-  
-  )
-|#
-
+;;;; struct
 
 (defstruct vdr
   (vec (vec 0 0))
   (deg 0))
+
+(defun vdr-to-easy-piece (vdr-list)
+  (easy-piece (vecs->spots (vdr-vec-origin-shift (mapcar #'vdr-vec vdr-list)))
+              (mapcar #'vdr-deg vdr-list)
+              nil))
+
+(defun easy-piece-to-vdr (easy-piece)
+  (mapcar #'(lambda (vec deg) (make-vdr :vec vec :deg deg))
+          (spots->vecs (epiece-spots easy-piece))
+          (epiece-degrees easy-piece)))
 
 (defun vdr-vec-origin-shift (vdr-vecs)
   (let ((first-vec (car vdr-vecs)))
@@ -24,10 +24,7 @@
                 (vec-sub  vdc first-vec))
             vdr-vecs)))
 
-(defun vdr-to-easy-piece (vdr-list)
-  (easy-piece (vecs->spots (vdr-vec-origin-shift (mapcar #'vdr-vec vdr-list)))
-              (mapcar #'vdr-deg vdr-list)
-              nil))
+;;;; synthesize rule
 
 (defun synthesize-easy-piece-rule (easy-piece1 easy-piece2)
   (let* ((vdr-queue
@@ -132,7 +129,3 @@
   "let direction of round correct"
   (cons vdr1 vdr2))
 
-(defun easy-piece-to-vdr (easy-piece)
-  (mapcar #'(lambda (vec deg) (make-vdr :vec vec :deg deg))
-          (spots->vecs (epiece-spots easy-piece))
-          (epiece-degrees easy-piece)))
