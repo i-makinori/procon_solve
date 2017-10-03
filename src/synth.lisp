@@ -51,12 +51,6 @@ which can intepret special synth"
          (epiece-is-frame easy-piece)
          synth-from synth-to))
 
-(defun test ()
-  (print (piece-area (piece->piece-s-not-frame-piece *test-piece1*) ))
-  (print (piece-area *test-piece1*))
-  (show-piece-list (synthesize-piece-list-all 
-                    (piece->piece-s-not-frame-piece *test-piece1*) 
-                    (piece->piece-s-not-frame-piece *test-piece-n1*))))
 
 ;;;; function 
 
@@ -80,7 +74,9 @@ which can intepret special synth"
 
 
 (defun synthesize-syntesizeable-easy-piece (able-easy-piece1 able-easy-piece2)
-  (let* (;; vdr way. maybe in synthesize.lisp
+  (let* ((is-frame (or (epiece-is-frame able-easy-piece1)
+                       (epiece-is-frame able-easy-piece2)))
+         ;; vdr way. maybe in synthesize.lisp
          (easy-piece (synthesize-easy-piece-rule able-easy-piece1 able-easy-piece2))
          ;; csd-way.
          (csd-list (mapcar #'cons
@@ -93,7 +89,7 @@ which can intepret special synth"
     (if (>= 2 (length vdr-adjust))
         (piece->easy-piece *nil-piece*)
         (easy-piece (mapcar #'car vdr-adjust) (mapcar #'cdr vdr-adjust)
-                    nil))))
+                    is-frame))))
 
 ;;;; csd synthesize 
 
