@@ -1,13 +1,19 @@
 (in-package :procon)
 
 
-;;;; json to piece-list
+;;;; read file
 
 (defun file-get-contents! (filename)
   (with-open-file (stream filename)
     (let ((contents (make-string (file-length stream))))
       (read-sequence contents stream)
       contents)))
+
+;;;; coordinate txt
+
+
+
+;;;; json to piece-list
 
 (defun json-str-to-json (piece-list-json-str)
   (with-input-from-string 
@@ -26,8 +32,6 @@
                              (rest (assoc :y json-point))))
                    (rest (assoc :points primirative-piece-json)))))
      piece-list-json)))
-
-
 
 (defun read-primirative-pieces-list-from-json-file! (filename)
   ;; (read-primirative-pieces-list-from-json-file! *json-file-of-piecess1*)

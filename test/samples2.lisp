@@ -1,7 +1,22 @@
 (in-package #:procon)
 
 
-;;;; test for io
+;;;; probrems by files / also test for io
+
+
+(defparameter *test-piece-file1* ""
+
+  ;;puzzle_01.txt  puzzle_4.txt  puzzle_6.txt  puzzle_8.txt
+  ;;puzzle_10.txt  puzzle_5.txt  puzzle_7.txt  puzzle_9.txt
+)
+
+(defun txt-file->piece-list (path)
+  "IO(path) -> [piece]"
+  ;;(bad-piece-list->piece-list)
+  )
+
+
+
 ;;;; sampel-json-file
 ;; sample json of synth and piece
 ;; https://github.com/nnct-jo-ken/procon2017_kyogi_server/wiki/piece-synth-in-JSON
