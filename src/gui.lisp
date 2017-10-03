@@ -142,7 +142,11 @@
                       (piece-spots piece) (piece-degrees piece)))
       ;;(format stream "~%~%~%")
       ;;(format stream "~&~A~%" piece)
-
+      (unless (is-nil-piece piece)
+        
+        (format stream "~&area : ~A~%" (piece-area piece))
+        )
+      
       (finish-output stream))))
 
 

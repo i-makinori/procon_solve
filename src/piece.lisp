@@ -61,16 +61,23 @@
         (t (mapcar #'(lambda (deg) (- 2pi deg)) degrees))))
 
 (defun piece-area (piece)
-  (abs (* 0.5 (reduce #'+ 
-                      (map-tuple #'(lambda (s1 s2) (* (- (spot-x s1) (spot-x s2))
-                                                      (+ (spot-y s1) (spot-y s2))))
-                                 2 (piece-spots piece))))))
+  (let ((area-dir ;; piece-is-frame => (area<=0) , !=> (area>=0)
+         (if (piece-is-frame piece) #'- #'+)))
+    (funcall area-dir
+             (* 0.5 (reduce #'+ 
+                            (map-tuple #'(lambda (s1 s2) (* (- (spot-x s1) (spot-x s2))
+                                                            (+ (spot-y s1) (spot-y s2))))
+                                       2 (piece-spots piece)))))))
 
 
 (defun bad-piece-list->piece-list (bad-piece-list)
   "bad-piece-list :: [piece] && not contain frame-piece"
-  (let* ((sorted-pieces (safety-sort 
-                         bad-piece-list 
+  (let* ((to-bad-piece-list 
+          (mapcar #'(lambda (piece)
+                      (piece (piece-spots piece) (piece-degrees piece) nil nil nil))
+                  bad-piece-list))
+         (sorted-pieces (safety-sort 
+                         to-bad-piece-list 
                          #'(lambda (p1 p2) (> (piece-area p1) (piece-area p2)))))
          (bad-frame-piece (car sorted-pieces))
          (frame-piece (piece (piece-spots bad-frame-piece)
