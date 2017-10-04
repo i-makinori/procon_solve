@@ -216,13 +216,20 @@ t : included"
 (defun spot-include?-in-easy-piece (easy-piece)
   "search each triangle included in easy-piece,
 center-deg is smaller than (pi - st-error), it's gravity-center is included in piece16"
-  (let ((n (search '(()) (epiece-degrees easy-piece)
-                   :test #'(lambda (n x) n (> pi x))))
-        (vecs (spots->vecs (epiece-spots easy-piece))))
-    (gravity-center (list
-                     (rotate-nth (- n 1) vecs)
-                     (nth n vecs)
-                     (rotate-nth (+ n 1) vecs)))))
+  (handler-case 
+      (let ((n (search '(()) (epiece-degrees easy-piece)
+                        :test #'(lambda (n x) n (> pi x))))
+             (vecs (spots->vecs (epiece-spots easy-piece))))
+         (gravity-center (list
+                          (rotate-nth (- n 1) vecs)
+                          (nth n vecs)
+                          (rotate-nth (+ n 1) vecs))))
+    (type-error (c) ;; caused when 'n' returns nil, such as frame
+      (let ((e-piece! (copy-easy-piece easy-piece)))
+        (setf (epiece-degrees e-piece!)
+              (mapcar #'(lambda (deg) (- 2pi deg))
+                      (epiece-degrees easy-piece)))
+        (spot-include?-in-easy-piece e-piece!)))))
 
 (defun easy-piece-collision-detection (easy-piece1 easy-piece2)
   "nil=>not hit, T=>hit"
