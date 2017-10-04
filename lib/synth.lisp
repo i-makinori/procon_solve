@@ -54,12 +54,23 @@ which can intepret special synth"
 
 ;;;; function 
 
+(defun !fix-easy-piece-spot-list (easy-piece)
+  ;; bug of easy-piece spots liist
+  (let ((spots-fix
+         (mapcar #'(lambda (spot?)
+                     (if (spot-p spot?) spot? (car spot?)))
+                 (epiece-spots easy-piece))))
+    (easy-piece spots-fix
+                (epiece-degrees easy-piece)
+                (epiece-is-frame easy-piece))))
+
 (defun maybe-synthesize-piece (synth1 synth2)
   (let-maybe ((easy-piece-cons
                (synthesize-able?--also--maybe-consed-easy-piece synth1 synth2)))
     ;;(show-easy-piece-list (list (car easy-piece-cons) (cdr easy-piece-cons)))
-    (let* ((easy-piece (synthesize-syntesizeable-easy-piece
-                        (car easy-piece-cons) (cdr easy-piece-cons)))
+    (let* ((easy-piece 
+            (!fix-easy-piece-spot-list (synthesize-syntesizeable-easy-piece
+                                        (car easy-piece-cons) (cdr easy-piece-cons))))
            (is-frame (or (piece-is-frame (synth-piece synth1))
                          (piece-is-frame (synth-piece synth2))))
            (area-test (= (piece-area (easy-piece->piece easy-piece))

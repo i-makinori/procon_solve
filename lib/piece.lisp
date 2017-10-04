@@ -29,8 +29,8 @@
   (piece nil nil nil nil nil))
 
 (defun is-nil-piece (piece)
-  ;;(>= 2 (length (piece-spots piece)))
-  (null (piece-spots piece)))
+  (>= 2 (length (piece-spots piece))))
+  ;;(null (piece-spots piece)))
   
 
 (defun is-primirative-piece (piece)

@@ -39,20 +39,26 @@
                       (maybe-synthesize-piece (car consed) (cdr consed)))
                   ziped-list))
          (piece-list-d (remove *nothing* list-maybe))
+         #|
          (nil-piece->just-nil-piece
           (find-if #'(lambda (piece) (is-nil-piece piece))
                 piece-list-d))
          (piece-list (if nil-piece->just-nil-piece
                          (list nil-piece->just-nil-piece)
                          piece-list-d)))
+         |#
+         )
     ;;(print piece-list)
-    piece-list))
+    piece-list-d))
 
 
 (defun synthesize-piece-list-all-adjust (piece-list)
+  piece-list
+  #|
   (if (some #'(lambda (piece) (or (is-nil-piece piece) (= 0 (piece-area piece))))
             piece-list)
-      (list *nil-piece*) piece-list))
+      (list *nil-piece*) piece-list)
+  |#)
 
 
 (defun equivalent-piece (piece1 piece2)

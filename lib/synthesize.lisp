@@ -36,10 +36,16 @@
          (vdr-added-line-point-vdr2
           (add-ridden-line-point (cdr vdr-queue) (car vdr-queue)))
          (remove-sy-line
-          (remove-sy-line vdr-added-line-point-vdr1 vdr-added-line-point-vdr2)))
-    (if (position nil remove-sy-line) nil
+          (remove-sy-line vdr-added-line-point-vdr1 vdr-added-line-point-vdr2))
+         (hogehoge-?
+           (remove-synth (remove nil remove-sy-line)))
+         )
+    ;;(if (position nil remove-sy-line) nil
+    (if hogehoge-?
         (vdr-to-easy-piece (remove-line
-                            (remove-synth-rev (remove-synth remove-sy-line)))))))
+                            ;;(remove-synth-rev (remove-synth remove-sy-line)))))))
+                            hogehoge-?))
+        (piece->easy-piece *nil-piece*))))
 
 (defun remove-line (vdr-list)
   (remove-if
