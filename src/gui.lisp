@@ -104,15 +104,18 @@
         (piece (gui-piece-piece (current-piece frame))))
     (when piece
       (window-clear stream)
-      
+
+      (format stream "~&~A~%" piece)
+
       (format stream "piece-label : ~A ~%" name)
       (format stream "is-frame :  ~A ~%" (piece-is-frame piece))
+      (format stream "is-nil-piece :  ~A ~%" (is-nil-piece piece))
       (format stream "spots deg : (x y deg) ~% ~A" 
               (mapcar #'(lambda (spot deg)
                           (list (spot-x spot) (spot-y spot) (round (rad->360 deg))))
                       (piece-spots piece) (piece-degrees piece)))
       ;;(format stream "~%~%~%")
-      ;;(format stream "~&~A~%" piece)
+
       (unless (is-nil-piece piece)
         
         (format stream "~&area : ~A~%" (piece-area piece))
@@ -133,7 +136,8 @@
 (defmethod display-piece-preview (frame stream)
   (let ((medium (sheet-medium stream))
         (piece (gui-piece-piece (current-piece frame))))
-    (when (and piece (piece-spots piece))
+    (when (and piece 
+               (not (is-nil-piece piece)))
       (let*
           (;; transformation
            ;; all(transform) => (width >= scale * delta-x * 0.5 )
@@ -183,15 +187,16 @@
                  :ink +gray+)
 
     ;; axis-line
+    #|
     (draw-line* stream (- axis-length) 0 (* axis-length) 0
-                :ink +blue+ :line-thickness 2)
+    :ink +blue4+ :line-thickness 1)
     (draw-line* stream 0 (- axis-length) 0 (* axis-length)
-                :ink +blue+ :line-thickness 2)
-
+    :ink +blue3+ :line-thickness 1)
+    |#
     ;; origin point
     (draw-point* stream 0 0 :ink +blue+ :line-thickness 10)))
 
-
+#|
 (defun draw-childs-pieces (piece stream)
   (let-maybe
       ((sy-from (just-*-nil=>nothng (piece-synth-from piece)))
@@ -199,28 +204,22 @@
     (let-maybe 
         ((easy-piece-cons 
           (synthesize-able?--also--maybe-consed-easy-piece sy-from sy-to)))
-      (draw-polygon* stream
-                     (flatten (mapcar #'spot->list (epiece-spots (car easy-piece-cons))))
-                     :filled nil :ink +gray+ :line-thickness 2)
-      (draw-polygon* stream
-                     (flatten (mapcar #'spot->list (epiece-spots (cdr easy-piece-cons))))
-                     :filled nil :ink +gray+ :line-thickness 2)
+      (draw-easy-piece (car easy-piece-cons) stream)
+      (draw-easy-piece (cdr easy-piece-cons) stream)
+
       (draw-childs-pieces (synth-piece sy-from) stream)
       (draw-childs-pieces (synth-piece sy-to) stream)
-      )))  
-
+      )))
+|#
+(defun draw-childs-pieces (piece stream)
+  (draw-easy-piece (piece->easy-piece piece) stream)
+  ;;(let ((piece-synth-fro ))))
+)
 
 (defun draw-piece (piece stream)
-  (let ((fill-color 
-         (if (piece-is-frame piece)
-             (make-rgb-color 1.0 0.5 0.5)
-             (make-rgb-color 0.5 0.5 1.0))))
-    (draw-polygon* 
-     stream
-     (flatten (mapcar #'spot->list (piece-spots piece)))
-     :filled t :ink fill-color :line-thickness 4)
-    (draw-polygon* 
-     stream
-     (flatten (mapcar #'spot->list (piece-spots piece)))
-     :filled nil :ink +green+ :line-thickness 4)
-    (draw-childs-pieces piece stream)))
+  (draw-childs-pieces piece stream))
+
+(defun draw-easy-piece (easy-piece stream)
+  (draw-polygon* stream
+                 (flatten (mapcar #'spot->list (epiece-spots easy-piece)))
+                 :filled nil :ink +green+ :line-thickness 3))
