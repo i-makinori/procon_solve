@@ -29,9 +29,13 @@
   (piece nil nil nil nil nil))
 
 (defun is-nil-piece (piece)
-  (>= 2 (length (piece-spots piece)))
-  ;;(null (piece-spots piece)))
-  )
+  ;;(>= 2 (length (piece-spots piece)))
+  (null (piece-spots piece)))
+  
+
+(defun is-primirative-piece (piece)
+  (and (null (piece-synth-to piece))
+       (null (piece-synth-from piece))))
 
 (defparameter *zero-piece* nil)
 
@@ -49,7 +53,8 @@
 
 (defun piece->piece-s-not-frame-piece (piece)
   "ret-piece.is-frame <- not piece.is-frame"
-  (piece (piece-spots piece) (piece-degrees piece)
+  (piece (piece-spots piece)
+         (mapcar #'(lambda (deg) (- 2pi deg)) (piece-degrees piece))
          (not (piece-is-frame piece))
          (piece-synth-from piece) (piece-synth-to piece)))
 
@@ -74,17 +79,20 @@
 (defun bad-piece-list->piece-list (bad-piece-list)
   "bad-piece-list :: [piece] && not contain frame-piece"
   (let* ((to-bad-piece-list 
-          (mapcar #'(lambda (piece)
-                      (piece (piece-spots piece) (piece-degrees piece) nil nil nil))
-                  bad-piece-list))
-         (sorted-pieces (safety-sort 
-                         to-bad-piece-list 
-                         #'(lambda (p1 p2) (> (piece-area p1) (piece-area p2)))))
-         (bad-frame-piece (car sorted-pieces))
-         (frame-piece (piece (piece-spots bad-frame-piece)
-                             (mapcar #'(lambda (deg) (- 2pi deg))
-                                     (piece-degrees bad-frame-piece))
-                             t nil nil)))
+          (mapcar 
+           #'(lambda (piece)
+               (piece (mapcar
+                       #'(lambda (spot) ;; spot-origin shift
+                           (spot (- (spot-x (car (piece-spots piece))) (spot-x spot))
+                                 (- (spot-y (car (piece-spots piece))) (spot-y spot))))
+                       (piece-spots piece))
+                      (piece-degrees piece) nil nil nil))
+           bad-piece-list))
+         ;;
+         (sorted-pieces ;; to find frame 
+          (safety-sort to-bad-piece-list 
+                       #'(lambda (p1 p2) (> (piece-area p1) (piece-area p2)))))
+         (frame-piece (piece->piece-s-not-frame-piece (car sorted-pieces))))
     (cons frame-piece (cdr sorted-pieces))))
 
 
