@@ -4,17 +4,13 @@
 ;;;; probrems by files / also test for io
 
 
-(defparameter *test-piece-file1* ""
-
-  ;;puzzle_01.txt  puzzle_4.txt  puzzle_6.txt  puzzle_8.txt
-  ;;puzzle_10.txt  puzzle_5.txt  puzzle_7.txt  puzzle_9.txt
-)
-
-(defun txt-file->piece-list (path)
-  "IO(path) -> [piece]"
-  ;;(bad-piece-list->piece-list)
-  )
-
+(defparameter *test-piece-file4* "test/assets/puzzle_4.txt")
+(defparameter *test-piece-file5* "test/assets/puzzle_5.txt")
+(defparameter *test-piece-file6* "test/assets/puzzle_6.txt")
+(defparameter *test-piece-file7* "test/assets/puzzle_7.txt")
+(defparameter *test-piece-file8* "test/assets/puzzle_8.txt")
+(defparameter *test-piece-file9* "test/assets/puzzle_9.txt")
+(defparameter *test-piece-file10* "test/assets/puzzle_10.txt")
 
 
 ;;;; sampel-json-file
