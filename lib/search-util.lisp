@@ -28,27 +28,7 @@
 
 (defun synth+piece->synthesizeable-list (synth piece)
   (synth+synth-list->synthesizeable-list
-   synth (piece->ability-synth-list piece)))
-
-(defun synth+piece->synthesizeable-list-test ()
-  ;; test
-  (let* ((test-synth *test-synth-n1*)
-         (test-piece *test-piece-n2*))
-    (let-maybe
-        ((synthesizeable-list 
-          (synth+piece->synthesizeable-list test-synth test-piece)))
-      (let* ((synthable-list
-              (cons (synth->easy-piece test-synth)
-                    (mapcar #'cdr synthesizeable-list)))
-             (synthed-list
-              (mapcar #'(lambda (sy-able-cons)
-                          (synthesize-syntesizeable-easy-piece 
-                           (car sy-able-cons) (cdr sy-able-cons)))
-                      synthesizeable-list)))
-        (show-easy-piece-list 
-         (append synthable-list synthed-list)))
-      )))
-      
+   synth (piece->ability-synth-list piece)))      
 
 (defun synthesize-piece-list-all (piece1 piece2)
   ;; (show-piece-list (synthesize-piece-list-all *test-piece1* *test-piece-n1*))
@@ -60,10 +40,12 @@
                   ziped-list))
          (piece-list-d (remove *nothing* list-maybe))
          (nil-piece->just-nil-piece
-          (if (some #'(lambda (piece) (or (is-nil-piece piece) (= 0 (piece-area piece))))
-                    piece-list-d)
-              (list *nil-piece*) piece-list-d))
-         (piece-list nil-piece->just-nil-piece))
+          (find-if #'(lambda (piece) (is-nil-piece piece))
+                piece-list-d))
+         (piece-list (if nil-piece->just-nil-piece
+                         (list nil-piece->just-nil-piece)
+                         piece-list-d)))
+    ;;(print piece-list)
     piece-list))
 
 
