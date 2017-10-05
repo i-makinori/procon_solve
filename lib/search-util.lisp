@@ -39,18 +39,31 @@
                       (maybe-synthesize-piece (car consed) (cdr consed)))
                   ziped-list))
          (piece-list-d (remove *nothing* list-maybe))
-         #|
-         (nil-piece->just-nil-piece
-          (find-if #'(lambda (piece) (is-nil-piece piece))
-                piece-list-d))
+         ;; some nil piece => (list nil-piece)
+         (nil-piece->just-nil-piece (find-if #'is-nil-piece
+                                             piece-list-d))
          (piece-list (if nil-piece->just-nil-piece
                          (list nil-piece->just-nil-piece)
-                         piece-list-d)))
-         |#
+                         piece-list-d))
+         ;; remove shape=
+         
          )
     ;;(print piece-list)
-    piece-list-d))
+    piece-list
+    
+))
 
+(defun remove-piece-shape=from-piece-list (piece-list &optional (hoge 0))
+  ;; its too slow
+  ;;(show-param hoge "fuga" (length piece-list))
+  (cond ((null piece-list) nil)
+        ((find (car piece-list) (cdr piece-list)
+               :test #'piece-shape=)
+         (remove-piece-shape=from-piece-list (cdr piece-list) 
+                                             (+ hoge 1)))
+        (t (cons (car piece-list)
+                 (remove-piece-shape=from-piece-list (cdr piece-list)
+                                                     (+ hoge 1))))))
 
 (defun synthesize-piece-list-all-adjust (piece-list)
   piece-list
