@@ -23,25 +23,22 @@
             ((:file "util")
              (:file "maybe-nothing")
              (:file "tree")
-             (:file "line")
              (:file "vector")))
    (:module "lib"
             :components
             (;; piece
              (:file "piece")
-             ;; synth
-             (:file "synth")
-             (:file "synthesize")
              ;; search 1-move / search lib
              (:file "search-util")
-             (:file "search")))
+             (:file "search")
+             ))
    (:module "src"
             :components
             (;; application
              (:file "io")
              ;; gui
-             (:file "gui")
-             (:file "run-gui")
+             ;;(:file "gui")
+             ;;(:file "run-gui")
              ;; decrim
              ;; app
              (:file "test")

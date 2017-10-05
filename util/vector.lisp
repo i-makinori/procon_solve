@@ -6,13 +6,6 @@
 
 ;;;; struct
 
-(defstruct (piece-deg (:conc-name deg-))
-  deg)
-
-(defun deg (deg)
-  "(degree::velue)->piece-deg"
-  (make-piece-deg :deg deg))
-
 
 (defstruct (piece-vec (:conc-name))
   vx vy)
@@ -22,21 +15,6 @@
   (make-piece-vec :vx dx :vy dy))
 
 ;;;; convert
-
-(defun spot->vec (spot)
-  (vec (spot-x spot) (spot-y spot)))
-
-(defun vec->spot (vec)
-  (spot (vx vec) (vy vec)))
-
-(defun spots->vecs (spot-list)
-  (mapcar #'spot->vec spot-list))
-
-(defun vecs->spots (vector-list)
-  (mapcar #'vec->spot vector-list))
-
-(defun vector-to-spot (vec)
-  (spot (vx vec) (vy vec)))
 
 (defun vector-to-line (vector-start vector-delta)
   (line (vx vector-start) (vy vector-start)
@@ -163,28 +141,6 @@
        (mapcar #'(lambda (vec) (vec-add (vec 10 10) vec))
                vecs))
       vecs))
-
-(defun vectors-to-angle (vec1 vec2 vec3)
-  "ok"
-  (let ((adjust-vecs (angle-vectors-adjust (list vec1 vec2 vec3))))
-    (angle (vector-to-spot (nth 0 adjust-vecs))
-           (vector-to-spot (nth 1 adjust-vecs))
-           (vector-to-spot (nth 2 adjust-vecs)))))
-
-(defun vector-angle (vec)
-  (vectors-to-angle *angle-vec-criteria* *vec-origin* vec))
-
-(defun clock-wise-angle (vec1 vec2 vec3) 
-  "vec1 from to vec2"
-  (let ((angle (vectors-to-angle vec1 vec2 vec3)))
-    (if (> angle 0) angle
-        (+ PI angle))))
-
-(defun rotate-vec (vector degree)
-  "2d rotation marrix"
-  (vec (- (* (vx vector) (cos degree)) (* (vy vector) (sin degree)))
-       (+ (* (vx vector) (sin degree)) (* (vy vector) (cos degree)))))
-
 
 ;;;; standard-error
 
