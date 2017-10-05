@@ -20,6 +20,11 @@
   (line (vx vector-start) (vy vector-start)
         (vx vector-delta) (vy vector-delta)))
 
+(defun vecs->list (vecs)
+  (concat (mapcar #'(lambda (vec)
+                      (list (vx vec) (vy vec)))
+                  vecs)))
+
 ;;;; functions
 
 (defun dxdy (vec1 vec2)

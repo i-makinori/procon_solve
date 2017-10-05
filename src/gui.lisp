@@ -108,20 +108,15 @@
       (format stream "~&~A~%" piece)
 
       (format stream "piece-label : ~A ~%" name)
-      (format stream "is-frame :  ~A ~%" (piece-is-frame piece))
       (format stream "is-nil-piece :  ~A ~%" (is-nil-piece piece))
-      (format stream "spots deg : (x y deg) ~% ~A~%" 
-              (mapcar #'(lambda (spot deg)
-                          (list (spot-x spot) (spot-y spot) (round (rad->360 deg))))
-                      (piece-spots piece) (piece-degrees piece)))
+      (format stream "spots deg : (x y) ~% ~A~%" 
+
+                      (piece-vecs piece)))
       ;;(format stream "~%~%~%")
 
       
-      (format stream "length-test : ~A ~A ~A ~A"
-              (length (piece-spots (synth-piece (piece-synth-to piece))))
-              (length (piece-spots (synth-piece (piece-synth-from piece))))
-              (length (piece-spots piece))
-              (delta-num-of-vertices piece))
+      (format stream "length-test : ~A"
+              (length (piece-vecs piece)))
 
       (unless (is-nil-piece piece)
         
@@ -129,7 +124,7 @@
         )
 
       
-      (finish-output stream))))
+      (finish-output stream)))
 
 
 ;;;; display-piece-preview
@@ -194,104 +189,11 @@
                                   grid-coord-list-1dim))
                  :ink +gray+)
 
-    ;; axis-line
-    #|
-    (draw-line* stream (- axis-length) 0 (* axis-length) 0
-    :ink +blue4+ :line-thickness 1)
-    (draw-line* stream 0 (- axis-length) 0 (* axis-length)
-    :ink +blue3+ :line-thickness 1)
-    |#
     ;; origin point
     (draw-point* stream 0 0 :ink +blue+ :line-thickness 10)))
 
-#|
-(defun draw-childs-pieces (piece stream)
-  (let-maybe
-      ((sy-from (just-*-nil=>nothng (piece-synth-from piece)))
-       (sy-to (just-*-nil=>nothng (piece-synth-to piece))))
-    (let-maybe 
-        ((easy-piece-cons 
-          (synthesize-able?--also--maybe-consed-easy-piece sy-from sy-to)))
-      (draw-easy-piece (car easy-piece-cons) stream)
-      (draw-easy-piece (cdr easy-piece-cons) stream)
-
-      (draw-childs-pieces (synth-piece sy-from) stream)
-      (draw-childs-pieces (synth-piece sy-to) stream)
-      )))
-|#
-(defun draw-childs-pieces (piece stream)
-  ;;(draw-easy-piece (piece->easy-piece piece) stream)
-  (let* ((medium (sheet-medium stream))
-         ;;
-         (synth-to (piece-synth-to piece))
-         (synth-from (piece-synth-from piece))
-         ;; deployed-piece
-         (deped-list (maybe-return 
-                      (synth+synth->maybe-deployed-easy-piece-list synth-from synth-to))))
-    (draw-1piece-synth piece stream)
-    
-))
-
-(defun draw-1piece-synth (piece stream)
-  (let-maybe
-      ((synth-from (just-*-nil=>nothng (piece-synth-from piece)))
-       (synth-to (just-*-nil=>nothng (piece-synth-to piece))))
-    (let-maybe 
-        ((easy-piece-cons 
-          (synthesize-able?--also--maybe-consed-easy-piece synth-from synth-to)))
-      (draw-easy-piece (car easy-piece-cons) stream)
-      (draw-easy-piece (cdr easy-piece-cons) stream)
-      ;;(print piece)
-      (draw-easy-piece-d (piece->easy-piece piece) stream)
-
-      (if (synth-piece synth-from)
-          (draw-1piece-synth (synth-piece synth-from) stream))
-      (if (synth-piece synth-to)
-          (draw-1piece-synth (synth-piece synth-to) stream))
-      )))
-
-#|
-(defun draw-1piece-synth (piece stream)
-  (let-maybe
-      ((synth-from (just-*-nil=>nothng (piece-synth-from piece)))
-       (synth-to (just-*-nil=>nothng (piece-synth-to piece))))
-    (let-maybe 
-        ((easy-piece-cons 
-          (synthesize-able?--also--maybe-consed-easy-piece synth-from synth-to)))
-      (draw-easy-piece (car easy-piece-cons) stream)
-      (draw-easy-piece (cdr easy-piece-cons) stream)
-      ;;(print piece)
-      (draw-easy-piece-d (piece->easy-piece piece) stream)
-
-      (if (synth-piece synth-from)
-          (draw-1piece-synth (synth-piece synth-from) stream))
-      (if (synth-piece synth-to)
-          (draw-1piece-synth (synth-piece synth-to) stream))
-      )))
-|#
-
-#|
-(defun draw-1piece-synth (piece stream)
-  (let* ((synth-from (piece-synth-from piece))
-         (synth-to (piece-synth-to piece))
-         (consed-easy-piece
-          (maybe-return (synthesize-able?--also--maybe-consed-easy-piece
-                         synth-from synth-to))))
-    ;;(draw-easy-piece-d (piece->easy-piece piece) stream)
-    (draw-easy-piece (car consed-easy-piece) stream)
-    (draw-easy-piece (cdr consed-easy-piece) stream)
-    ))
-|#  
 
 (defun draw-piece (piece stream)
-  (draw-childs-pieces piece stream))
-
-(defun draw-easy-piece-d (piece stream)
   (draw-polygon* stream
-                 (flatten (mapcar #'spot->list (epiece-spots piece)))
-                 :filled nil :ink +blue+ :line-thickness 3))
-
-(defun draw-easy-piece (easy-piece stream)
-  (draw-polygon* stream
-                 (flatten (mapcar #'spot->list (epiece-spots easy-piece)))
+                 (vecs->list (piece-vecs piece))
                  :filled nil :ink +green+ :line-thickness 3))

@@ -37,8 +37,8 @@
             (;; application
              (:file "io")
              ;; gui
-             ;;(:file "gui")
-             ;;(:file "run-gui")
+             (:file "gui")
+             (:file "run-gui")
              ;; decrim
              ;; app
              (:file "test")
