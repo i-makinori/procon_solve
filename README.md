@@ -1,11 +1,14 @@
 
 # Puzzle theory simulator
-competition division of 28th programming contest of NCT
+competition division of 28th programming contest of NCTs.
 
 
 
-### made by
+### written by
 Makinori Ikegami <maau3p@gmail.com>
+
+
+![./puzzle2017.png](./puzzle2017.png)
 
 
 # memos
