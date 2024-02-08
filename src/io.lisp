@@ -1,7 +1,17 @@
 (in-package :puzzle-1617)
 
 
-;;;; I/O
+
+;;;; I/O functions
+
+(defun write-string-to-file (pathname string)
+  (with-open-file (f pathname :direction :output
+                              :if-exists :supersede
+                              :if-does-not-exist :create)
+    (write-sequence string f)))
+
+
+;;;; I/O for puzzle solver.
 
 (defparameter *pathname-puzzle-1617-root*
   (asdf:system-relative-pathname :puzzle-1617 nil))

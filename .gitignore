@@ -1,3 +1,10 @@
+
+# puzzle-1617
+
+/test/results/*.html
+
+# common lisp
+
 *.FASL
 *.fasl
 *.lisp-temp
