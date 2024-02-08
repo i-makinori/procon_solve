@@ -20,10 +20,17 @@
    (:file "package")
    (:module "src"
             :components
-            (;; solver
+            (;; utility
+             (:file "utility")
+             ;; define of types
+             (:file "defines") ;; "data-types"
+             ;; solver
+             (:file "linear-algebra")
              (:file "solver")
-             ;; I/O
+             ;; I/O, viewer render
+             (:file "io")
              ;; SVG viwer
+             (:file "render-html")
              ;; test
              ))
    ))
