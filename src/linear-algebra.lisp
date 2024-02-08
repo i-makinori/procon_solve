@@ -6,6 +6,16 @@
 (defun vec3 (&optional (v0 0) (v1 0) (v2 0))
   (make-array 3 :initial-contents `(,v0 ,v1 ,v2)))
 
+(defun vec3-x (vec3)
+  (aref vec3 0))
+
+(defun vec3-y (vec3)
+  (aref vec3 1))
+
+(defun vec3-j (vec3)
+  ;; we use j. not z because z meanse height dimention.
+  (aref vec3 2))
+
 (defun matrix3x3
     (&optional (a00 0) (a01 0) (a02 0) (a10 0) (a11 0) (a12 0) (a20 0) (a21 0) (a22 0))
   (make-array '(3 3) :initial-contents `((,a00 ,a01 ,a02)
