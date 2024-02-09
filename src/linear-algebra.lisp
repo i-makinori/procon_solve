@@ -28,8 +28,28 @@
           do (setf (aref V3 i) (* (aref V1 i) (aref V2 i))))
     V3))
 
+
+(defun vec3-add-xy (V1 V2)
+  (vec3 (+ (vec3-x V1) (vec3-x V2))
+        (+ (vec3-y V1) (vec3-y V2))
+        1))
+
+(defun vec3-sub-xy (V1 V2)
+  (vec3 (- (vec3-x V1) (vec3-x V2))
+        (- (vec3-y V1) (vec3-y V2))
+        1))
+
 (defun vec3-dot (V1 V2)
   (reduce #'+ (vec3-multiply V1 V2)))
+
+(defun vec3-cross-xy (V1 V2)
+  (- (* (vec3-x V1) (vec3-y V2))
+     (* (vec3-y V1) (vec3-x V2))))
+
+(defun vec3-cross (V1 V2)
+  (vec3 (- (* (vec3-y V1) (vec3-j V2)) (* (vec3-j V1) (vec3-y V2)))
+        (- (* (vec3-j V1) (vec3-x V2)) (* (vec3-x V1) (vec3-j V2)))
+        (- (* (vec3-x V1) (vec3-y V2)) (* (vec3-y V1) (vec3-x V2)))))
 
 (defun vec3-matrix-row (An row)
   (let ((Vn (vec3)))
