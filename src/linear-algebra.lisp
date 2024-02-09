@@ -39,6 +39,17 @@
         (- (vec3-y V1) (vec3-y V2))
         1))
 
+(defun vec3-length-xy (Vn)
+  (sqrt (+ (expt (vec3-x Vn) 2) (expt (vec3-y Vn) 2))))
+
+(defun vec3-normalize-xy (Vn)
+  (let ((length (vec3-length-xy Vn)))
+    (vec3 (/ (vec3-x Vn) length) (/ (Vec3-y Vn) length) 1)))
+
+(defun vec3-dot-xy (V1 V2)
+  (+ (* (vec3-x V1) (vec3-x V2))
+     (* (vec3-y V1) (vec3-y V2))))
+
 (defun vec3-dot (V1 V2)
   (reduce #'+ (vec3-multiply V1 V2)))
 
