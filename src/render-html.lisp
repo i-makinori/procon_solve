@@ -8,14 +8,12 @@
 
 (defun vec3-list-into-svg-polygon (vec3-list)
   (let* ((vec3-text
-           ;;(reduce #'(lambda (s1 s2) (concatenate 'string s1 s2))
            (apply #'concatenate 'string
                   (mapcar #'(lambda (vec3) (format nil "~A,~A "
                                                    (* (vec3-x vec3) *display-scale-multiply*)
                                                    (* (vec3-y vec3) *display-scale-multiply*)))
                           vec3-list)))
-         (style "style='fill:none;stroke:#555555;stroke-width:1'"
-         ))
+         (style "style='fill:none;stroke:#555555;stroke-width:1'"))
     (format nil "<polygon points='~A' ~A />~%"
             vec3-text style)))
 
@@ -36,30 +34,13 @@
   (let*
       ((pathname (merge-pathnames (format nil "test/results/~A" file-name) 
                                   *pathname-puzzle-1617-root*))
-       ;;(svg-text (identity (vec3-list-list-into-svg (identity puzzle))))
-       ;;(html-text (html-text-by-template svg-text)))
-       (html-text (template-text-of-solven-puzzle-html puzzle))
-       )
+       (html-text (template-text-of-solven-puzzle-html puzzle)))
     (handler-case
         (progn (write-string-to-file pathname html-text)
                (format t "HTML file updated at : ~A ~%" pathname)
                pathname)
       (error (e) (print e) nil))))
 
-#|
-(defun write-point-list-list-as-html (file-name puzzle)
-  "for piece list"
-  (let*
-      ((pathname (merge-pathnames (format nil "test/results/~A" file-name) 
-                                  *pathname-puzzle-1617-root*))
-       (svg-text (identity (vec3-list-list-into-svg (identity puzzle))))
-       (html-text (html-text-by-template svg-text)))
-    (handler-case
-        (progn (write-string-to-file pathname html-text)
-               (format t "HTML file updated at : ~A ~%" pathname)
-               pathname)
-      (error (e) (print e) nil))))
-|#
 
 (defparameter *html-template-file* (merge-pathnames "src/viewer/htmlpage_template.html.clt"))
 
@@ -79,4 +60,3 @@
       (read-sequence template template-file)
       (funcall (cl-template:compile-template template)
                (list :svgs svg-alist)))))
-
