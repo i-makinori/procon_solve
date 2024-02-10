@@ -18,3 +18,18 @@ releases are available here [Releases · i-makinori/procon_solve](https://github
 | 2017    | https://github.com/i-makinori/procon_solve/tree/release_2017 |
 | 2016    | https://github.com/i-makinori/procon_solve/tree/release_2016 |
 
+
+# Thankfull References
+
+Thank you for these texts.
+
+# Thankfull Libraries
+
+Thank you for these libraries.
+
+- SVG Viewer for HTML pages  
+  [bumbu/svg-pan-zoom: JavaScript library that enables panning and zooming of an SVG in an HTML document, with mouse events or custom JavaScript hooks](https://github.com/bumbu/svg-pan-zoom)
+- Template Engine  
+  [alpha123/cl-template: Simple, output-agnostic template engine for Common Lisp, inspired by ERb.](https://github.com/alpha123/cl-template/)
+
+
