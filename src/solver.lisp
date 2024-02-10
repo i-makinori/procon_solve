@@ -18,13 +18,38 @@
 
 ;;;; polynomial
 
+
 ;;; sample shape
 (defparameter *shape1* (list #(0 0 1) #(18 0 1) #(16 8 1) #(18 18 1) #(9 18 1) #(9 17 1) #(2 16 1)
                              #(2 18 1) #(0 18 1) #(0 14 1) #(2 11 1) #(1 8 1) #(3 3 1) #(0 2 1)))
 
 ;;;; collision detection
 
+;;;; collision detection for boundary lines
+
+(defun point-line-collision-detection (point-a1 point-a2 point-b1 point-b2)
+  ;; {   0 < (A1A2 X A1B1) * (A1A2 X A1B2)
+  ;;  && 0 < (B1B2 X B1A1) * (B1B2 X B1A2)}
+  ;; => 2D line A1A2 and B1B2 are crossing.
+  ;; Ref: https://qiita.com/zu_rin/items/e04fdec4e3dec6072104
+  (let ((vec-a1a2 (vec3-sub-xy point-a2 point-a1))
+        (vec-b1b2 (vec3-sub-xy point-b2 point-b1)))
+    (and
+     (< 0 (* (vec3-cross-xy vec-a1a2 (vec3-sub-xy point-b1 point-a1))   ;; A1A2 X A1B1
+             (vec3-cross-xy vec-a1a2 (vec3-sub-xy point-b2 point-a1)))) ;; A1A2 X A1B2
+     (< 0 (* (vec3-cross-xy vec-b1b2 (vec3-sub-xy point-a1 point-b1))   ;; B1B2 X B1A1
+             (vec3-cross-xy vec-b1b2 (vec3-sub-xy point-a2 point-b1)))) ;; B1B2 X B1A2
+     )))
+
+(defun piece-piece-boundary-collision-detection (piece1 piece2)
+
+  
+  )
+
+;;;; contains detection for aprrox point.
+
 (defun collision-detection-piece-piece (p1 p2)
+  ;; and boundary contain
   p1 p2 nil
   )
 
