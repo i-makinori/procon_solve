@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title> () - :puzzle-1617 solver viewer. </title>
+    <script src="../htmlpage-assets/svg-pan-zoom.js"></script>
+  </head>
+
+  <body>
+    <h1>solution</h1>
+
+    <% loop for svg in (@ svgs) do %>
+    <p><%= (cdr (assoc :id svg)) %></p>
+    <%= (cdr (assoc :svg-text svg)) %>
+    <% end %>
+
+    <hr />
+    solution contents end.
+    
+    <script>
+      // Don't use window.onLoad like this in production, because it can only listen to one function.
+      svgPanZoomElements = [];
+
+      function register_to_svgPanZoomElements (id) {
+          window.svgPanZoomElements[id] = svgPanZoom(id, {
+              zoomEnabled: true,
+              controlIconsEnabled: true,
+              fit: true,
+              center: true
+          });              
+      };
+      
+      window.onload = function() {
+
+          // panZoom areas from list of SVGs 
+          <% loop for svg in (@ svgs) do %>
+              register_to_svgPanZoomElements(<%= (cdr (assoc :id svg)) %>)
+          <% end %>
+
+      };
+    </script>
+  </body>
+</html>
