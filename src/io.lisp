@@ -36,16 +36,29 @@
 (defun load-problem-file-into-puzzle (file-name)
   (let* ((file-path (problem-file-path file-name)))
     (handler-case
-        (let ((line-texts
+        (let* (;; read file
+               (line-texts
                 (reverse
                  (split-string (uiop:read-file-string file-path)
-                               #'(lambda (c) (char= c #\NewLine))))))
-          (cons
-           ;; frame-piece
-           (line-text-into-vector-list (car line-texts)) ;; -1 * Fn
-           ;; common-piece
-              (mapcar #'line-text-into-vector-list (cdr line-texts)) ;; +1 * Fns
-              ))
+                               #'(lambda (c) (char= c #\NewLine)))))
+               ;; shape
+               (pm-signs (cons '- (cdr (mapcar #'(lambda (l) l '+) line-texts)))) ;; - + + ...
+               (coords (mapcar #'line-text-into-vector-list line-texts))
+               (approx-points (mapcar #'(lambda (c) c nil)
+                                      ;; #'fill-shape-domain-by-approx-loading-points
+                                      coords))
+               (shapes
+                 (mapcar #'(lambda (pm coord approx)
+                             (shape :pm-sign pm :coord-points coord :approx-points approx))
+                         pm-signs coords approx-points))
+               ;; ids
+               (ids (loop for i from 0 to (1- (length shapes)) 
+                          collect i)))
+          ;; piece list
+          (mapcar #'(lambda (id shape) 
+                      (piece :leaf-or-synthed 'leaf :id id :shape shape))
+                  ids shapes))
+      ;; handle error
       (sb-ext:file-does-not-exist (e) e
         (warn (format nil "problem file: '~A' is not found.~%" file-path))
         nil)

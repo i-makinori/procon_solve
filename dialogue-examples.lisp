@@ -10,19 +10,17 @@
 > (load-problem-file-into-puzzle "puzzle_10.txt")
 ;; puzzle problem here
 
-
-> ;;;; write to HTML readed puzzle points
-> (write-point-list-list-as-html "solved-sample.html"
-                                 (load-problem-file-into-puzzle "puzzle_8.txt"))
-HTML file updated at : /home/maki/programs/procon_solve/test/results/solved-sample.html 
-#P"/home/maki/programs/procon_solve/test/results/solved-sample.html"
-
+> ;;;; write to HTML piece list in overlap
+> (write-piece-list-as-html "solved-sample.html"
+                                       (load-problem-file-into-puzzle "puzzle_10.txt"))
+HTML file updated at : /..../procon_solve/test/results/solved-sample.html 
+#P"/..../procon_solve/test/results/solved-sample.html"
 
 > ;;;; write to HTML solution
 > (write-solven-puzzle-as-html "solved-sample.html"
-                               (load-problem-file-into-puzzle "puzzle_10.txt"))
-HTML file updated at : /home/maki/programs/procon_solve/test/results/solved-sample.html 
-#P"/home/maki/programs/procon_solve/test/results/solved-sample.html"
+                               (solve-puzzle (load-problem-file-into-puzzle "puzzle_10.txt")))
+HTML file updated at : /..../procon_solve/test/results/solved-sample.html 
+#P"/..../programs/procon_solve/test/results/solved-sample.html"
 
 
 
