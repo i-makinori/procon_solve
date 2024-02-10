@@ -22,6 +22,14 @@
                                          (,a10 ,a11 ,a12)
                                          (,a20 ,a21 ,a22))))
 
+(defparameter *zero-matrix-3x3*
+  (matrix3x3 0 0 0 0 0 0 0 0 0))
+
+(defparameter *identity-matrix-3x3*
+  (matrix3x3 1 0 0 0 1 0 0 0 1))
+
+
+
 (defun vec3-multiply (V1 V2)
   (let ((V3 (vec3)))
     (loop for i from 0 to (- 3 1)
