@@ -5,7 +5,7 @@
 ;; piece
 
 (defstruct (piece-shape (:conc-name shape-) (:constructor shape))
-  (pm-sigh '+) ;; '+ or '-
+  (pm-sign '+) ;; '+ or '-
   (coord-points nil)
   ;; memo for detection
   (approx-points nil)        ;; piece's shape filling approx-points.
@@ -23,17 +23,17 @@
 
 (defstruct (piece (:conc-name piece-) (:constructor piece))
   ;; piece-type
-  (leaf-or-synthed-piece 'leaf)
+  (leaf-or-synthed 'leaf)
 
   ;; shape
-  (shape (shape))
+  (shape (shape)) ;; nil => nil-piece, (shape ...) => actual piece
 
   ;; for 'leaf piece
   (id nil) ;; nil => synthed, numbered => leaf
   
   ;; for 'synthed piece
-  (function-sign #'+)
-  (transform1 (transform))
-  (transform2 (transform))
+  (function-sign nil) ;; nil => not synthed, '+ => synthe piece, '- => negative synth piece.
+  (transform1 nil)
+  (transform2 nil)
   )
 
