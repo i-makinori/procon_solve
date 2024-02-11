@@ -33,5 +33,6 @@
              ;; SVG viwer
              (:file "render-html")
              ;; test
-             ))
-   ))
+             ;; examples
+             (:file "examples")
+             ))))

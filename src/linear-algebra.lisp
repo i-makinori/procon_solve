@@ -3,8 +3,11 @@
 
 ;; liner algebra
 
-(defun vec3 (&optional (v0 0) (v1 0) (v2 0))
+(defun vec3 (&optional (v0 0) (v1 0) (v2 1))
   (make-array 3 :initial-contents `(,v0 ,v1 ,v2)))
+
+(defun point (x y)
+  (vec3 x y 1))
 
 (defun vec3-x (vec3)
   (aref vec3 0))
