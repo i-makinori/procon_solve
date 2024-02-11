@@ -30,7 +30,18 @@
                      (split-string line-text-string
                                    #'(lambda (c) (char= c #\Space))))))
       (2takes-list int-list nil)
-    )))
+      )))
+
+(defun line-string-into-piece (id pm-sign line-text)
+  ;;todo
+  (let* ((coords (line-text-into-vector-list line-text))
+         (approx-points (funcall #'(lambda (c) c nil)
+                                ;; #'fill-shape-domain-by-approx-loading-points
+                                coords))
+         (shape (shape :pm-sign pm-sign
+                       :coord-points coords
+                       :approx-points approx-points)))
+    (piece :leaf-or-synthed 'leaf :id id :shape shape)))
 
 
 (defun load-problem-file-into-puzzle (file-name)
@@ -41,28 +52,19 @@
                 (reverse
                  (split-string (uiop:read-file-string file-path)
                                #'(lambda (c) (char= c #\NewLine)))))
-               ;; shape
-               (pm-signs (cons '- (cdr (mapcar #'(lambda (l) l '+) line-texts)))) ;; - + + ...
-               (coords (mapcar #'line-text-into-vector-list line-texts))
-               (approx-points (mapcar #'(lambda (c) c nil)
-                                      ;; #'fill-shape-domain-by-approx-loading-points
-                                      coords))
-               (shapes
-                 (mapcar #'(lambda (pm coord approx)
-                             (shape :pm-sign pm :coord-points coord :approx-points approx))
-                         pm-signs coords approx-points))
-               ;; ids
-               (ids (loop for i from 0 to (1- (length shapes)) 
-                          collect i)))
+               ;; ids, pm-signs
+               (ids (loop for i from 0 to (1- (length line-texts)) 
+                          collect i))
+               (pms (cons '- ;; (i = 0) => frame-hole
+                          (loop for i from 1 to (1- (length line-texts)) ;; (i >= 1) => piece
+                          collect '+))))
           ;; piece list
-          (mapcar #'(lambda (id shape) 
-                      (piece :leaf-or-synthed 'leaf :id id :shape shape))
-                  ids shapes))
+                (mapcar #'(lambda (id pm text) (line-string-into-piece id pm text))
+                        (cdr ids) pms (cdr line-texts)))
       ;; handle error
       (sb-ext:file-does-not-exist (e) e
         (warn (format nil "problem file: '~A' is not found.~%" file-path))
         nil)
       (error (e)
         (warn (format nil "there are format errors under loaded file.~% ~A~%" e))
-        nil
-        ))))
+        nil))))

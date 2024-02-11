@@ -37,3 +37,12 @@
   (transform2 nil)
   )
 
+
+(defun piece-pm-sign (piece)
+  (shape-pm-sign (piece-shape piece)))
+(defun piece-coord-points (piece)
+  (shape-coord-points (piece-shape piece)))
+(defun piece-approx-points (piece)
+  (shape-approx-points (piece-shape piece)))
+
+

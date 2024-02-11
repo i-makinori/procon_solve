@@ -36,10 +36,12 @@
   (uiop:read-file-string *html-template-file*))
   
 
+;; render to html
+
 (defun html-of-piece-list-overlap (piece-list)
   "for solven puzzle"
   (let* ((list-of-piece-points
-           (mapcar #'(lambda (piece) (shape-coord-points (piece-shape piece)))
+           (mapcar #'(lambda (piece) (piece-coord-points piece))
                    piece-list))
          (id1 "overlapped_pieces")
          (overlap-alist
@@ -64,7 +66,7 @@
       (error (e) (print e) nil))))
 
 
-;; render to html
+;;;; old implement memo writtings
 
 #|
 

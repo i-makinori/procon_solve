@@ -12,7 +12,7 @@
 
 > ;;;; write to HTML piece list in overlap
 > (write-piece-list-as-html "solved-sample.html"
-                                       (load-problem-file-into-puzzle "puzzle_10.txt"))
+                            (load-problem-file-into-puzzle "puzzle_10.txt"))
 HTML file updated at : /..../procon_solve/test/results/solved-sample.html 
 #P"/..../procon_solve/test/results/solved-sample.html"
 
