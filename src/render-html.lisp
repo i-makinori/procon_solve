@@ -53,7 +53,7 @@
   (funcall (cl-template:compile-template *html-template-text*)
            (list :svgs svg-alists))))
 
-(defun write-piece-list-as-html (file-name piece-list)
+(defun write-piece-list-as-html (piece-list &key (file-name "piece-list.html"))
   "for piece-list"
   (let*
       ((pathname (merge-pathnames (format nil "test/results/~A" file-name) 

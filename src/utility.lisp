@@ -37,14 +37,17 @@
 
 ;; cycled list into tuple list
 
-(defun make-tuple-aux (cycle-series cycle-car)
+(defun make-tuple-list-aux (cycle-series cycle-car)
   (cond ((null (cdr cycle-series)) 
          (list (cons (car cycle-series) cycle-car)))
         (t
          (cons (cons (car cycle-series) (cadr cycle-series))
-               (make-tuple-aux (cdr cycle-series)
-                           cycle-car)))))
+               (make-tuple-list-aux (cdr cycle-series)
+                                    cycle-car)))))
+
+(defun make-tuple-list (cycle-series)
+  (make-tuple-list-aux cycle-series (car cycle-series)))
 
 (defun map-tuple (function cycle-series)
   (mapcar #'(lambda (tuple) (funcall function (car tuple) (cdr tuple)))
-          (make-tuple-aux cycle-series (car cycle-series))))
+          (make-tuple-list cycle-series)))
