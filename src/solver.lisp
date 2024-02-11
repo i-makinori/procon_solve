@@ -29,7 +29,26 @@
 
 ;;;; collision detection
 
-;;;; collision detection for boundary lines
+;;; point on line-segment
+
+(defun point-on-line-segment-detection (point point1 point2)
+  ;; p = p1 + T*p1p2 = p1 + T*(p2-p1) ;; points set on line expressed by vector.
+  ;; if 0 < T < 1, p rides the line-segment.
+  ;; D1 is polynomial of line (p1, p2).
+  ;; if D1 is near to 0, point is near to line.
+  (let ((D1 (+ (+ (* (- (vec3-y point2) (vec3-y point1)) (vec3-x point)))
+               (- (* (- (vec3-x point2) (vec3-x point1)) (vec3-y point)))
+               (- (vec3-cross-xy point1 point2))))
+        (Tx (/ (- (vec3-x point)  (vec3-x point1))
+               (- (vec3-x point2) (vec3-x point1))))
+        (Ty (/ (- (vec3-y point)  (vec3-y point1))
+               (- (vec3-y point2) (vec3-y point1)))))
+    (and (ser= D1 0) ;; almost on-line
+         (< (+ 0 *standard-error*) Tx (- 1 *standard-error*)) ;; on-x range. but not near ε.
+         (< (+ 0 *standard-error*) Ty (- 1 *standard-error*)) ;; on-x range. but not near ε.
+  )))
+
+;;; collision detection for boundary lines
 
 (defun point-line-collision-detection (point-a1 point-a2 point-b1 point-b2)
   ;; {   0 < (A1A2 X A1B1) * (A1A2 X A1B2)
