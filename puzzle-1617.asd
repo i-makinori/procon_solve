@@ -24,11 +24,12 @@
              (:file "utility")
              ;; define of types
              (:file "defines") ;; "data-types"
-             ;; solver
-             (:file "linear-algebra")
-             (:file "solver")
              ;; I/O, viewer render
              (:file "io")
+             ;; solver
+             (:file "linear-algebra")
+             (:file "collision-detection")
+             (:file "solver")
              ;; SVG viwer
              (:file "render-html")
              ;; test
