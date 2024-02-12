@@ -35,9 +35,11 @@
 (defun line-string-into-piece (id pm-sign line-text)
   ;;todo
   (let* ((coords (line-text-into-vector-list line-text))
-         (approx-points (funcall #'(lambda (c) c nil)
-                                ;; #'fill-shape-domain-by-approx-loading-points
-                                coords))
+         (approx-points (funcall ;;#'(lambda (c) c nil)
+                         #'fill-shape-domain-by-approx-loading-points
+                         ;;
+                         ;;#'(lambda (c) (approx-points-list (shape-domain-rect c)))
+                         coords))
          (shape (shape :pm-sign pm-sign
                        :coord-points coords
                        :approx-points approx-points)))

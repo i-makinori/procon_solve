@@ -6,16 +6,32 @@
 
 (defparameter *display-scale-multiply* 14)
 
+;; SVG parts
+
+(defun tml-coord-text (number)
+  (float (* number *display-scale-multiply*)))
+
 (defun point-list-into-svg-polygon (point-list)
   (let* ((points-text
            (apply #'concatenate 'string
                   (mapcar #'(lambda (p) (format nil "~A,~A "
-                                                (* (vec3-x p) *display-scale-multiply*)
-                                                (* (vec3-y p) *display-scale-multiply*)))
+                                                (tml-coord-text (vec3-x p))
+                                                (tml-coord-text (vec3-y p))))
                           point-list)))
          (style "style='fill:none;stroke:#555555;stroke-width:1'"))
     (format nil "<polygon points='~A' ~A />~%"
             points-text style)))
+
+(defun approx-coords-into-svg-dots (approx-coords-list)
+  (let* ((template "<circle r='2' cx='~A' cy='~A' fill='green' />~%")
+         (text (apply #'concatenate 'string
+                      (mapcar #'(lambda (p) (format nil template
+                                                    (tml-coord-text (vec3-x p))
+                                                    (tml-coord-text (vec3-y p))))
+                              approx-coords-list))))
+    text))
+
+;; overlap version
 
 (defun point-list-list-into-svg (piece-points-list &key (id-string "shape_whole"))
   "piece vector list(piece) list into svg text"
@@ -27,16 +43,6 @@
     
     (format nil "<svg id='~A' width='600' height='600'>~%~A~%</svg>~%"
             id-string polygon-list-text)))
-
-;; template
-
-(defparameter *html-template-file* (merge-pathnames "src/viewer/htmlpage_template.html.clt"))
-
-(defparameter *html-template-text*
-  (uiop:read-file-string *html-template-file*))
-  
-
-;; render to html
 
 (defun html-of-piece-list-overlap (piece-list)
   "for solven puzzle"
@@ -50,15 +56,50 @@
                     (point-list-list-into-svg list-of-piece-points
                                               :id-string id1))))
          (svg-alists (list overlap-alist)))
-  (funcall (cl-template:compile-template *html-template-text*)
-           (list :svgs svg-alists))))
+    (funcall (cl-template:compile-template *html-template-text*)
+             (list :svgs svg-alists))))
+
+;; piece list version
+
+(defun piece-id-tml-string (piece)
+  (format nil "Piece_~A" (piece-id piece)))
+
+(defun piece-into-svg-element (piece)
+  (let* (;; meta
+         (template "<svg id='~A' width='600' height='600'>~%~A~%~A~%~A~%</svg>~%")
+         (id-text (piece-id-tml-string piece))
+         (elm-memo "<circle r='5' cx='0' cy='0' fill='red' />~%") ;; origin point
+         ;; elements
+         (elm-polygon (point-list-into-svg-polygon (piece-points piece)))
+         (elm-approxs (approx-coords-into-svg-dots (piece-approx-points piece))))
+    (format nil template id-text elm-polygon elm-approxs elm-memo )))
+
+;; template
+
+(defparameter *html-template-file* (merge-pathnames "src/viewer/htmlpage_template.html.clt"))
+
+(defparameter *html-template-text*
+  (uiop:read-file-string *html-template-file*))
+  
+;; render to html
+
+
+
+(defun html-of-piece-list (piece-list)
+  (let* ((svg-alists (mapcar #'(lambda (p)
+                                 `(,(cons :id (piece-id-tml-string p))
+                                   ,(cons :svg-text (piece-into-svg-element p))))
+                             piece-list)))
+    (funcall (cl-template:compile-template *html-template-text*)
+             (list :svgs svg-alists))))
 
 (defun write-piece-list-as-html (piece-list &key (file-name "piece-list.html"))
   "for piece-list"
   (let*
       ((pathname (merge-pathnames (format nil "test/results/~A" file-name) 
                                   *pathname-puzzle-1617-root*))
-       (html-text (html-of-piece-list-overlap piece-list)))
+    ;;   (html-text (html-of-piece-list-overlap piece-list)))
+       (html-text (html-of-piece-list piece-list)))
     (handler-case
         (progn (write-string-to-file pathname html-text)
                (format t "HTML file updated at : ~A ~%" pathname)
