@@ -23,7 +23,7 @@
             points-text style)))
 
 (defun approx-coords-into-svg-dots (approx-coords-list)
-  (let* ((template "<circle r='2' cx='~A' cy='~A' fill='green' />~%")
+  (let* ((template "<circle r='1' cx='~A' cy='~A' fill='green' />~%")
          (text (apply #'concatenate 'string
                       (mapcar #'(lambda (p) (format nil template
                                                     (tml-coord-text (vec3-x p))
@@ -31,7 +31,7 @@
                               approx-coords-list))))
     text))
 
-;; overlap version
+;; overlap version HTML
 
 (defun point-list-list-into-svg (piece-points-list &key (id-string "shape_whole"))
   "piece vector list(piece) list into svg text"
@@ -59,7 +59,7 @@
     (funcall (cl-template:compile-template *html-template-text*)
              (list :svgs svg-alists))))
 
-;; piece list version
+;; piece list version HTML
 
 (defun piece-id-tml-string (piece)
   (format nil "Piece_~A" (piece-id piece)))
@@ -74,6 +74,15 @@
          (elm-approxs (approx-coords-into-svg-dots (piece-approx-points piece))))
     (format nil template id-text elm-polygon elm-approxs elm-memo )))
 
+(defun html-of-piece-list (piece-list)
+  (let* ((svg-alists (mapcar #'(lambda (p)
+                                 `(,(cons :id (piece-id-tml-string p))
+                                   ,(cons :svg-text (piece-into-svg-element p))))
+                             piece-list)))
+    (funcall (cl-template:compile-template *html-template-text*)
+             (list :svgs svg-alists))))
+
+
 ;; template
 
 (defparameter *html-template-file* (merge-pathnames "src/viewer/htmlpage_template.html.clt"))
@@ -83,15 +92,6 @@
   
 ;; render to html
 
-
-
-(defun html-of-piece-list (piece-list)
-  (let* ((svg-alists (mapcar #'(lambda (p)
-                                 `(,(cons :id (piece-id-tml-string p))
-                                   ,(cons :svg-text (piece-into-svg-element p))))
-                             piece-list)))
-    (funcall (cl-template:compile-template *html-template-text*)
-             (list :svgs svg-alists))))
 
 (defun write-piece-list-as-html (piece-list &key (file-name "piece-list.html"))
   "for piece-list"

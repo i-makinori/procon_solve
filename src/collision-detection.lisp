@@ -54,48 +54,26 @@
       (or (some #'(lambda (p1ap1b) (some-line-collisions-p p1ap1b tu-points2)) tu-points1)
           (some #'(lambda (p2ap2b) (some-line-collisions-p p2ap2b tu-points1)) tu-points2)))))
 
+
+
 ;;;; contains detection for aprrox point.
 
-(defun collision-detection-piece-piece (p1 p2)
-  ;; and boundary contain
-  p1 p2 nil
-  )
+(defun angle (p_center p1 p2)
+  "p_* :: vector of coordinate"
+  ;; Ref: https://tjkendev.github.io/procon-library/python/geometry/point_inside_polygon.html
+  (let* ((v1 (vec3-sub-xy p1 p_center))
+         (v2 (vec3-sub-xy p2 p_center))
+         (dvv (vec3-dot-xy   v1 v2))
+         (cvv (vec3-cross-xy  v1 v2)))
+    (atan cvv dvv)))
 
-#|
-(defun point-inner-domnain-p (point shape)
-"shape is vec3 list of piece."
-;; does not contains above line points. because direction > 0 .
-;; ref: http://www.sousakuba.com/Programming/gs_hittest_point_triangle.html
-(let* ((edge-vecs (map-tuple #'(lambda (coord1 coord2) (vec3-sub-xy coord2 coord1)) shape))
-(to-point-vecs (mapcar #'(lambda (coord) (vec3-sub-xy coord point)) shape))
-(crosses-xy (mapcar #'vec3-cross-xy edge-vecs to-point-vecs)))
-(or (every #'(lambda (dir) (> dir 0)) crosses-xy)
-(every #'(lambda (dir) (< dir 0)) crosses-xy))
-
-))
-|#
-
-(defun angle (dir-vec-ab dir-vec-ac)
-  "need dir-vec-a* to be starts from common point a"
-  ;; theta    = Acos(cos(theta))
-  ;; a・b     = |a|*|b|*cos(theta)
-  ;; ∴ theta = Acos(a・b / |a|*|b|) = Acos(unit(a)・unit(b))
-  (realpart (acos (/ (vec3-dot-xy dir-vec-ab dir-vec-ac)
-                     (* (vec3-length-xy dir-vec-ab) (vec3-length-xy dir-vec-ac)))))
-  ;;(acos (vec3-dot-xy (vec3-normalize-xy dir-vec-ab)
-  ;;(vec3-normalize-xy dir-vec-ac)))
-  )
-
-(defun point-inner-domnain-p (point shape)
+(defun point-inner-domain-p (point shape)
   "shape is vec3 list of piece."
   ;; ?? does not contains above line points. because direction > 0 . ??
-  ;; ref: https://www.nttpc.co.jp/technology/number_algorithm.html
-  (let*
-      ((vec-point-to-point (mapcar #'(lambda (coord) (vec3-sub-xy coord point)) shape))
-       (angles (map-tuple #'angle vec-point-to-point)))
-    (>= (abs (apply #'+ angles)) *pi*2*)
-    ))
-
+  ;; Ref: https://www.nttpc.co.jp/technology/number_algorithm.html
+  (let* ((angles (map-tuple #'(lambda (sp1 sp2) (angle point sp1 sp2))
+                            shape)))
+    (>= (abs (apply #'+ angles)) (- *pi*2* *standard-error*))))
 
 (defun shape-domain-rect (shape)
   "(list x-min y-min x-max y-max)"
@@ -110,23 +88,30 @@
 (defun domain-rect-x-max (domain-rect) (nth 2 domain-rect))
 (defun domain-rect-y-max (domain-rect) (nth 3 domain-rect))
 
-(defparameter *default-approx-length* (* 1 1/2))
+(defparameter *default-approx-length* (* 1 1/4))
 
 (defun approx-points-list (domain-rect &optional (approx-length *default-approx-length*))
   "domain :: (list x_min y_min x_max y_max)"
-  (let ((y-from (+ (domain-rect-y-min domain-rect) (/ approx-length 2)))
-        (y-to   (- (domain-rect-y-max domain-rect) (/ approx-length 2)))
-        (x-from (+ (domain-rect-x-min domain-rect) (/ approx-length 2)))
-        (x-to   (- (domain-rect-x-max domain-rect) (/ approx-length 2))))
+  (let ((y-from (- (domain-rect-y-min domain-rect) (/ approx-length 2)))
+        (y-to   (+ (domain-rect-y-max domain-rect) (/ approx-length 2)))
+        (x-from (- (domain-rect-x-min domain-rect) (/ approx-length 2)))
+        (x-to   (+ (domain-rect-x-max domain-rect) (/ approx-length 2))))
     (flatten 
      (loop for y from y-from to y-to by approx-length
            collect (loop for x from x-from to x-to by approx-length
-                         collect (vec3 y x 1))))))
-
+                         collect (vec3 x y 1))))))
 
 
 (defun fill-shape-domain-by-approx-loading-points (shape)
   (remove-if
-   #'(lambda (point) (not (point-inner-domnain-p point shape)))
+   ;;#'(lambda (point) point nil ) ;;(not (point-inner-domnain-p point shape)))
+   #'(lambda (point) (not (point-inner-domain-p point shape)))
    (approx-points-list (shape-domain-rect shape))
    ))
+
+;;; piece piece collision detection
+
+(defun collision-detection-piece-piece (p1 p2)
+  ;; and boundary contain
+  p1 p2 nil
+  )

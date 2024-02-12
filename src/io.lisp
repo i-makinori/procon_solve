@@ -35,9 +35,9 @@
 (defun line-string-into-piece (id pm-sign line-text)
   ;;todo
   (let* ((coords (line-text-into-vector-list line-text))
-         (approx-points (funcall ;;#'(lambda (c) c nil)
+         (approx-points (funcall
+                         ;;#'(lambda (c) c nil)
                          #'fill-shape-domain-by-approx-loading-points
-                         ;;
                          ;;#'(lambda (c) (approx-points-list (shape-domain-rect c)))
                          coords))
          (shape (shape :pm-sign pm-sign
@@ -51,18 +51,15 @@
     (handler-case
         (let* (;; read file
                (line-texts
-                (reverse
-                 (split-string (uiop:read-file-string file-path)
-                               #'(lambda (c) (char= c #\NewLine)))))
-               ;; ids, pm-signs
-               (ids (loop for i from 0 to (1- (length line-texts)) 
-                          collect i))
-               (pms (cons '- ;; (i = 0) => frame-hole
-                          (loop for i from 1 to (1- (length line-texts)) ;; (i >= 1) => piece
-                          collect '+))))
+                 (reverse
+                  (split-string (uiop:read-file-string file-path)
+                                #'(lambda (c) (char= c #\NewLine)))))
+               (ids (from-m-to-n-list 0 (1- (length line-texts))))
+               (pms (cons '- ;; (i=0)=>frame, (i>=1)=>piece
+                          (cdr (mapcar #'(lambda (i) i '+) ids)))))
           ;; piece list
-                (mapcar #'(lambda (id pm text) (line-string-into-piece id pm text))
-                        (cdr ids) pms (cdr line-texts)))
+          (mapcar #'(lambda (id pm text) (line-string-into-piece id pm text))
+                  ids pms line-texts))
       ;; handle error
       (sb-ext:file-does-not-exist (e) e
         (warn (format nil "problem file: '~A' is not found.~%" file-path))
