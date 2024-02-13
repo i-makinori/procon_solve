@@ -88,7 +88,7 @@
 (defun domain-rect-x-max (domain-rect) (nth 2 domain-rect))
 (defun domain-rect-y-max (domain-rect) (nth 3 domain-rect))
 
-(defparameter *default-approx-length* (* 1 1/4))
+(defparameter *default-approx-length* (* 1 1)) ;; 1/2, 1/3, 1/4, 1/8 ...
 
 (defun approx-points-list (domain-rect &optional (approx-length *default-approx-length*))
   "domain :: (list x_min y_min x_max y_max)"
