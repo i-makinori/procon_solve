@@ -51,7 +51,10 @@
         1))
 
 (defun vec3-length-xy (Vn)
-  (sqrt (+ (expt (vec3-x Vn) 2) (expt (vec3-y Vn) 2))))
+  (sqrt (vec3-length-xy^2 Vn)))
+
+(defun vec3-length-xy^2 (Vn)
+  (vec3-dot-xy Vn Vn))
 
 (defun vec3-normalize-xy (Vn)
   (let ((length (vec3-length-xy Vn)))
@@ -93,8 +96,8 @@
     V1))
 
 
-(defun product-matrix3x3 (A1 A2)
-  (let ((A3 (transformation-matrix)))
+(defun matrix3x3-product (A1 A2)
+  (let ((A3 (matrix3x3)))
   (loop for i from 0 to (- 3 1)
         do (loop for j from 0 to (- 3 1)
                  do (setf (aref A3 i j)
@@ -111,13 +114,30 @@
              0 0 1))
 
 (defun transform-rotate (theta)
-  "theta counts from x axis. at the +y axis, theta is (1/2)*pi ."
-  (matrix3x3 (cos theta) (sin theta) 0
-             (sin theta) (cos theta) 0
-             0           0           1))
+  "theta counts from x axis. at the +y axis."
+  (matrix3x3 (+ (cos theta)) (- (sin theta)) 0
+             (+ (sin theta)) (+ (cos theta)) 0
+             0               0               1))
 
-(defun transform-mirror-axis-x-axis ()
-  "mirror from x-axis. theta = 0."
-  (matrix3x3 1 0  0
-             0 -1 0
-             0 0  1))
+(defun transform-mirror-axis-x-axis (&optional (mirror -1))
+  "mirror from x-axis."
+  (let ((mirror-param (if (= mirror -1) -1 +1)))
+    (matrix3x3 1 0            0
+               0 mirror-param 0
+               0 0            1)))
+
+(defun transform-mirror-by-axis-vec (axis-vec)
+  "mirror transform panels from axis-vec which origins(starts) from origin point."
+  ;; Ref: https://ja.wikipedia.org/wiki/%E9%8F%A1%E6%98%A0
+  ;; where mirrors point, not axis.
+  (let* ((length^2 (vec3-length-xy^2 axis-vec))
+         (ax (vec3-x axis-vec))
+         (ay (vec3-y axis-vec)))
+    (labels ((Rij (kro-delta Ai Aj)
+               (- (- kro-delta (/ (* 2 Ai Aj) length^2))))) ;; mirrors points
+      (matrix3x3 (Rij 1 ax ax) (Rij 0 ax ay) 0
+                 (Rij 0 ay ax) (Rij 1 ay ay) 0
+                 0             0             1))))
+
+
+                 
