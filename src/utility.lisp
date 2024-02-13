@@ -4,12 +4,24 @@
 
 ;;;; utility
 
+;; assoc
+
+(defun assocdr (item alist)
+  (cdr (assoc item alist))) 
+
+;; mod-nth
+
+(defun modnth (n list)
+  (nth (mod n (length list)) list))
+               
+
+
 ;; constant
 
 (defparameter *standard-error* 0.0001)
 (defparameter *pi* 3.141592653589793238462643)
-(defparameter *pi/2* (* 2 *pi*))
-(defparameter *pi*2* (* 2 *pi*))
+(defparameter *pi/2* (/ *pi* 2))
+(defparameter *pi*2* (* *pi* 2))
 
 ;; flat list
 (defun flatten (ons-list-list)
