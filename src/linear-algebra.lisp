@@ -50,6 +50,11 @@
         (- (vec3-y V1) (vec3-y V2))
         1))
 
+(defparameter *vec3-zero-xy* #(0 0 1))
+
+(defun vec3-inverse-xy (Vn)
+  (vec3 (- (vec3-x Vn)) (- (vec3-y Vn)) 1))
+
 (defun vec3-length-xy (Vn)
   (sqrt (vec3-length-xy^2 Vn)))
 
@@ -108,9 +113,16 @@
 ;; reference of transformation matrix.
 ;; https://ch.mathworks.com/help/images/matrix-representation-of-geometric-transformations.html
 
+#|
 (defun transform-parallel-move (transform-x transform-y)
   (matrix3x3 1 0 transform-x
              0 1 transform-y
+             0 0 1))
+|# 
+
+(defun transform-parallel-move (vec-moves)
+  (matrix3x3 1 0 (vec3-x vec-moves)
+             0 1 (vec3-y vec-moves)
              0 0 1))
 
 (defun transform-rotate (theta)
@@ -131,6 +143,10 @@
   ;; Ref: https://ja.wikipedia.org/wiki/%E9%8F%A1%E6%98%A0
   ;; where mirrors point, not axis.
   (let* ((length^2 (vec3-length-xy^2 axis-vec))
+         (length^2 (if (zerop length^2) ;; 0-direction. avoid (x/0).
+                       (progn (warn (format nil "direction of ~A is not decidable~%" axis-vec))
+                              1) 
+                       length^2)) 
          (ax (vec3-x axis-vec))
          (ay (vec3-y axis-vec)))
     (labels ((Rij (kro-delta Ai Aj)
