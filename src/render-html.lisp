@@ -85,7 +85,8 @@
 
 ;; template
 
-(defparameter *html-template-file* (merge-pathnames "src/viewer/htmlpage_template.html.clt"))
+(defparameter *html-template-file* (merge-pathnames "src/viewer/htmlpage_template.html.clt"
+                                                    *pathname-puzzle-1617-root*))
 
 (defparameter *html-template-text*
   (uiop:read-file-string *html-template-file*))
