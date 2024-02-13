@@ -13,7 +13,7 @@
   )
 
 (defstruct (transform (:conc-name transform-) (:constructor transform))
-  (function-sigh '+)
+  (function-sign '+)
   (point-from 0)
   (direction +1)
   (piece (piece))
