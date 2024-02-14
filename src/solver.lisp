@@ -78,12 +78,11 @@
  mirrorp : mirror?"
   (let* ((I *identity-matrix-3x3*) ;; Identity
          (-P1 (transform-parallel-move (vec3-inverse-xy p1))) ;; move p1 to O(Origin) point
-         (R  (transform-rotate (angle v1 *vec3-zero-xy* v2))) ;; rotate from (p1=O)
+         (R  (transform-rotate (angle *vec3-zero-xy* v1 v2))) ;; rotate from (p1=O)
          (ME (if mirrorp ;; Empty or Mirror by Vector(O,v2) plate
                  (transform-mirror-by-axis-vec v2)
                  *identity-matrix-3x3*))
-         (+P2 (transform-parallel-move (identity p2))) ;; move (p1=O) to p2
-         )
+         (+P2 (transform-parallel-move (identity p2)))) ;; move (p1=O) to p2
     (reduce #'matrix3x3-product
             (list +P2 ME R -P1 I)
             :from-end t)))
@@ -99,6 +98,9 @@
                         :direction direction1
                         :piece piece1
                         :transformation-matrix matrix)))
+    (format t "make-transform: (id, point, direction):~%~A, ~A, ~A, ~%~A, ~A, ~A~%"
+            (piece-id piece1) point-from1 direction1 
+            (piece-id piece2) point-from2 direction2)
     (if (null transformp)
         (list (gen-transform *identity-matrix-3x3*))
         (let* (;; p1, v1
@@ -136,8 +138,13 @@
     (cons (car transforms-frame) (identity transforms-piece))))
 
 
-(defun all-contains-direction-frame-piece (frame-shape piece-shape)
-  frame-shape piece-shape nil)
+(defun all-contains-detection-frame-piece (frame-shape piece-shape)
+  ;; C1: point are all contained
+  ;; C2: edge are not collisioned
+  ;; C1 && C2
+  frame-shape piece-shape nil
+  ;; todo
+  )
 
 (defun transform-shape-by-transformation-matrix (shape transformation-matrix)
   (labels ((transform (v)
@@ -146,26 +153,44 @@
            :coord-points (mapcar #'transform (shape-coord-points shape))
            :approx-points (mapcar #'transform (shape-approx-points shape)))))
 
+(defparameter *id-counter* 1000)
+(defun incf-id-counter! ()
+  (incf *id-counter*)
+  )
+
 (defun synthesize-piece-to-frame-by-selection-piece-or-fail (select-frame.piece)
   (let* ((sel select-frame.piece)
-         ;; transforms
-         (transforms (make-transforms-by-point-and-edge-selection-piece-to-frame sel))
-         (tms (mapcar #'transform-transformation-matrix transforms))
-         ;; Spape'(dush) s. shapes after transforms 
+         ;; transforms, transform matrixes(Array)
+         (tms (make-transforms-by-point-and-edge-selection-piece-to-frame sel))
+         (tmas (mapcar #'transform-transformation-matrix tms))
+         ;; Spape'(Dush) s. shapes after transforms 
          (ss (mapcar #'piece-shape 
                      (cons (assocdr :p1 sel) (list (assocdr :p2 sel) (assocdr :p2 sel)))))
          (sds (mapcar #'(lambda (shape transform)
                            (transform-shape-by-transformation-matrix shape transform))
-                      ss tms))
-         ;; shape' (dush) _ piece or frame
-         (sd_f (car tms))
-         (sd_p_a (nth 0 (cdr tms)))
-         (sd_p_b (nth 1 (cdr tms))))
-    (or (all-contains-direction-frame-piece sd_f sd_p_a)
-        (all-contains-direction-frame-piece sd_f sd_p_b))
-    sds))
-
-
+                      ss tmas))
+         ;; Shape' (Dush) _ piece or frame
+         (sd_f (car sds))
+         (sd_p_a (nth 0 (cdr sds)))
+         (sd_p_b (nth 1 (cdr sds))))
+    ;; shape collision detection
+    (or (all-contains-detection-frame-piece sd_f sd_p_a)
+        (all-contains-detection-frame-piece sd_f sd_p_b))
+    ;; test
+    (append
+     (list (assocdr :p1 sel)
+           (assocdr :p2 sel))
+     (mapcar #'(lambda (shape tm)
+                 (incf-id-counter!)
+                 (piece :leaf-or-synthed :synthed
+                        :shape shape ;; todo synthed shape
+                        :id *id-counter*
+                        :function-sign '+
+                        :transform1 (car tms) ;; frame's transform
+                        :transform2 tm ;; piece-to's transform
+                        ))
+             sds tms)
+    )))
 
 #|
 ;; test

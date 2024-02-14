@@ -61,27 +61,56 @@
 
 ;; piece list version HTML
 
+(defun shape-svg-element-text (shape)
+  (format nil "~A~%~A~%"
+          (point-list-into-svg-polygon (shape-coord-points shape))
+          (approx-coords-into-svg-dots (shape-approx-points shape))))
+
+
+(defparameter *tml-id* 0)
+(defun incf-tml-id! ()
+  (incf *tml-id*))
+
+
 (defun piece-id-tml-string (piece)
-  (format nil "Piece_~A" (piece-id piece)))
+  (format nil "Piece_~A_~A_" (piece-id piece) *tml-id*))
+
+    
+(defun piece-into-svg-element-aux (piece)
+  (if (null piece)
+      ""
+      (let ((current-text (shape-svg-element-text (piece-shape piece))))
+        (cond ((equal 'leaf (piece-leaf-or-synthed piece))
+               current-text)
+              (t
+               (format nil "~A~A~A"
+                       current-text
+                       (piece-into-svg-element
+                        (transform-piece (piece-transform1 piece)))
+                       (piece-into-svg-element
+                        (transform-piece (piece-transform2 piece)))))))))
 
 (defun piece-into-svg-element (piece)
   (let* (;; meta
-         (template "<svg id='~A' width='600' height='600'>~%~A~%~A~%~A~%</svg>~%")
+         (template "<svg id='~A' width='600' height='600'>~%~A~%~A~%</svg>~%")
          (id-text (piece-id-tml-string piece))
          (elm-memo "<circle r='5' cx='0' cy='0' fill='red' />~%") ;; origin point
          ;; elements
-         (elm-polygon (point-list-into-svg-polygon (piece-points piece)))
-         (elm-approxs (approx-coords-into-svg-dots (piece-approx-points piece))))
-    (format nil template id-text elm-polygon elm-approxs elm-memo )))
+         ;;(elm-shape (shape-svg-element-text (piece-shape piece)))
+         (tree-elements
+           (piece-into-svg-element-aux piece)))
+    ;;(format nil template id-text elm-shape elm-memo )))
+    (format nil template id-text
+            tree-elements elm-memo)))
 
 (defun html-of-piece-list (piece-list)
   (let* ((svg-alists (mapcar #'(lambda (p)
+                                 (incf-tml-id!)
                                  `(,(cons :id (piece-id-tml-string p))
                                    ,(cons :svg-text (piece-into-svg-element p))))
                              piece-list)))
     (funcall (cl-template:compile-template *html-template-text*)
              (list :svgs svg-alists))))
-
 
 ;; template
 
