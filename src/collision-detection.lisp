@@ -42,14 +42,14 @@
            (vec3-cross-xy vec-b1b2 (vec3-sub-xy point-a2 point-b1)))) ;; B1B2 X B1A2
      )))
 
-(defun piece-piece-boundary-collision-detection (piece1 piece2)
+(defun shape-shape-boundary-collision-detection (shape1 shape2)
   (labels ((some-line-collisions-p (papb pnpms)
              (cond ((null pnpms) nil)
                    ((point-line-collision-detection (car papb) (cdr papb) (caar pnpms) (cdar pnpms))
                     t)
                    (t nil))))
-    (let* ((tu-points1 (make-tuple-list (piece-points piece1)))
-           (tu-points2 (make-tuple-list (piece-points piece2))))
+    (let* ((tu-points1 (make-tuple-list (shape-coord-points shape1)))
+           (tu-points2 (make-tuple-list (shape-coord-points shape2))))
       ;; if some edge by 2 points crosses to another edges, piece1 and piece2 are touch crossing.
       (or (some #'(lambda (p1ap1b) (some-line-collisions-p p1ap1b tu-points2)) tu-points1)
           (some #'(lambda (p2ap2b) (some-line-collisions-p p2ap2b tu-points1)) tu-points2)))))

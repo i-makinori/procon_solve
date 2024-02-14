@@ -98,9 +98,9 @@
                         :direction direction1
                         :piece piece1
                         :transformation-matrix matrix)))
-    (format t "make-transform: (id, point, direction):~%~A, ~A, ~A, ~%~A, ~A, ~A~%"
-            (piece-id piece1) point-from1 direction1 
-            (piece-id piece2) point-from2 direction2)
+    ;;(format t "make-transform: (id, point, direction):~%~A, ~A, ~A, ~%~A, ~A, ~A~%"
+    ;;(piece-id piece1) point-from1 direction1 
+    ;;(piece-id piece2) point-from2 direction2)
     (if (null transformp)
         (list (gen-transform *identity-matrix-3x3*))
         (let* (;; p1, v1
@@ -137,15 +137,6 @@
             (assocdr :n1 sel) (assocdr :pm1 sel) (assocdr :p1 sel))))
     (cons (car transforms-frame) (identity transforms-piece))))
 
-
-(defun all-contains-detection-frame-piece (frame-shape piece-shape)
-  ;; C1: point are all contained
-  ;; C2: edge are not collisioned
-  ;; C1 && C2
-  frame-shape piece-shape nil
-  ;; todo
-  )
-
 (defun transform-shape-by-transformation-matrix (shape transformation-matrix)
   (labels ((transform (v)
              (matrix3x3-vector3-product transformation-matrix v)))
@@ -155,50 +146,75 @@
 
 (defparameter *id-counter* 1000)
 (defun incf-id-counter! ()
-  (incf *id-counter*)
-  )
+  (incf *id-counter*))
+
+(defun all-contains-detection-piece-in-frame (frame-shape piece-shape)
+  (let (; C1: every point of piece are contained to frame
+        (c1 (every #'(lambda (p) (point-inner-domain-p p 
+                                                       (shape-coord-points frame-shape)))
+                   (shape-approx-points piece-shape)))
+        ;; C2: edges of frame and piece are not collisioned.
+        (c2 (not (shape-shape-boundary-collision-detection frame-shape piece-shape))))
+    ;; C1 && C2
+    (and c1 c2)))
 
 (defun synthesize-piece-to-frame-by-selection-piece-or-fail (select-frame.piece)
+  ;; in some appears of,
+  ;; (car . cdr) means (frame_shape . piece_maybely_shape_list)
   (let* ((sel select-frame.piece)
          ;; transforms, transform matrixes(Array)
          (tms (make-transforms-by-point-and-edge-selection-piece-to-frame sel))
          (tmas (mapcar #'transform-transformation-matrix tms))
-         ;; Spape'(Dush) s. shapes after transforms 
+         ;; Spape'(Dush) eS. shapes after transforms.
          (ss (mapcar #'piece-shape 
                      (cons (assocdr :p1 sel) (list (assocdr :p2 sel) (assocdr :p2 sel)))))
          (sds (mapcar #'(lambda (shape transform)
                            (transform-shape-by-transformation-matrix shape transform))
                       ss tmas))
-         ;; Shape' (Dush) _ piece or frame
-         (sd_f (car sds))
-         (sd_p_a (nth 0 (cdr sds)))
-         (sd_p_b (nth 1 (cdr sds))))
-    ;; shape collision detection
-    (or (all-contains-detection-frame-piece sd_f sd_p_a)
-        (all-contains-detection-frame-piece sd_f sd_p_b))
-    ;; test
-    (append
-     (list (assocdr :p1 sel)
-           (assocdr :p2 sel))
+         ;; indexes
+         (tm_f  (car tms))         (sd_f  (car sds))
+         (tm_p1 (nth 0 (cdr tms))) (sd_p1 (nth 0 (cdr sds)))
+         (tm_p2 (nth 1 (cdr tms))) (sd_p2 (nth 1 (cdr sds))))
+
+    ;; make new (frame-)piece if piece is contained to frame
+    ;; and filter disable-transforms.
+    (remove
+     nil
      (mapcar #'(lambda (shape tm)
-                 (incf-id-counter!)
-                 (piece :leaf-or-synthed :synthed
-                        :shape shape ;; todo synthed shape
-                        :id *id-counter*
-                        :function-sign '+
-                        :transform1 (car tms) ;; frame's transform
-                        :transform2 tm ;; piece-to's transform
-                        ))
-             sds tms)
-    )))
+                 (cond ((all-contains-detection-piece-in-frame sd_f shape)
+                        (incf-id-counter!)
+                        (piece :leaf-or-synthed :synthed
+                               :shape shape ;; 
+                               :id *id-counter*
+                               :function-sign '+
+                               :transform1 tm_f ;; frame's transform
+                               :transform2 tm)) ;; piece-to's transform
+                       (t nil)))
+             (list sd_p1 sd_p2) (list tm_p1 tm_p2)))))
+
+
+
+(defun all-synthesizeable-patterns-of-pieces-to-frame (frame piece-list)
+  (flatten
+   (remove nil 
+           (mapcar #'synthesize-piece-to-frame-by-selection-piece-or-fail
+                   (whole-set-of-point-and-edge-selections-pieces-to-frame
+                    frame piece-list)))))
 
 #|
 ;; test
-(mapcar #'shape-coord-points (synthesize-piece-to-frame-by-selection-piece-or-fail
+(mapcar #'piece-coord-points (synthesize-piece-to-frame-by-selection-piece-or-fail
                               (nth 0 (whole-set-of-point-and-edge-selections-pieces-to-frame
                                          (car *example-problem-10*)
                                          (cdr *example-problem-10*)))))
+
+(write-piece-list-as-html
+              (all-synthesizeable-patterns-of-pieces-to-frame
+               (car *example-problem-9*) (cdr *example-problem-9*)))
+
 |#
+
+
     
 
 ;;; transform
