@@ -33,3 +33,25 @@ Thank you for these libraries.
   [alpha123/cl-template: Simple, output-agnostic template engine for Common Lisp, inspired by ERb.](https://github.com/alpha123/cl-template/)
 
 
+# ToDo
+
+I'm going to do...
+
+- [ ] 辺の相手と重なる頂点座標による分割
+- [ ] 頂点の省略演算
+- [ ] ピース合成演算を一般化した函数の定義
+- [ ] 探索
+- [ ] まともなUI
+- [ ] 解探索試験・高速化
+- [ ] モデルの一般化
+
+以上、 2024/2/26までに。
+
+- [ ] ドキュメント生成
+
+以上、3/15~3/20 頃にまでに。
+
+- [ ] 著作権などの確認
+- [ ] 技術資料公開
+
+以上、2月中に初動を送信し、準備が整い次第。

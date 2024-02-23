@@ -99,8 +99,8 @@
                         :piece piece1
                         :transformation-matrix matrix)))
     ;;(format t "make-transform: (id, point, direction):~%~A, ~A, ~A, ~%~A, ~A, ~A~%"
-    ;;(piece-id piece1) point-from1 direction1 
-    ;;(piece-id piece2) point-from2 direction2)
+    ;;  (piece-id piece1) point-from1 direction1 
+    ;;  (piece-id piece2) point-from2 direction2)
     (if (null transformp)
         (list (gen-transform *identity-matrix-3x3*))
         (let* (;; p1, v1
@@ -175,24 +175,17 @@
          (tm_f  (car tms))         (sd_f  (car sds))
          (tm_p1 (nth 0 (cdr tms))) (sd_p1 (nth 0 (cdr sds)))
          (tm_p2 (nth 1 (cdr tms))) (sd_p2 (nth 1 (cdr sds))))
-
     ;; make new (frame-)piece if piece is contained to frame
-    ;; and filter disable-transforms.
+    ;; and filter disabled-transforms.
     (remove
      nil
-     (mapcar #'(lambda (shape tm)
-                 (cond ((all-contains-detection-piece-in-frame sd_f shape)
-                        (incf-id-counter!)
-                        (piece :leaf-or-synthed :synthed
-                               :shape shape ;; 
-                               :id *id-counter*
-                               :function-sign '+
-                               :transform1 tm_f ;; frame's transform
-                               :transform2 tm)) ;; piece-to's transform
-                       (t nil)))
+     (mapcar #'(lambda (sd_px tm_px)
+                 (if (all-contains-detection-piece-in-frame sd_f sd_px)
+                     ;; able to put piece into frame
+                     (synthesize-syntheable-piece  sd_f tm_f sd_px tm_px)
+                     ;; diable to put piece into frame
+                     nil))
              (list sd_p1 sd_p2) (list tm_p1 tm_p2)))))
-
-
 
 (defun all-synthesizeable-patterns-of-pieces-to-frame (frame piece-list)
   (flatten
@@ -200,6 +193,37 @@
            (mapcar #'synthesize-piece-to-frame-by-selection-piece-or-fail
                    (whole-set-of-point-and-edge-selections-pieces-to-frame
                     frame piece-list)))))
+
+;;;;
+
+(defun synthesize-syntheable-piece (new-shape1 transform1 new-shape2 transform2)
+  ;; synthesize OK transforms
+  (let* ((synthed-new-shape new-shape2))
+    (incf-id-counter!)
+    (piece :leaf-or-synthed :synthed
+           :shape synthed-new-shape
+           :id *id-counter*
+           :function-sign '+
+           :transform1 transform1
+           :transform2 transform2
+           
+           )))
+
+;;; insert to edges if point is on edge.
+;; 辺の相手の点と重なる座標から、頂点を分割する。
+;; 辺分割
+
+(defun insert-point-to-shape-if-point-is-on-edge (point shape)
+
+  (reduce 
+   #'(lambda (p s)
+       p s nil
+       )
+   ;;:initial-value shape
+   shape
+  ))
+
+
 
 #|
 ;; test
@@ -220,26 +244,6 @@
 ;;; transform
 
 #|
-(defun transform-matrix-of-transform (transform)
-  ;; (Mirror * Rotate * ParallelMove) * points
-  ;; Parallel Move to origin point, Rotate to x axis, Mirror by x axis.
-  (reduce
-   #'matrix3x3-product
-   (list (transform-parallel-move 2 3)
-         (transform-rotate (* 1/4 *pi*2*))
-         (transform-mirror-axis-x-axis -1)))
-  '(+1  -1))
-
-(defun apply-transform (transform)
-  (let* ((piece-ago (transform-piece transform))
-         (shape-ago (piece-shape piece-ago)))
-    (piece-shape
-     :pm-sign (shape-pm-sign shape-ago)
-     :coord-points
-     :approx-points nil
-     
-     )))
-
 
 (defun try-synthesize-piece (transform1 transform2)
   (let* (;; trdpc:: transformed piece
