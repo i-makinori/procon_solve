@@ -31,7 +31,11 @@
 (defparameter *identity-matrix-3x3*
   (matrix3x3 1 0 0 0 1 0 0 0 1))
 
-
+(defun vec3-ser= (V1 V2)
+  (and (ser= (vec3-x V1) (vec3-x V2))
+       (ser= (vec3-y V1) (vec3-y V2))
+       (ser= (vec3-j V1) (vec3-j V2))))
+         
 
 (defun vec3-multiply (V1 V2)
   (let ((V3 (vec3)))
@@ -63,7 +67,9 @@
 
 (defun vec3-normalize-xy (Vn)
   (let ((length (vec3-length-xy Vn)))
-    (vec3 (/ (vec3-x Vn) length) (/ (Vec3-y Vn) length) 1)))
+    (if (< length *standard-error*)
+        #(0 0 0)
+        (vec3 (/ (vec3-x Vn) length) (/ (Vec3-y Vn) length) 1))))
 
 (defun vec3-dot-xy (V1 V2)
   (+ (* (vec3-x V1) (vec3-x V2))
