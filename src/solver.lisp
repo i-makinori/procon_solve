@@ -209,19 +209,30 @@
            
            )))
 
-;;; insert to edges if point is on edge.
-;; 辺の相手の点と重なる座標から、頂点を分割する。
-;; 辺分割
+;;; split line segment at the collisioning another shape's point coordinate.
 
-(defun insert-point-to-shape-if-point-is-on-edge (point shape)
+(defun sew-for-each-point-aux (point coord-tuples-old coord-points-new)
+  (cond ((null coord-tuples-old)
+         (reverse  coord-points-new))
+        (t
+         (sew-for-each-point-aux
+          point
+          (if (point-on-line-segment-detection
+               point (car (car coord-tuples-old)) (cdr (car coord-tuples-old)))
+              (cons (cons point (cdr (car coord-tuples-old)))
+                    (cdr coord-tuples-old))
+              (cdr coord-tuples-old))
+          (cons (car (car coord-tuples-old)) coord-points-new)))))
 
-  (reduce 
-   #'(lambda (p s)
-       p s nil
-       )
-   ;;:initial-value shape
-   shape
-  ))
+
+(defun insert-point-at-collisioning-edges (points shape-coord-points)
+  ;; Unravel, stuff, sew. at the point where collisioning on another line segment.
+  (cond ((null points) shape-coord-points)
+        (t
+         (insert-point-at-collisioning-edges
+          (cdr points)
+          (sew-for-each-point-aux
+           (car points) (make-tuple-list shape-coord-points) '())))))
 
 
 
@@ -235,6 +246,11 @@
 (write-piece-list-as-html
               (all-synthesizeable-patterns-of-pieces-to-frame
                (car *example-problem-9*) (cdr *example-problem-9*)))
+
+
+(insert-point-at-collisioning-edges
+              '(#(2 5 0) #(0.1 0 0) #(0 4 0))
+              '(#(0 0 1) #(5 0 0) #(5 5 0) #(0 5 0)))
 
 |#
 
