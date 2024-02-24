@@ -9,7 +9,8 @@
     <h1>solution</h1>
 
     <% loop for svg in (@ svgs) do %>
-      <p><%= (cdr (assoc :id svg)) %></p>
+      <pre><%= (cdr (assoc :id svg)) %>
+      <%= (cdr (assoc :describe-text svg)) %></pre>
       <%= (cdr (assoc :svg-text svg)) %>
     <% end %>
 

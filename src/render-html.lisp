@@ -103,11 +103,18 @@
     (format nil template id-text
             tree-elements elm-memo)))
 
+(defun piece-into-html-describe (piece)
+  (let* ((coords (piece-coord-points piece))
+         (id (piece-id piece)))
+    (format nil "Length: ~A [n edge points],~%id: ~A,~%shapee: ~A"
+            (length coords) id coords)))
+
 (defun html-of-piece-list (piece-list)
   (let* ((svg-alists (mapcar #'(lambda (p)
                                  (incf-tml-id!)
                                  `(,(cons :id (piece-id-tml-string p))
-                                   ,(cons :svg-text (piece-into-svg-element p))))
+                                   ,(cons :svg-text (piece-into-svg-element p))
+                                   ,(cons :describe-text (piece-into-html-describe p))))
                              piece-list)))
     (funcall (cl-template:compile-template *html-template-text*)
              (list :svgs svg-alists))))
