@@ -235,6 +235,34 @@
            (car points) (make-tuple-list shape-coord-points) '())))))
 
 
+;;; ommit edge points
+
+(defun ommit-edge-points-aux (3tuple-points)
+  (let* ((pp0 (car  (car 3tuple-points)))  ;; point n plus 0
+         (pp1 (cadr (car 3tuple-points)))  ;; point n plus 1
+         (pp2 (cddr (car 3tuple-points)))) ;; point n plus 2
+    ;;(format t "~A ~A ~A,  : ~A~%" pp0 pp1 pp2 3tuple-points)
+    (cond ((null 3tuple-points) nil)
+          ((vec3-ser= pp0 pp1) ;; (0,1)---(2) -> (m1)... ;; Maybe 1. decide after check
+           (identity (ommit-edge-points-aux (cdr 3tuple-points))))
+          ((vec3-ser= pp0 pp2) ;; (0,2)---(1) -> (2)--...
+           (cons pp2 (ommit-edge-points-aux (cddr 3tuple-points))))
+          (t                   ;; (1)-- -> (1)--...
+           (cons pp0 (ommit-edge-points-aux (cdr 3tuple-points)))))))
+
+
+(defun ommit-edge-points (coord-points)
+  ;; usage example
+  ;; (ommit-edge-points '(#(0 0 1) #(0 5 0) #(5 5 0) #(4 0 0) #(5 5 0) #(5 0 0) #(0 0 1)))
+  (let ((ommit-once
+          (ommit-edge-points-aux (make-3tuple-list coord-points))))
+    (if (equalp ommit-once coord-points)
+        ommit-once
+        (ommit-edge-points ommit-once))))
+
+
+
+;;;
 
 #|
 ;; test
