@@ -50,7 +50,8 @@
 ;; cycled list into tuple list
 
 (defun make-tuple-list-aux (cycle-series cycle-car)
-  (cond ((null (cdr cycle-series)) 
+  (cond ((null cycle-series) nil)
+        ((null (cdr cycle-series)) 
          (list (cons (car cycle-series) cycle-car)))
         (t
          (cons (cons (car cycle-series) (cadr cycle-series))
@@ -63,3 +64,28 @@
 (defun map-tuple (function cycle-series)
   (mapcar #'(lambda (tuple) (funcall function (car tuple) (cdr tuple)))
           (make-tuple-list cycle-series)))
+
+
+;; 3tuple list
+
+(defun make-3tuple-list-aux (cycle-series fst snd)
+  (cond ((null (identity cycle-series))
+         nil)
+        ((null (cdr cycle-series))
+         (cons (cons (car cycle-series) (cons fst snd))
+               (make-3tuple-list-aux (cdr cycle-series) fst snd)))
+        ((null (cddr cycle-series))
+         (cons (cons (car cycle-series) (cons (cadr cycle-series) fst))
+               (make-3tuple-list-aux (cdr cycle-series) fst snd)))
+        (t
+         (cons (cons (car cycle-series) (cons (cadr cycle-series) (caddr cycle-series)))
+               (make-3tuple-list-aux (cdr cycle-series) fst snd)))))
+
+(defun make-3tuple-list (cycle-series)
+  (make-3tuple-list-aux cycle-series 
+                        (car cycle-series)
+                        (if (null (cadr cycle-series))
+                            (car cycle-series)
+                            (cadr cycle-series))))
+
+
