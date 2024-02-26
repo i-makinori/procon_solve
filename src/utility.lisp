@@ -20,10 +20,24 @@
 (defparameter *pi/2* (/ *pi* 2))
 (defparameter *pi*2* (* *pi* 2))
 
+;; list, number collection from m to n.
+(defun from-m-to-n-list (from-m to-n)
+  (loop for i from from-m to to-n
+        collect i))
 
 ;; flat list
 (defun flatten (ons-list-list)
   (apply #'concatenate 'list ons-list-list))
+
+(defun flat-2d-nest-list (list-list-list)
+  (apply #'append (apply #'append  list-list-list)))
+
+;; rot list (rotated list, modular)
+(defun rot-left (n l)
+  (append (nthcdr n l) (butlast l (- (length l) n))))
+
+(defun rot-right (n l)
+  (rot-left (- (length l) n) l))
 
 
 ;; determine specific character

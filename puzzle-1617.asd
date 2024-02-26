@@ -29,10 +29,13 @@
              ;; solver
              (:file "linear-algebra")
              (:file "collision-detection")
+             (:file "synthesize")
              (:file "solver")
              ;; SVG viwer
              (:file "render-html")
              ;; test
              ;; examples
              (:file "examples")
+             ;; note, sketches
+             (:file "note")
              ))))
