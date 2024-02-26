@@ -14,18 +14,6 @@
   (nth (mod n (length list)) list))
                
 
-;; set theory subset
-#|
-(defun set-difference (set-a set-b &key (test #'eql))
-  "set-a - set-b"
-  (remove-if 
-   #'(lambda (a)
-       (find-if
-        #'(lambda (b) (funcall test a b))
-        set-b))
-   set-a))
-|#
-
 ;; constant
 (defparameter *standard-error* 0.0001)
 (defparameter *pi* 3.141592653589793238462643)
