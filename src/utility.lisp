@@ -5,27 +5,26 @@
 ;;;; utility
 
 ;; assoc
-
 (defun assocdr (item alist)
   (cdr (assoc item alist))) 
 
-;; mod-nth
 
+;; mod-nth
 (defun modnth (n list)
   (nth (mod n (length list)) list))
                
 
-
 ;; constant
-
 (defparameter *standard-error* 0.0001)
 (defparameter *pi* 3.141592653589793238462643)
 (defparameter *pi/2* (/ *pi* 2))
 (defparameter *pi*2* (* *pi* 2))
 
+
 ;; flat list
 (defun flatten (ons-list-list)
   (apply #'concatenate 'list ons-list-list))
+
 
 ;; determine specific character
 (defun delimiterp (c) (or (char= c #\Space) (char= c #\,)))
@@ -40,8 +39,6 @@
 
 
 ;; standard error
-
-
 (defun ser= (val1 val2 &optional (standard-error *standard-error*))
   "standard error rounded equal"
   (< (abs (- val2 val1)) standard-error))

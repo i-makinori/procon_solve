@@ -14,8 +14,6 @@
 ;;;; polynomial
 
 
-
-
 ;;;; 
 
 
@@ -194,31 +192,15 @@
                    (whole-set-of-point-and-edge-selections-pieces-to-frame
                     frame piece-list)))))
 
-;;;;
-
-(defun rot-left (n l)
-  (append (nthcdr n l) (butlast l (- (length l) n))))
-
-(defun rot-right (n l)
-  (rot-left (- (length l) n) l))
-
-(defun re-order-coordinate-points-by-transform (transform coordinate-points arc-dirp)
-  (let* ((rot-list (rot-left (transform-point-from transform) coordinate-points))
-         (pm-sign (= -1 (transform-direction transform)))
-         (pm-direction
-           (if arc-dirp (not pm-sign) (identity pm-sign))))
-    (cond ((eq t pm-direction)
-           (cons (car rot-list) (identity (cdr rot-list))))
-          (t 
-           (cons (car rot-list) (reverse (cdr rot-list)))))))
+;;;; synthesize
 
 (defun synthesize-syntheable-piece-to-frame (new-shape1 transform1 new-shape2 transform2)
   ;; synthesize OK transforms
   ;;
-  ;; 1. transform のパラメータを取得して、頂点をappendする
-  ;; 2. 頂点を省略する。
-  ;; 3. 領域を近似点で充填する。
-  ;; 4. ピースの生成
+  ;; 1. get transform parameter and append edge points at coordinate.
+  ;; 2. ommit points。
+  ;; 3. fill domain by approx points.
+  ;; 4. make-piece
   (let* (;; Coordinates
          (c1 (shape-coord-points new-shape1))
          (c2 (shape-coord-points new-shape2))
@@ -244,15 +226,31 @@
     (incf-id-counter!)
     ;;(format t "HOGE ~A, ~A~%" (transform-point-from transform1) (transform-point-from transform2))
     ;;(format t "  ~A~%  ~A ~%" rc1 rc2)
-
     (piece :leaf-or-synthed :synthed
            :shape synthed-new-shape
            :id *id-counter*
            :function-sign '+
            :transform1 transform1
-           :transform2 transform2
-           
-           )))
+           :transform2 transform2)))
+
+
+;;;; util to point omitting
+
+(defun rot-left (n l)
+  (append (nthcdr n l) (butlast l (- (length l) n))))
+
+(defun rot-right (n l)
+  (rot-left (- (length l) n) l))
+
+(defun re-order-coordinate-points-by-transform (transform coordinate-points arc-dirp)
+  (let* ((rot-list (rot-left (transform-point-from transform) coordinate-points))
+         (pm-sign (= -1 (transform-direction transform)))
+         (pm-direction
+           (if arc-dirp (not pm-sign) (identity pm-sign))))
+    (cond ((eq t pm-direction)
+           (cons (car rot-list) (identity (cdr rot-list))))
+          (t 
+           (cons (car rot-list) (reverse (cdr rot-list)))))))
 
 
 ;;; split line segment at the collisioning another shape's point coordinate.
@@ -335,34 +333,6 @@
               '(#(0 0 1) #(5 0 0) #(5 5 0) #(0 5 0)))
 
 |#
-
-
-    
-
-;;; transform
-
-#|
-
-(defun try-synthesize-piece (transform1 transform2)
-  (let* (;; trdpc:: transformed piece
-         (trdpe-1 nil)
-         (trdpe-2 nil))
-    (piece
-     :leaf-or-synthed 'synthed
-     :shape ()
-
-     
-     )))
-
-(defun synth (p1 p2)
-  nil)
-
-
-;;(defun synthesize ()
-;;)
-
-|#
-
 
 
 ;;;; search solution
