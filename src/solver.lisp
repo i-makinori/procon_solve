@@ -182,7 +182,7 @@
      (mapcar #'(lambda (sd_px tm_px)
                  (if (all-contains-detection-piece-in-frame sd_f sd_px)
                      ;; able to put piece into frame
-                     (synthesize-syntheable-piece  sd_f tm_f sd_px tm_px)
+                     (synthesize-syntheable-piece-to-frame  sd_f tm_f sd_px tm_px)
                      ;; diable to put piece into frame
                      nil))
              (list sd_p1 sd_p2) (list tm_p1 tm_p2)))))
@@ -196,10 +196,55 @@
 
 ;;;;
 
-(defun synthesize-syntheable-piece (new-shape1 transform1 new-shape2 transform2)
+(defun rot-left (n l)
+  (append (nthcdr n l) (butlast l (- (length l) n))))
+
+(defun rot-right (n l)
+  (rot-left (- (length l) n) l))
+
+(defun re-order-coordinate-points-by-transform (transform coordinate-points arc-dirp)
+  (let* ((rot-list (rot-left (transform-point-from transform) coordinate-points))
+         (pm-sign (= -1 (transform-direction transform)))
+         (pm-direction
+           (if arc-dirp (not pm-sign) (identity pm-sign))))
+    (cond ((eq t pm-direction)
+           (cons (car rot-list) (identity (cdr rot-list))))
+          (t 
+           (cons (car rot-list) (reverse (cdr rot-list)))))))
+
+(defun synthesize-syntheable-piece-to-frame (new-shape1 transform1 new-shape2 transform2)
   ;; synthesize OK transforms
-  (let* ((synthed-new-shape new-shape2))
+  ;;
+  ;; 1. transform のパラメータを取得して、頂点をappendする
+  ;; 2. 頂点を省略する。
+  ;; 3. 領域を近似点で充填する。
+  ;; 4. ピースの生成
+  (let* (;; Coordinates
+         (c1 (shape-coord-points new-shape1))
+         (c2 (shape-coord-points new-shape2))
+         ;; rotated C
+         (rc1 (re-order-coordinate-points-by-transform transform1 c1 nil))
+         (rc2 (re-order-coordinate-points-by-transform transform2 c2 t))
+         ;; insert pointed RC
+         (irc1 (insert-point-at-collisioning-edges rc2 rc1))
+         (irc2 (insert-point-at-collisioning-edges rc1 rc2))
+         ;; next coordintae-points is ommited append two IRCs.
+         (synthed-coord-points
+           (ommit-edge-points (append irc1 irc2)))
+         ;; approxs points
+         (approx-points
+           ;; A-B (Set theory Subset) may be faster than 1ce below line
+           (fill-shape-domain-by-approx-loading-points synthed-coord-points))
+         ;; shape
+         (synthed-new-shape
+           (shape :pm-sign '-
+                  :coord-points synthed-coord-points
+                  :approx-points approx-points)))
+
     (incf-id-counter!)
+    ;;(format t "HOGE ~A, ~A~%" (transform-point-from transform1) (transform-point-from transform2))
+    ;;(format t "  ~A~%  ~A ~%" rc1 rc2)
+
     (piece :leaf-or-synthed :synthed
            :shape synthed-new-shape
            :id *id-counter*
@@ -208,6 +253,7 @@
            :transform2 transform2
            
            )))
+
 
 ;;; split line segment at the collisioning another shape's point coordinate.
 
@@ -259,6 +305,8 @@
     (if (equalp ommit-once coord-points)
         ommit-once
         (ommit-edge-points ommit-once))))
+
+
 
 
 

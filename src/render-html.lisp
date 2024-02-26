@@ -75,7 +75,8 @@
 (defun piece-id-tml-string (piece)
   (format nil "Piece_~A_~A_" (piece-id piece) *tml-id*))
 
-    
+
+#|
 (defun piece-into-svg-element-aux (piece)
   (if (null piece)
       ""
@@ -89,6 +90,19 @@
                         (transform-piece (piece-transform1 piece)))
                        (piece-into-svg-element
                         (transform-piece (piece-transform2 piece)))))))))
+|#
+    
+(defun piece-into-svg-element-aux (piece)
+  (if (null piece)
+      ""
+      (let ((current-text (shape-svg-element-text (piece-shape piece))))
+        (cond ((equal 'leaf (piece-leaf-or-synthed piece))
+               current-text)
+              (t
+               (format nil "~A"
+                       current-text))))))
+
+
 
 (defun piece-into-svg-element (piece)
   (let* (;; meta
