@@ -18,27 +18,45 @@
 (defun list-of-piece-of-synthesized-piece (synthesized-piece)
   (labels
       ((aux (p_n)
-         (format t "==============~%~A~%" p_n)
          (cond ((null p_n) nil)
-               (t
-                (append
-                 ;;(list (piece-id p_n))
-                 (list p_n)
-                 (if (piece-transform1 p_n)
-                     (aux (transform-piece (piece-transform1 p_n)))
-                     nil)
-                 (if (piece-transform2 p_n)
-                     (aux (transform-piece (piece-transform2 p_n)))
-                     nil))))))
+               (t (append
+                   ;;(list (piece-id p_n))
+                   (list p_n)
+                   (if (piece-transform1 p_n)
+                       (aux (transform-piece (piece-transform1 p_n)))
+                       nil)
+                   (if (piece-transform2 p_n)
+                       (aux (transform-piece (piece-transform2 p_n)))
+                       nil))))))
     (aux synthesized-piece)))
 
 
-(defun list-of-primary-piece-id-list-of-synthesized-piece (synthesized-piece)
+(defun list-of-primary-piece-list-of-synthesized-piece (synthesized-piece primary-piece-list)
+  (let ((used-pieces
+          (list-of-piece-of-synthesized-piece synthesized-piece)))
+    (intersection ;; set theory and
+     used-pieces primary-piece-list
+     :test #'(lambda (p1 p2) (equal (piece-id p1) (piece-id p2))))))
+
+(defun list-of-unused-primary-piece-list-of-synthesized-piece (synthesized-piece primary-piece-list)
+  (set-difference ;; set of (original - used)
+   primary-piece-list
+   (list-of-primary-piece-list-of-synthesized-piece 
+    synthesized-piece primary-piece-list)
+   :test #'(lambda (p1 p2) (equal (piece-id p1) (piece-id p2)))))
+
+(defun sort-by-delta_points (synthesized-piece-list)  
   )
 
-(defun sort-by-delta_points (synthesized-piece-list)
-  
-  )
+
+#|
+(defun make-puzzle-statement (piece-list)
+  ;; alist as puzzle statement.
+  (let ((id-list (mapcar #'piece-id piece-list)))
+    (list (cons 'id-list id-list)
+          (cons 'frame   (find-if #'(lambda (piece) (eql -1 (piece-pm-sign piece))) id-list))
+          )))
+|#
 
 
 ;;;
@@ -48,6 +66,21 @@
 (write-piece-list-as-html
               (all-synthesizeable-patterns-of-pieces-to-frame
                (car *example-problem-9*) (cdr *example-problem-9*)))
+
+
+;; piece id list for synthesized piece
+(mapcar #'piece-id
+        (list-of-primary-piece-list-of-synthesized-piece
+         (nth 20 (all-synthesizeable-patterns-of-pieces-to-frame
+                  (car *example-problem-9*) (cdr *example-problem-9*)))
+         *example-problem-9*))
+
+(mapcar #'piece-id
+        (list-of-unused-primary-piece-list-of-synthesized-piece
+         (nth 20 (all-synthesizeable-patterns-of-pieces-to-frame
+                  (car *example-problem-9*) (cdr *example-problem-9*)))
+         *example-problem-9*))
+
 
 
 |#
