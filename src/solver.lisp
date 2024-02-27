@@ -13,7 +13,8 @@
                     frame piece-list)))))
 
 
-;;;
+;;; 
+;;; set theoretical manipulations
 
 (defun list-of-piece-of-synthesized-piece (synthesized-piece)
   (labels
@@ -30,7 +31,6 @@
                        nil))))))
     (aux synthesized-piece)))
 
-
 (defun list-of-primary-piece-list-of-synthesized-piece (synthesized-piece primary-piece-list)
   (let ((used-pieces
           (list-of-piece-of-synthesized-piece synthesized-piece)))
@@ -45,9 +45,27 @@
     synthesized-piece primary-piece-list)
    :test #'(lambda (p1 p2) (equal (piece-id p1) (piece-id p2)))))
 
-(defun sort-by-delta_points (synthesized-piece-list)  
-  )
 
+;;; sort by delta points
+
+(defun sort-by-delta_points (synthesized-piece-list primary-piece-list)
+  (sort synthesized-piece-list
+        #'(lambda (p1 p2)
+            (>
+             (delta_points-of-synthesize p1 primary-piece-list)
+             (delta_points-of-synthesize p2 primary-piece-list)))))
+
+(defun delta_points-of-synthesize (synthesized-piece primary-piece-list)
+  (let ((n-points-of-primary
+         (apply #'+ (mapcar #'(lambda (piece) (length (piece-coord-points piece)))
+                     (list-of-primary-piece-list-of-synthesized-piece 
+                      synthesized-piece primary-piece-list))))
+        (n-points-of-synthesized-piece
+          (length (piece-coord-points synthesized-piece))))
+    (- n-points-of-primary n-points-of-synthesized-piece)))
+
+
+;;;
 
 #|
 (defun make-puzzle-statement (piece-list)
