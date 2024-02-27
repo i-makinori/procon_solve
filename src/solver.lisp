@@ -16,53 +16,79 @@
 ;;; 
 ;;; set theoretical manipulations
 
-(defun list-of-piece-of-synthesized-piece (synthesized-piece)
-  (labels
-      ((aux (p_n)
-         (cond ((null p_n) nil)
-               (t (append
-                   ;;(list (piece-id p_n))
-                   (list p_n)
-                   (if (piece-transform1 p_n)
-                       (aux (transform-piece (piece-transform1 p_n)))
-                       nil)
-                   (if (piece-transform2 p_n)
-                       (aux (transform-piece (piece-transform2 p_n)))
-                       nil))))))
+(defun primary-piece-p (piece-common)
+  ;; piece- null?
+  (eq 'leaf (piece-leaf-or-synthed piece-common)))
+
+(defun list-of-primary-piece-list-of-synthesized-piece (synthesized-piece)
+  (labels ((aux (p_n)
+             (cond ((primary-piece-p p_n) (list p_n))
+                   (t (append
+                       (if (piece-transform1 p_n)
+                           (aux (transform-piece (piece-transform1 p_n)))
+                           nil)
+                       (if (piece-transform2 p_n)
+                           (aux (transform-piece (piece-transform2 p_n)))
+                           nil))))))
     (aux synthesized-piece)))
 
+#|
 (defun list-of-primary-piece-list-of-synthesized-piece (synthesized-piece primary-piece-list)
   (let ((used-pieces
           (list-of-piece-of-synthesized-piece synthesized-piece)))
     (intersection ;; set theory and
      used-pieces primary-piece-list
      :test #'(lambda (p1 p2) (equal (piece-id p1) (piece-id p2))))))
+|#
+
+(defun list-of-piece-of-synthesized-piece (synthesized-piece)
+  (labels ((aux (p_n)
+             (cond ((null p_n) nil)
+                   (t (append
+                       ;;(list (piece-id p_n))
+                       (list p_n)
+                       (if (piece-transform1 p_n)
+                           (aux (transform-piece (piece-transform1 p_n)))
+                           nil)
+                       (if (piece-transform2 p_n)
+                           (aux (transform-piece (piece-transform2 p_n)))
+                           nil))))))
+    (aux synthesized-piece)))
 
 (defun list-of-unused-primary-piece-list-of-synthesized-piece (synthesized-piece primary-piece-list)
   (set-difference ;; set of (original - used)
    primary-piece-list
    (list-of-primary-piece-list-of-synthesized-piece 
-    synthesized-piece primary-piece-list)
+    synthesized-piece)
    :test #'(lambda (p1 p2) (equal (piece-id p1) (piece-id p2)))))
 
 
 ;;; sort by delta points
 
-(defun sort-by-delta_points (synthesized-piece-list primary-piece-list)
+(defun sort-by-delta_points (synthesized-piece-list)
   (sort synthesized-piece-list
         #'(lambda (p1 p2)
-            (>
-             (delta_points-of-synthesize p1 primary-piece-list)
-             (delta_points-of-synthesize p2 primary-piece-list)))))
+            (> (delta_points-of-synthesize p1)
+               (delta_points-of-synthesize p2)))))
 
-(defun delta_points-of-synthesize (synthesized-piece primary-piece-list)
+(defun delta_points-of-synthesize (synthesized-piece)
   (let ((n-points-of-primary
          (apply #'+ (mapcar #'(lambda (piece) (length (piece-coord-points piece)))
-                     (list-of-primary-piece-list-of-synthesized-piece 
-                      synthesized-piece primary-piece-list))))
+                     (list-of-primary-piece-list-of-synthesized-piece synthesized-piece))))
         (n-points-of-synthesized-piece
           (length (piece-coord-points synthesized-piece))))
     (- n-points-of-primary n-points-of-synthesized-piece)))
+
+
+;;; detect congruent
+
+(defun detect-piece-congruent (piece1 piece2)
+  ;; 頂点数
+  ;; ピースを構成するピース
+  ;; P1 - P2 = 0Set の存在
+  
+
+  )
 
 
 ;;;
