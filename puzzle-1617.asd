@@ -14,7 +14,7 @@
   :licence "MIT"
   :description "puzzle-1617 solver"
   :long-description "puzzle-1617 solver. 2023 version."
-  :depends-on (#:cl-template) ;; #:cl-json
+  :depends-on (#:cl-template #:sb-sprof) ;; #:cl-json
   :components
   (;; package
    (:file "package")

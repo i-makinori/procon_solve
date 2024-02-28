@@ -122,13 +122,11 @@ nil
 (defun remove-congruent-from-synthesized-piece-list (synthesized-piece-list)
   (labels ((aux (lis)
              (cond ((null lis) '())
-                   (t
-                    (format t "~A:~%" (piece-id (car lis)))
+                   (t ;;(format t "~A:~%" (piece-id (car lis)))
                     (cons (car lis)
                           (aux
                            (remove-if #'(lambda (p) (detect-piece-congruent (car lis) p))
-                                     (cdr lis))
-                          ))))))
+                                      (cdr lis))))))))
     (aux synthesized-piece-list)))
 
 
@@ -142,7 +140,6 @@ nil
           (cons 'frame   (find-if #'(lambda (piece) (eql -1 (piece-pm-sign piece))) id-list))
           )))
 |#
-
 
 ;;;
 
