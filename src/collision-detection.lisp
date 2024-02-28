@@ -95,11 +95,14 @@
 
 
 (defun fill-shape-domain-by-approx-loading-points (shape)
-  (remove-if
-   ;;#'(lambda (point) point nil ) ;;(not (point-inner-domnain-p point shape)))
-   #'(lambda (point) (not (point-inner-domain-p point shape)))
-   (approx-points-list (shape-domain-rect shape))
-   ))
+  (cond ((null shape) ;; 0 shape, zero-shape, it is zero element.
+         nil)
+        (t ;; otherwise, there is actual (physical) volume at the plane.
+         (remove-if
+          ;;#'(lambda (point) point nil ) ;;(not (point-inner-domnain-p point shape)))
+          #'(lambda (point) (not (point-inner-domain-p point shape)))
+          (approx-points-list (shape-domain-rect shape))
+          ))))
 
 ;;; piece piece collision detection
 

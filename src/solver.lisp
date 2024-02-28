@@ -83,12 +83,53 @@
 ;;; detect congruent
 
 (defun detect-piece-congruent (piece1 piece2)
-  ;; 頂点数
-  ;; ピースを構成するピース
-  ;; P1 - P2 = 0Set の存在
-  
+  ;; detect piece1 === piece2
+  (let* ((piece1-as-frame (copy-piece piece1))
+         (piece2-as-piece (copy-piece piece2)))
+    ;; !
+    (setf (shape-pm-sign (piece-shape piece1-as-frame)) -1)
+    (setf (shape-pm-sign (piece-shape piece2-as-piece)) +1)
+    ;;
+    (and
+     ;; num edge points
+     (= (length (piece-coord-points piece1))
+        (length (piece-coord-points piece2)))
+     ;; primary piecese which composes its piece.
+     (equal (mapcar #'piece-id (list-of-primary-piece-list-of-synthesized-piece piece1))
+            (mapcar #'piece-id (list-of-primary-piece-list-of-synthesized-piece piece2)))
+     ;; exist of {t1,t2 | t1*P1 - t2*P2 = 0[shaped piece], t1 = identity}
+     ;; where t1, t2 is transform
+     (some #'zero-shape-piece-p
+           (all-synthesizeable-patterns-of-pieces-to-frame
+            ;; piece1 (list piece2) ;; unsafe because of pm-sign specification unsettled.
+            (identity piece1-as-frame)
+            (list piece2-as-piece)))
+     ;; true if congruent
+     t)))
 
-  )
+
+#|
+
+> (setq *search1*
+              (sort-by-delta_points
+               (all-synthesizeable-patterns-of-pieces-to-frame
+                (car *example-problem-9*) (cdr *example-problem-9*))))
+nil
+> (detect-piece-congruent (nth 1 *search1*) (nth 0 *search1*))
+|#
+
+
+(defun remove-congruent-from-synthesized-piece-list (synthesized-piece-list)
+  (labels ((aux (lis)
+             (cond ((null lis) '())
+                   (t
+                    (format t "~A:~%" (piece-id (car lis)))
+                    (cons (car lis)
+                          (aux
+                           (remove-if #'(lambda (p) (detect-piece-congruent (car lis) p))
+                                     (cdr lis))
+                          ))))))
+    (aux synthesized-piece-list)))
 
 
 ;;;
@@ -112,19 +153,10 @@
                (car *example-problem-9*) (cdr *example-problem-9*)))
 
 
-;; piece id list for synthesized piece
-(mapcar #'piece-id
-        (list-of-primary-piece-list-of-synthesized-piece
-         (nth 20 (all-synthesizeable-patterns-of-pieces-to-frame
-                  (car *example-problem-9*) (cdr *example-problem-9*)))
-         *example-problem-9*))
-
-(mapcar #'piece-id
-        (list-of-unused-primary-piece-list-of-synthesized-piece
-         (nth 20 (all-synthesizeable-patterns-of-pieces-to-frame
-                  (car *example-problem-9*) (cdr *example-problem-9*)))
-         *example-problem-9*))
-
+(write-piece-list-as-html
+ (sort-by-delta_points
+  (all-synthesizeable-patterns-of-pieces-to-frame
+   (car *example-problem-9*) (cdr *example-problem-9*))))
 
 
 |#

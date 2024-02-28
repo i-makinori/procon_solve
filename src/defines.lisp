@@ -50,3 +50,11 @@
   (shape-approx-points (piece-shape piece)))
 
 
+;; zero element 
+
+(defun zero-shape-p (shape)
+  ;; synthesized zero shape is one of the solution
+  (eq nil (shape-coord-points shape)))
+
+(defun zero-shape-piece-p (piece)
+  (zero-shape-p (piece-shape piece)))
