@@ -37,9 +37,9 @@ Thank you for these libraries.
 
 I'm going to do...
 
-- [ ] 辺の相手と重なる頂点座標による分割
-- [ ] 頂点の省略演算
-- [ ] ピース合成演算を一般化した函数の定義
+- [X] 辺の相手と重なる頂点座標による分割
+- [X] 頂点の省略演算
+- [X] ピース合成演算を一般化した函数の定義
 - [ ] 探索
 - [ ] まともなUI
 - [ ] 解探索試験・高速化
@@ -55,3 +55,18 @@ I'm going to do...
 - [ ] 技術資料公開
 
 以上、2月中に初動を送信し、準備が整い次第。
+
+
+### known bugs
+
+collision detection misses some cases.
+
+```lisp
+(write-piece-list-as-html 
+ (all-synthesizeable-patterns-of-pieces-to-frame 
+  (nth 0 *example-problem-10*)
+  (list (nth 3 *example-problem-10*))))
+```
+
+some of collision detection among line-to-line is maybe ignored.
+
