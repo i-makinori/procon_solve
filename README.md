@@ -59,14 +59,5 @@ I'm going to do...
 
 ### known bugs
 
-collision detection misses some cases.
-
-```lisp
-(write-piece-list-as-html 
- (all-synthesizeable-patterns-of-pieces-to-frame 
-  (nth 0 *example-problem-10*)
-  (list (nth 3 *example-problem-10*))))
-```
-
-some of collision detection among line-to-line is maybe ignored.
+yes there is unclear specification and implements.
 

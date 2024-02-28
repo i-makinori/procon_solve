@@ -39,7 +39,7 @@
              (cond ((null pnpms) nil)
                    ((point-line-collision-detection (car papb) (cdr papb) (caar pnpms) (cdar pnpms))
                     t)
-                   (t nil))))
+                   (t (some-line-collisions-p papb (cdr pnpms))))))
     (let* ((tu-points1 (make-tuple-list (shape-coord-points shape1)))
            (tu-points2 (make-tuple-list (shape-coord-points shape2))))
       ;; if some edge by 2 points crosses to another edges, piece1 and piece2 are touch crossing.
