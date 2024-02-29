@@ -52,21 +52,18 @@ To load "puzzle-1617":
 PUZZLE-1617> (in-package :puzzle-1617)
 #<PACKAGE "PUZZLE-1617">
 PUZZLE-1617> (search-solution (list `((:frame . ,(car *example-problem-9*))))
-
-> (ql:quickload :puzzle-1617)
-;; ...
-> (in-package :puzzle-1617)
-;;
-> (search-solution (list `((:frame . ,(car *example-problem-9*))))
-                           (cdr *example-problem-9*))
+                                      (cdr *example-problem-9*))
 synth-list to: 0, using-pieces [len]: (0)[1]
 HTML file updated at : /path/to/projects/procon_solve/test/results/piece-list.html 
 synth-list to: 1416, using-pieces [len]: (0 2)[2]
 ;; ...
-'piece
-;; after wait, solven synthesized piece is returned access to 
-;; /path/to/projects/procon_solve/test/results/piece-list.html
-;; shows solution of piece synthesizing (maybe)
+(piece ... omit ...)
+;; after wait, solven synthesized piece is returned.
+;; access to HTML file updated, you can view the solution or searching-progress
+;; of piece synthesizing (maybely)
+
+PUZZLE-1617>
+
 ```
 
 
@@ -88,8 +85,6 @@ I'm going to do...
 - [ ] モデルの一般化。
   - 例えば、枠にピースをはめるだけでなく、ピースとピースを合成できるように。 など。
 
-以上、 2024/2/26までに。
-
 - [ ] ドキュメント生成
 
 以上、3/15~3/20 頃にまでに。
@@ -98,7 +93,6 @@ I'm going to do...
 - [ ] 技術資料公開
 
 以上、2月中に初動を送信し、準備が整い次第。
-
 
 ### known bugs
 
