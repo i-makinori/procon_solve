@@ -99,4 +99,17 @@
                             (car cycle-series)
                             (cadr cycle-series))))
 
+;;
 
+
+(defun cartesian (&rest lists)
+  ;; Ref: https://gist.github.com/capablemonkey/4133438ba7043af94691a2b54d997e8b
+  (labels ((cartesian2 (a b)
+             (mapcan (lambda (item-from-a)
+                       (mapcar (lambda (item-from-b)
+                                 (if (listp item-from-a)
+                                     (append item-from-a (list item-from-b))
+                                     (list item-from-a item-from-b)))
+                               b))
+                     a)))
+    (reduce #'cartesian2 lists)))

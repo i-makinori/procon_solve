@@ -17,6 +17,21 @@
 ...
 |#
 
+
+(defun whole-set-of-point-and-edge-selections-piece-piece (piece1 piece2)
+  (apply #'append
+         (mapcar
+          #'(lambda (cp12) ;; cp: coordinate points 1,2
+              (list
+               (mapcar #'(lambda (sign)
+                           `((:p1 . ,piece1) (:n1 . ,(car  cp12)) (:pm1 . ,(car sign))
+                             (:p2 . ,piece2) (:n2 . ,(cadr cp12)) (:pm2 . ,(cdr sign))))
+                       '((+1 . +1) (+1 . -1) (-1 . +1) (-1 . -1)))))
+          (cartesian ;; A x B of {0,1, ... , (n_points-1)}.
+           (from-m-to-n-list 0 (1- (length (piece-points piece1))))
+           (from-m-to-n-list 0 (1- (length (piece-points piece2))))))))
+
+#|
 (defun whole-set-of-point-and-edge-selections-piece-piece (piece1 piece2)
   ;; 
   (apply #'append
@@ -28,6 +43,7 @@
                                          `((:p1 . ,piece1) (:n1 . ,i) (:pm1 . ,(car sign))
                                            (:p2 . ,piece2) (:n2 . ,j) (:pm2 . ,(cdr sign))))
                                      '((+1 . +1) (+1 . -1) (-1 . +1) (-1 . -1)))))))
+|#
 
 (defun whole-set-of-point-and-edge-selections-pieces-to-frame (frame-piece piece-list)
   (flat-2d-nest-list
@@ -109,19 +125,19 @@
            :coord-points (mapcar #'transform (shape-coord-points shape))
            :approx-points (mapcar #'transform (shape-approx-points shape)))))
 
+(defun all-contains-detection-piece-in-frame (frame-shape piece-shape)
+  (and
+   ;; edges of frame and piece are not collisioned.
+   (not (shape-shape-boundary-collision-detection frame-shape piece-shape))
+   ;; every point of piece are contained to frame
+   (every #'(lambda (p) (point-inner-domain-p p 
+                                              (shape-coord-points frame-shape)))
+          (shape-approx-points piece-shape))))
+
+
 (defparameter *id-counter* 1000)
 (defun incf-id-counter! ()
   (incf *id-counter*))
-
-(defun all-contains-detection-piece-in-frame (frame-shape piece-shape)
-  (let (; C1: every point of piece are contained to frame
-        (c1 (every #'(lambda (p) (point-inner-domain-p p 
-                                                       (shape-coord-points frame-shape)))
-                   (shape-approx-points piece-shape)))
-        ;; C2: edges of frame and piece are not collisioned.
-        (c2 (not (shape-shape-boundary-collision-detection frame-shape piece-shape))))
-    ;; C1 && C2
-    (and c1 c2)))
 
 (defun synthesize-piece-to-frame-by-selection-piece-or-fail (select-frame.piece)
   ;; in some appears of,
