@@ -22,8 +22,12 @@
     (format nil "<polygon points='~A' ~A />~%"
             points-text style)))
 
-(defun approx-coords-into-svg-dots (approx-coords-list)
-  (let* ((template "<circle r='1' cx='~A' cy='~A' fill='green' />~%")
+(defun approx-coords-into-svg-dots (approx-coords-list &key (frame-piece-p nil))
+  (let* ((template
+           (if frame-piece-p
+               "<circle r='2' cx='~A' cy='~A' fill='aliceblue' />" ;; frame 
+               "<circle r='1' cx='~A' cy='~A' fill='green'     />" ;; piece (none framed)
+               ))
          (text (apply #'concatenate 'string
                       (mapcar #'(lambda (p) (format nil template
                                                     (tml-coord-text (vec3-x p))
@@ -61,10 +65,13 @@
 
 ;; piece list version HTML
 
-(defun shape-svg-element-text (shape)
-  (format nil "~A~%~A~%"
+(defun shape-svg-element-text (shape &key (frame-piece-p nil))
+  (format nil
+          ;;"~A~%" 
+          "~A~A~%"
           (point-list-into-svg-polygon (shape-coord-points shape))
-          (approx-coords-into-svg-dots (shape-approx-points shape))))
+          (approx-coords-into-svg-dots (shape-approx-points shape)
+                                       :frame-piece-p frame-piece-p)))
 
 
 (defparameter *tml-id* 0)
@@ -82,26 +89,39 @@
       ""
       (let ((current-text (shape-svg-element-text (piece-shape piece))))
         (cond ((equal 'leaf (piece-leaf-or-synthed piece))
-               current-text)
+               ;;current-text
+               "")
               (t
                (format nil "~A~A~A"
                        current-text
-                       (piece-into-svg-element
+                       (piece-into-svg-element-aux
                         (transform-piece (piece-transform1 piece)))
-                       (piece-into-svg-element
+                       (piece-into-svg-element-aux
                         (transform-piece (piece-transform2 piece)))))))))
 |#
-    
-(defun piece-into-svg-element-aux (piece)
-  (if (null piece)
-      ""
-      (let ((current-text (shape-svg-element-text (piece-shape piece))))
-        (cond ((equal 'leaf (piece-leaf-or-synthed piece))
-               current-text)
-              (t
-               (format nil "~A"
-                       current-text))))))
 
+(defun piece-into-svg-element-aux1 (piece transformation-matrixes)
+  (cond ((null piece) "")
+        ((primary-piece-p piece)
+         (let ((transfomed-shape
+                 ;; transform-shape-by-transformation-matrix (shape transformation-matrix)
+                 (transform-shape-by-transformation-matrix
+                  (piece-shape piece)
+                  (reduce #'matrix3x3-product transformation-matrixes)))
+               (frame?
+                 (if (eq '- (piece-pm-sign piece)) t nil)))
+           (shape-svg-element-text transfomed-shape :frame-piece-p frame?)))
+        (t
+         (let ((trans1 (piece-transform1 piece))
+               (trans2 (piece-transform2 piece)))
+           (format nil "~A~A~A"
+                   ""
+                   (piece-into-svg-element-aux1
+                    (transform-piece trans1)
+                    (cons (transform-transformation-matrix trans1) transformation-matrixes))
+                   (piece-into-svg-element-aux1
+                    (transform-piece trans2)
+                    (cons (transform-transformation-matrix trans2) transformation-matrixes)))))))
 
 
 (defun piece-into-svg-element (piece)
@@ -112,7 +132,9 @@
          ;; elements
          ;;(elm-shape (shape-svg-element-text (piece-shape piece)))
          (tree-elements
-           (piece-into-svg-element-aux piece)))
+           ;;(piece-into-svg-element-aux piece))
+           (piece-into-svg-element-aux1 piece (list *identity-matrix-3x3*)))
+         )
     ;;(format nil template id-text elm-shape elm-memo )))
     (format nil template id-text
             tree-elements elm-memo)))
