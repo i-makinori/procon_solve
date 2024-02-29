@@ -33,6 +33,43 @@ Thank you for these libraries.
   [alpha123/cl-template: Simple, output-agnostic template engine for Common Lisp, inspired by ERb.](https://github.com/alpha123/cl-template/)
 
 
+
+# example usage
+
+ref `src/note.lisp`
+
+this is maybe older...
+
+```lisp
+
+CL-USER> (ql:quickload :puzzle-1617)
+To load "puzzle-1617":
+; ...
+; ... omit
+; ...
+; Loading "puzzle-1617"
+(:PUZZLE-1617)
+PUZZLE-1617> (in-package :puzzle-1617)
+#<PACKAGE "PUZZLE-1617">
+PUZZLE-1617> (search-solution (list `((:frame . ,(car *example-problem-9*))))
+
+> (ql:quickload :puzzle-1617)
+;; ...
+> (in-package :puzzle-1617)
+;;
+> (search-solution (list `((:frame . ,(car *example-problem-9*))))
+                           (cdr *example-problem-9*))
+synth-list to: 0, using-pieces [len]: (0)[1]
+HTML file updated at : /path/to/projects/procon_solve/test/results/piece-list.html 
+synth-list to: 1416, using-pieces [len]: (0 2)[2]
+;; ...
+'piece
+;; after wait, solven synthesized piece is returned access to 
+;; /path/to/projects/procon_solve/test/results/piece-list.html
+;; shows solution of piece synthesizing (maybe)
+```
+
+
 # ToDo
 
 I'm going to do...
@@ -40,10 +77,16 @@ I'm going to do...
 - [X] 辺の相手と重なる頂点座標による分割
 - [X] 頂点の省略演算
 - [X] ピース合成演算を一般化した函数の定義
-- [ ] 探索
-- [ ] まともなUI
+- [X] 探索
+- [X] まともなUI
+- [ ] 正しい評価関数、
+  - 正しい評価値。 
+  - 零形状のスコアを0(最小)又は最大に、解に近い程0に近く、
+  - 総減少頂点数だけでなく、利用したピースあたりの減少頂点数も考慮するように(?)、、、
 - [ ] 解探索試験・高速化
-- [ ] モデルの一般化
+- [ ] 解探索の試験II。 幅優先探索に切り替えても、解に到達できることを確認する必要がある。
+- [ ] モデルの一般化。
+  - 例えば、枠にピースをはめるだけでなく、ピースとピースを合成できるように。 など。
 
 以上、 2024/2/26までに。
 
@@ -59,9 +102,3 @@ I'm going to do...
 
 ### known bugs
 
-at the final part of `search-solution` , `zero-shape-piece-p` or some piece-synthesize-function has bug, which can not zero_points_shape'd piece.
-
-`(zero-shape-piece-p (car patterns-of-step)) ;; todo`
-
-
-has the 
