@@ -70,18 +70,6 @@
           (length (piece-coord-points synthesized-piece))))
     (- n-points-of-primary n-points-of-synthesized-piece)))
 
-
-#|
-
-> (setq *search1*
-              (sort-by-delta_points
-               (all-synthesizeable-patterns-of-pieces-to-frame
-                (car *example-problem-9*) (cdr *example-problem-9*))))
-nil
-> (detect-piece-congruent (nth 1 *search1*) (nth 0 *search1*))
-|#
-
-
 (defun remove-congruent-from-synthesized-piece-list (synthesized-piece-list)
   (labels ((aux (lis)
              (cond ((null lis) '())
@@ -143,7 +131,54 @@ nil
            current-state) ;; it is goal
           )))
 
-(defun search-solution (frame pieces)
-  
+#|
+;; usage
+(search-solution
+  (list `((:frame . ,(car *example-problem-9*))))
+  (cdr *example-problem-9*))
+|#
+
+(defun search-solution (stack-of-states primary-piece-list)
+  (let* ((state (car stack-of-states))
+         (stacking (cdr stack-of-states))
+         ;;
+         (piece-frame         (assocdr :frame state))
+         (primary-piece-using (list-of-primary-piece-list-of-synthesized-piece piece-frame))
+         (primary-piece-rests (list-of-unused-primary-piece-list-of-synthesized-piece 
+                               piece-frame primary-piece-list))
+         ;;
+         )
+    (format t "synth-list to: ~A, using-pieces [len]: ~A[~A]~%"
+            (piece-id piece-frame)
+            (mapcar #'piece-id primary-piece-using)
+            (length primary-piece-using))
+            
+    (let* ((patterns-of-step
+             (remove-congruent-from-synthesized-piece-list
+              (sort-by-delta_points
+               (all-synthesizeable-patterns-of-pieces-to-frame
+                piece-frame primary-piece-rests))))
+           (next-stack ;; todo sort by score of statement
+             (sort
+              (append (mapcar #'(lambda (next-frame)
+                                  `((:frame . ,next-frame)))
+                              patterns-of-step)
+                      stacking)
+              #'(lambda (state1 state2)
+                  (> (delta_points-of-synthesize (assocdr :frame state1))
+                     (delta_points-of-synthesize (assocdr :frame state2)))))))
+      ;;
+      (write-piece-list-as-html
+       (mapcar #'(lambda (state) (assocdr :frame state))
+               next-stack))
+      ;;
+      (cond (;; solution is car
+             (zero-shape-piece-p (car patterns-of-step)) ;; todo
+             (list (car patterns-of-step)))
+            (t
+             (search-solution
+              next-stack primary-piece-list)))
+       ;;
+      )) ;; and report at last
   )
 

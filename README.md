@@ -59,5 +59,9 @@ I'm going to do...
 
 ### known bugs
 
-yes there is unclear specification and implements.
+at the final part of `search-solution` , `zero-shape-piece-p` or some piece-synthesize-function has bug, which can not zero_points_shape'd piece.
 
+`(zero-shape-piece-p (car patterns-of-step)) ;; todo`
+
+
+has the 

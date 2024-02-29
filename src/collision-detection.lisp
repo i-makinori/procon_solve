@@ -156,3 +156,13 @@
    ;; exist of congruent transform
    (detect-piece-exist-congruent-transform piece1
                                            piece2)))
+
+#|
+
+> (setq *search1*
+              (sort-by-delta_points
+               (all-synthesizeable-patterns-of-pieces-to-frame
+                (car *example-problem-9*) (cdr *example-problem-9*))))
+nil
+> (detect-piece-congruent (nth 1 *search1*) (nth 0 *search1*))
+|#
