@@ -15,6 +15,9 @@
     <% end %>
 
     <hr />
+    <%= (@ len-limitage-text) %>
+
+    <hr />
     solution contents end.
     
     <script>

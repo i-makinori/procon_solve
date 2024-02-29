@@ -133,8 +133,7 @@
          ;;(elm-shape (shape-svg-element-text (piece-shape piece)))
          (tree-elements
            ;;(piece-into-svg-element-aux piece))
-           (piece-into-svg-element-aux1 piece (list *identity-matrix-3x3*)))
-         )
+           (piece-into-svg-element-aux1 piece (list *identity-matrix-3x3*))))
     ;;(format nil template id-text elm-shape elm-memo )))
     (format nil template id-text
             tree-elements elm-memo)))
@@ -146,14 +145,28 @@
             (length coords) id coords)))
 
 (defun html-of-piece-list (piece-list)
-  (let* ((svg-alists (mapcar #'(lambda (p)
+  (let* (;; limitage
+         (len-piece-limit-per-page 180)
+         (len-limited-piece-list (subseq piece-list 0
+                                         (min len-piece-limit-per-page (length piece-list))))
+         ;; svg XML
+         (svg-alists (mapcar #'(lambda (p)
                                  (incf-tml-id!)
                                  `(,(cons :id (piece-id-tml-string p))
                                    ,(cons :svg-text (piece-into-svg-element p))
                                    ,(cons :describe-text (piece-into-html-describe p))))
-                             piece-list)))
+                             len-limited-piece-list))
+         ;; limitage-text
+         (len-limitage-text
+           (if (> len-piece-limit-per-page (length piece-list))
+               (format nil "<p>all pieces are shown: ~A pieces.</p>"
+                       (length piece-list))
+               (format nil "<p>omit because so many (synthesized) pieces: ~A of ~A pieces.</p>"
+                       len-piece-limit-per-page (length piece-list)))))
+    ;; format via template
     (funcall (cl-template:compile-template *html-template-text*)
-             (list :svgs svg-alists))))
+             (list :svgs svg-alists
+                   :len-limitage-text len-limitage-text))))
 
 ;; template
 
