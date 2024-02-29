@@ -104,12 +104,25 @@
             (assocdr :n1 sel) (assocdr :pm1 sel) (assocdr :p1 sel))))
     (cons (car transforms-frame) (identity transforms-piece))))
 
-(defun transform-shape-by-transformation-matrix (shape transformation-matrix)
+(defun transform-shape-by-transformation-matrix
+    (shape transformation-matrix
+     &key
+       (transform-coord-points  #'(lambda (f-transform coord-ps)  (mapcar f-transform coord-ps)))
+       (transform-approx-points #'(lambda (f-transform approx-ps) (mapcar f-transform approx-ps))))
   (labels ((transform (v)
              (matrix3x3-vector3-product transformation-matrix v)))
-    (shape :pm-sign (shape-pm-sign shape)
-           :coord-points (mapcar #'transform (shape-coord-points shape))
-           :approx-points (mapcar #'transform (shape-approx-points shape)))))
+    (shape 
+     :pm-sign (shape-pm-sign shape)
+     :coord-points  (funcall transform-coord-points  #'transform (shape-coord-points shape))
+     :approx-points (funcall transform-approx-points #'transform (shape-approx-points shape)))))
+
+
+(defun transform-shape-by-transformation-matrix-however-nil-approxs (shape transformation-matrix)
+  (transform-shape-by-transformation-matrix
+   shape transformation-matrix
+   :transform-approx-points #'(lambda (f-transform coord-ps) f-transform coord-ps
+                                      '()) ;; none of approx-points.
+   ))
 
 (defun all-contains-detection-piece-in-frame (frame-shape piece-shape)
   (and
@@ -120,18 +133,21 @@
                                               (shape-coord-points frame-shape)))
           (shape-approx-points piece-shape))))
 
-(defun map-to-combination-selection-frame.piece (func select-frame.piece)
+(defun map-to-combination-selection-frame.piece
+    (func select-frame.piece
+     &key (shape-transformer #'transform-shape-by-transformation-matrix))
   ;; in some appears of,
   ;; (car . cdr) means (frame_shape . piece_maybely_shape_list)
   (let* ((sel select-frame.piece)
          ;; transforms, transform matrixes(Array)
          (tms (make-transforms-by-point-and-edge-selection-piece-to-frame sel))
          (tmas (mapcar #'transform-transformation-matrix tms))
-         ;; Spape'(Dush) eS. shapes after transforms.
+         ;; SapeS before transform
          (ss (mapcar #'piece-shape 
                      (cons (assocdr :p1 sel) (list (assocdr :p2 sel) (assocdr :p2 sel)))))
+         ;; Spape'(Dush) eS. shapes after transforms.
          (sds (mapcar #'(lambda (shape transform)
-                           (transform-shape-by-transformation-matrix shape transform))
+                          (funcall shape-transformer shape transform))
                       ss tmas))
          ;; indexes
          (tm_f  (car tms))         (sd_f  (car sds))

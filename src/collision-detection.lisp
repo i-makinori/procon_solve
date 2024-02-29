@@ -127,7 +127,8 @@
                       (rc1 (re-order-coordinate-points-by-transform tm_1 c1 nil))
                       (rc2 (re-order-coordinate-points-by-transform tm_2 c2 nil)))
                  (every #'vec3-ser= rc1 rc2)))
-           select-piece.piece)))
+           select-piece.piece
+           :shape-transformer #'transform-shape-by-transformation-matrix-however-nil-approxs)))
     (or (car detect_1_2) (cadr detect_1_2))))
 
 (defun detect-piece-exist-congruent-transform (piece1 piece2)
