@@ -76,7 +76,10 @@
      (* (vec3-y V1) (vec3-y V2))))
 
 (defun vec3-dot (V1 V2)
-  (reduce #'+ (vec3-multiply V1 V2)))
+  ;; (reduce #'+ (vec3-multiply V1 V2)) ;; <- slower implement
+  (+ (* (vec3-x V1) (vec3-x V2))
+     (* (vec3-y V1) (vec3-y V2))
+     (* (vec3-j V1) (vec3-j V2))))
 
 (defun vec3-cross-xy (V1 V2)
   (- (* (vec3-x V1) (vec3-y V2))
@@ -88,24 +91,20 @@
         (- (* (vec3-x V1) (vec3-y V2)) (* (vec3-y V1) (vec3-x V2)))))
 
 (defun vec3-matrix-row (An row)
-  (let ((Vn (vec3)))
-    (loop for iter from 0 to (- 3 1)
-          do (setf (aref Vn iter) (aref An row iter)))
-    Vn))
+  (vec3 (aref An row 0)
+        (aref An row 1)
+        (aref An row 2)))
 
 (defun vec3-matrix-col (An col)
-  (let ((Vn (vec3)))
-    (loop for iter from 0 to (- 3 1)
-          do (setf (aref Vn iter) (aref An iter col)))
-    Vn))
+  (vec3 (aref An 0 col)
+        (aref An 1 col)
+        (aref An 2 col)))
 
 (defun matrix3x3-vector3-product (An Vn)
   "An * Vn. where Vn as col vector."
-  (let ((V1 (vec3)))
-    (loop for iter from 0 to (- 3 1)
-          do (setf (aref V1 iter) (vec3-dot (vec3-matrix-row An iter) Vn)))
-    V1))
-
+  (vec3 (vec3-dot (vec3-matrix-row An 0) Vn)
+        (vec3-dot (vec3-matrix-row An 1) Vn)
+        (vec3-dot (vec3-matrix-row An 2) Vn)))
 
 (defun matrix3x3-product (A1 A2)
   (let ((A3 (matrix3x3)))
