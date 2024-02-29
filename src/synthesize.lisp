@@ -238,9 +238,9 @@
    (= (length (piece-coord-points piece1)) 
       (length (piece-coord-points piece2)))
    ;; == primary piecese which composes its piece.
-   (equal (mapcar #'piece-id (list-of-primary-piece-list-of-synthesized-piece piece1))
-          (mapcar #'piece-id (list-of-primary-piece-list-of-synthesized-piece piece2)))
-   ;; some of all {i | I * P1_points == t2 * P2_points, i = (0, ... ,Len(coord_points)-1) }
+   (set-equal (mapcar #'piece-id (list-of-primary-piece-list-of-synthesized-piece piece1))
+              (mapcar #'piece-id (list-of-primary-piece-list-of-synthesized-piece piece2)))
+   ;; exist of congruent transform
    (detect-piece-exist-congruent-transform piece1
                                            piece2)
    ))

@@ -99,7 +99,7 @@
                             (car cycle-series)
                             (cadr cycle-series))))
 
-;;
+;; set theory
 
 
 (defun cartesian (&rest lists)
@@ -113,3 +113,7 @@
                                b))
                      a)))
     (reduce #'cartesian2 lists)))
+
+(defun set-equal (set-list1 set-list2 &key (test #'eql))
+  (and (subsetp set-list1 set-list2 :test test)
+       (subsetp set-list2 set-list1 :test test)))
