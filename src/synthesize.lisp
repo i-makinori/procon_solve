@@ -139,6 +139,7 @@
 (defun incf-id-counter! ()
   (incf *id-counter*))
 
+#|
 (defun synthesize-piece-to-frame-by-selection-piece-or-fail (select-frame.piece)
   ;; in some appears of,
   ;; (car . cdr) means (frame_shape . piece_maybely_shape_list)
@@ -167,8 +168,110 @@
                      ;; diable to put piece into frame
                      nil))
              (list sd_p1 sd_p2) (list tm_p1 tm_p2)))))
+|#
 
+(defun map-to-combination-selection-frame.piece (func select-frame.piece)
+  ;; in some appears of,
+  ;; (car . cdr) means (frame_shape . piece_maybely_shape_list)
+  (let* ((sel select-frame.piece)
+         ;; transforms, transform matrixes(Array)
+         (tms (make-transforms-by-point-and-edge-selection-piece-to-frame sel))
+         (tmas (mapcar #'transform-transformation-matrix tms))
+         ;; Spape'(Dush) eS. shapes after transforms.
+         (ss (mapcar #'piece-shape 
+                     (cons (assocdr :p1 sel) (list (assocdr :p2 sel) (assocdr :p2 sel)))))
+         (sds (mapcar #'(lambda (shape transform)
+                           (transform-shape-by-transformation-matrix shape transform))
+                      ss tmas))
+         ;; indexes
+         (tm_f  (car tms))         (sd_f  (car sds))
+         (tm_p1 (nth 0 (cdr tms))) (sd_p1 (nth 0 (cdr sds)))
+         (tm_p2 (nth 1 (cdr tms))) (sd_p2 (nth 1 (cdr sds))))
+    ;; map func to selected transform and shapes
+    (mapcar #'(lambda (sd_px tm_px)
+                (funcall func sd_f tm_f sd_px tm_px))
+            (list sd_p1 sd_p2) (list tm_p1 tm_p2))))
 
+(defun synthesize-piece-to-frame-by-selection-piece-or-fail (select-frame.piece)
+  ;; make new (frame-)piece if piece is contained to frame
+  ;; and filter disabled-transforms.
+  (remove
+   nil
+   (map-to-combination-selection-frame.piece
+    #'(lambda (sd_f tm_f sd_px tm_px)
+        (if (all-contains-detection-piece-in-frame sd_f sd_px)
+            ;; able to put piece into frame
+            (synthesize-syntheable-piece-to-frame  sd_f tm_f sd_px tm_px)
+            ;; diable to put piece into frame
+            nil))
+    select-frame.piece)))
+
+;;; detect congruent
+
+(defun detect-piece-all-coordinates-equal-by-selection (select-piece.piece)
+  (find t
+  (map-to-combination-selection-frame.piece
+    #'(lambda (sd_1 tm_1 sd_2 tm_2) ;; Shape_Dush, TransforM
+        sd_1 sd_2
+        (let* (;; Coordinates[List]
+               (c1 (shape-coord-points sd_1))
+               (c2 (shape-coord-points sd_2))
+               ;; rotated C, where δ1 = δ2
+               (rc1 (re-order-coordinate-points-by-transform tm_1 c1 nil))
+               (rc2 (re-order-coordinate-points-by-transform tm_2 c2 nil)))
+          (every #'vec3-ser= rc1 rc2)))
+     select-piece.piece)))
+
+(defun detect-piece-exist-congruent-transform (piece1 piece2)
+  (some #'detect-piece-all-coordinates-equal-by-selection
+          (whole-set-of-point-and-edge-selections-pieces-to-frame
+           piece1 (list piece2))))
+
+(defun detect-piece-congruent (piece1 piece2)
+  ;; new implement
+  ;; detect piece1 === piece2
+  (and
+   ;; == pm_sign
+   (eq (piece-pm-sign piece1)
+       (piece-pm-sign piece2))
+   ;; == num edge points
+   (= (length (piece-coord-points piece1)) 
+      (length (piece-coord-points piece2)))
+   ;; == primary piecese which composes its piece.
+   (equal (mapcar #'piece-id (list-of-primary-piece-list-of-synthesized-piece piece1))
+          (mapcar #'piece-id (list-of-primary-piece-list-of-synthesized-piece piece2)))
+   ;; some of all {i | I * P1_points == t2 * P2_points, i = (0, ... ,Len(coord_points)-1) }
+   (detect-piece-exist-congruent-transform piece1
+                                           piece2)
+   ))
+
+#|
+(defun detect-piece-congruent (piece1 piece2)
+  ;; old implement  
+  ;; detect piece1 === piece2
+  (let* ((piece1-as-frame (copy-piece piece1))
+         (piece2-as-piece (copy-piece piece2)))
+    ;; !
+    (setf (shape-pm-sign (piece-shape piece1-as-frame)) -1)
+    (setf (shape-pm-sign (piece-shape piece2-as-piece)) +1)
+    ;;
+    (and
+     ;; num edge points
+     (= (length (piece-coord-points piece1))
+        (length (piece-coord-points piece2)))
+     ;; primary piecese which composes its piece.
+     (equal (mapcar #'piece-id (list-of-primary-piece-list-of-synthesized-piece piece1))
+            (mapcar #'piece-id (list-of-primary-piece-list-of-synthesized-piece piece2)))
+     ;; exist of {t1,t2 | t1*P1 - t2*P2 = 0[shaped piece], t1 = identity}
+     ;; where t1, t2 is transform
+     (some #'zero-shape-piece-p
+           (all-synthesizeable-patterns-of-pieces-to-frame
+            ;; piece1 (list piece2) ;; unsafe because of pm-sign specification unsettled.
+            (identity piece1-as-frame)
+            (list piece2-as-piece)))
+     ;; true if congruent
+     t)))
+|#
 
 ;;;; synthesize
 
@@ -194,10 +297,10 @@
   ;; 2. ommit points。
   ;; 3. fill domain by approx points.
   ;; 4. make-piece
-  (let* (;; Coordinates
+  (let* (;; Coordinates[List]
          (c1 (shape-coord-points new-shape1))
          (c2 (shape-coord-points new-shape2))
-         ;; rotated C
+         ;; rotated C, where δ1 = -(δ2)
          (rc1 (re-order-coordinate-points-by-transform transform1 c1 nil))
          (rc2 (re-order-coordinate-points-by-transform transform2 c2 t))
          ;; insert pointed RC
