@@ -153,7 +153,7 @@
             (mapcar #'piece-id primary-piece-using)
             (length primary-piece-using))
             
-    (let* ((patterns-of-step
+    (let* ((patterns-of-step!
              (remove-congruent-from-synthesized-piece-list
               (sort-by-delta_points
                (all-synthesizeable-patterns-of-pieces-to-frame
@@ -162,7 +162,7 @@
              (sort
               (append (mapcar #'(lambda (next-frame)
                                   `((:frame . ,next-frame)))
-                              patterns-of-step)
+                              patterns-of-step!)
                       stacking)
               #'(lambda (state1 state2)
                   (> (delta_points-of-synthesize (assocdr :frame state1))
@@ -173,8 +173,8 @@
                next-stack))
       ;;
       (cond (;; solution is car
-             (zero-shape-piece-p (car patterns-of-step)) ;; todo
-             (list (car patterns-of-step)))
+             (zero-shape-piece-p (assocdr :frame (car next-stack))) ;; todo
+             (list (car next-stack)))
             (t
              (search-solution
               next-stack primary-piece-list)))

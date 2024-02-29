@@ -207,8 +207,9 @@
                   :approx-points approx-points)))
 
     (incf-id-counter!)
-    ;;(format t "HOGE ~A, ~A~%" (transform-point-from transform1) (transform-point-from transform2))
-    ;;(format t "  ~A~%  ~A ~%" rc1 rc2)
+    ;;(format t "~A, ~A, (~A: ~A)~%"
+    ;;  (length synthed-coord-points) (length approx-points)
+    ;;  (length irc1) (length irc2))
     (piece :leaf-or-synthed :synthed
            :shape synthed-new-shape
            :id *id-counter*

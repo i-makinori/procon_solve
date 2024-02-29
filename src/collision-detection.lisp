@@ -153,9 +153,14 @@
    ;; == primary piecese which composes its piece.
    (set-equal (mapcar #'piece-id (list-of-primary-piece-list-of-synthesized-piece piece1))
               (mapcar #'piece-id (list-of-primary-piece-list-of-synthesized-piece piece2)))
-   ;; exist of congruent transform
-   (detect-piece-exist-congruent-transform piece1
-                                           piece2)))
+   ;; or 
+   (or
+    ;; root is zero shape
+    (and (zero-shape-piece-p piece1)
+         (zero-shape-piece-p piece2))
+    ;; exist of congruent transform
+    (detect-piece-exist-congruent-transform piece1
+                                            piece2))))
 
 #|
 

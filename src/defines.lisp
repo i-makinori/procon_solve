@@ -57,5 +57,4 @@
   (eq nil (shape-coord-points shape)))
 
 (defun zero-shape-piece-p (piece)
-  (or (eq nil piece) ;; temporary ;; todo fix
-      (zero-shape-p (piece-shape piece))))
+  (zero-shape-p (piece-shape piece)))
