@@ -110,3 +110,49 @@
   ;; and boundary contain
   p1 p2 nil
   )
+
+
+
+;;; detect congruent of piece and piece
+
+(defun detect-piece-point-selection-makes-congruent-transform (select-piece.piece)
+  (let ((detect_1_2
+          (map-to-combination-selection-frame.piece
+           #'(lambda (sd_1 tm_1 sd_2 tm_2) ;; Shape_Dush, TransforM
+               sd_1 sd_2
+               (let* (;; Coordinates[List]
+                      (c1 (shape-coord-points sd_1))
+                      (c2 (shape-coord-points sd_2))
+                      ;; rotated C, where δ1 = δ2
+                      (rc1 (re-order-coordinate-points-by-transform tm_1 c1 nil))
+                      (rc2 (re-order-coordinate-points-by-transform tm_2 c2 nil)))
+                 (every #'vec3-ser= rc1 rc2)))
+           select-piece.piece)))
+    (or (car detect_1_2) (cadr detect_1_2))))
+
+(defun detect-piece-exist-congruent-transform (piece1 piece2)
+  ;; if piece1 and piece2 is congruent, 
+  ;; it exist congruent transform, all coordinates of corresponding
+  ;; points at piece1 and piece2 are equal in its specific transform.
+  ;;
+  ;; in other words,
+  ;; whether if the exist of transform which makes perfectly overlapping or not.
+  (some #'detect-piece-point-selection-makes-congruent-transform
+          (whole-set-of-point-and-edge-selections-pieces-to-frame
+           piece1 (list piece2))))
+
+(defun detect-piece-congruent (piece1 piece2)
+  ;; detect piece1 === piece2
+  (and
+   ;; == pm_sign
+   (eq (piece-pm-sign piece1)
+       (piece-pm-sign piece2))
+   ;; == num edge points
+   (= (length (piece-coord-points piece1)) 
+      (length (piece-coord-points piece2)))
+   ;; == primary piecese which composes its piece.
+   (set-equal (mapcar #'piece-id (list-of-primary-piece-list-of-synthesized-piece piece1))
+              (mapcar #'piece-id (list-of-primary-piece-list-of-synthesized-piece piece2)))
+   ;; exist of congruent transform
+   (detect-piece-exist-congruent-transform piece1
+                                           piece2)))
