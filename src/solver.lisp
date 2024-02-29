@@ -123,22 +123,14 @@
   (cdr (assoc :remains state))
   )
 
-(defun search-solution-aux (state-stack)
-  (let* ((current-state (car state-stack))
-         (stack (cdr state-stack))) ;; older sorted stack
-    stack
-    (cond ((null (state-remains current-state)) ;; remain-piece is nil
-           current-state) ;; it is goal
-          )))
 
 #|
 ;; usage
-(search-solution
-  (list `((:frame . ,(car *example-problem-9*))))
-  (cdr *example-problem-9*))
+(search-solution-from-prime-pieces
+ (cons (car *example-problem-9*) (cdr *example-problem-9*)))
 |#
 
-(defun search-solution (stack-of-states primary-piece-list)
+(defun search-solution-aux (stack-of-states primary-piece-list)
   (let* ((state (car stack-of-states))
          (stacking (cdr stack-of-states))
          ;;
@@ -176,9 +168,26 @@
              (zero-shape-piece-p (assocdr :frame (car next-stack))) ;; todo
              (list (car next-stack)))
             (t
-             (search-solution
+             (search-solution-aux
               next-stack primary-piece-list)))
        ;;
       )) ;; and report at last
   )
+
+
+(defun search-solution-from-prime-pieces (whole-primary-piece-list)
+  (let* ((primary-pieces (remove-if-not #'primary-piece-p whole-primary-piece-list))
+         (frame-pieces   (remove-if-not #'(lambda (p) (eq '- (piece-pm-sign p))) primary-pieces)))
+    (cond
+      ((not (= 1 (length frame-pieces)))
+       (warn (format nil "whole-piece-list has multiple frames. IDs: ~A~%"
+                     (mapcar #'piece-id frame-pieces)))
+       nil)
+      (t 
+       (let* ((frame-piece    (car frame-pieces))
+              ;;
+              (none-frame-pieces (remove frame-piece primary-pieces :test #'equalp))
+              (stack-of-states_t0
+                (list `((:frame . ,frame-piece)))))
+         (search-solution-aux stack-of-states_t0 none-frame-pieces))))))
 

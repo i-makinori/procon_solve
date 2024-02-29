@@ -51,8 +51,9 @@ To load "puzzle-1617":
 (:PUZZLE-1617)
 PUZZLE-1617> (in-package :puzzle-1617)
 #<PACKAGE "PUZZLE-1617">
-PUZZLE-1617> (search-solution (list `((:frame . ,(car *example-problem-9*))))
-                                      (cdr *example-problem-9*))
+PUZZLE-1617> ;; in *example-problem-9*, car is frame-piece(-), cdr is noneframe-piece(+)
+PUZZLE-1617> (search-solution-from-prime-pieces
+              (cons (car *example-problem-9*) (cdr *example-problem-9*)))
 synth-list to: 0, using-pieces [len]: (0)[1]
 HTML file updated at : /path/to/projects/procon_solve/test/results/piece-list.html 
 synth-list to: 1416, using-pieces [len]: (0 2)[2]
@@ -80,19 +81,18 @@ I'm going to do...
   - 正しい評価値。 
   - 零形状のスコアを0(最小)又は最大に、解に近い程0に近く、
   - 総減少頂点数だけでなく、利用したピースあたりの減少頂点数も考慮するように(?)、、、
-- [ ] 解探索試験・高速化
+- [ ] 解探索試験・高速化I
 - [ ] 解探索の試験II。 幅優先探索に切り替えても、解に到達できることを確認する必要がある。
 - [ ] モデルの一般化。
   - 例えば、枠にピースをはめるだけでなく、ピースとピースを合成できるように。 など。
-
 - [ ] ドキュメント生成
 
 以上、3/15~3/20 頃にまでに。
 
-- [ ] 著作権などの確認
-- [ ] 技術資料公開
+- [ ] 著作権などの確認。問題の著作権、問題の引用などについて。
+- [ ] 理論と技術に関する資料の公開
 
-以上、2月中に初動を送信し、準備が整い次第。
+以上、3月中旬に確認を開始し、準備が整い次第。
 
 ### known bugs
 
