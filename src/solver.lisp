@@ -81,16 +81,33 @@
     (aux synthesized-piece-list)))
 
 
-;;;
+;;; evaluation functions for evaluate values
 
-#|
-(defun make-puzzle-statement (piece-list)
-  ;; alist as puzzle statement.
-  (let ((id-list (mapcar #'piece-id piece-list)))
-    (list (cons 'id-list id-list)
-          (cons 'frame   (find-if #'(lambda (piece) (eql -1 (piece-pm-sign piece))) id-list))
-          )))
-|#
+(defun evaluation-value-by-delta-points (state primary-piece-list)
+  primary-piece-list
+  (delta_points-of-synthesize (assocdr :frame state)))
+
+(defun evaluation-value-by-div1-nomials (state primary-piece-list)
+  ;;(let* ((synth-prims (list-of-primary-piece-list-of-synthesized-piece (assocdr :frame state))))
+  ;;primaries
+  primary-piece-list
+  state
+  0)
+
+(defun sorted-states-by-evaluation-function (evaluation-function state-list! primary-piece-list)
+  (let ((states-added-evaluation-value
+          (mapcar #'(lambda (state)
+                      (if (null (assocdr :evaluation-value state))
+                          (cons `(:evaluation-value 
+                                  . ,(funcall evaluation-function state primary-piece-list))
+                                state)
+                          state))
+                  state-list!)))
+    (sort
+     states-added-evaluation-value
+     #'(lambda (state1 state2)
+         (> (assocdr :evaluation-value state1)
+            (assocdr :evaluation-value state2))))))
 
 ;;;
 
@@ -114,16 +131,6 @@
 
 ;; minus to frame method
 
-(defun state (current-frame remains-pieces points-length)
-  `((:current-frame . ,current-frame)
-    (:remains . ,remains-pieces)
-    (:points-length . ,points-length)))
-
-(defun state-remains (state)
-  (cdr (assoc :remains state))
-  )
-
-
 #|
 ;; usage
 (search-solution-from-prime-pieces
@@ -144,26 +151,26 @@
             (piece-id piece-frame)
             (mapcar #'piece-id primary-piece-using)
             (length primary-piece-using))
-            
-    (let* ((patterns-of-step!
+    (let* ((patterns-of-step
              (remove-congruent-from-synthesized-piece-list
               (sort-by-delta_points
                (all-synthesizeable-patterns-of-pieces-to-frame
                 piece-frame primary-piece-rests))))
-           (next-stack ;; todo sort by score of statement
-             (sort
-              (append (mapcar #'(lambda (next-frame)
-                                  `((:frame . ,next-frame)))
-                              patterns-of-step!)
-                      stacking)
-              #'(lambda (state1 state2)
-                  (> (delta_points-of-synthesize (assocdr :frame state1))
-                     (delta_points-of-synthesize (assocdr :frame state2)))))))
-      ;;
+           (states-of-step! (mapcar #'(lambda (next-frame)
+                                        `((:frame . ,next-frame)))
+                                    patterns-of-step))
+           (next-stack (sorted-states-by-evaluation-function
+                        #'evaluation-value-by-delta-points
+                        (append states-of-step! stacking)
+                        primary-piece-list)))
+      ;; debugging format
+      (format t "~A" (mapcar #'(lambda (s) (assocdr :evaluation-value s)) next-stack))
+      (format t "~%~%")
+      ;; HTML
       (write-piece-list-as-html
        (mapcar #'(lambda (state) (assocdr :frame state))
                next-stack))
-      ;;
+      ;; finish or recursive
       (cond (;; solution is car
              (zero-shape-piece-p (assocdr :frame (car next-stack))) ;; todo
              (list (car next-stack)))

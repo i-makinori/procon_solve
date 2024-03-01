@@ -42,4 +42,11 @@
     ))
 
 
+;;;; memo
 
+#|
+(time (progn (search-solution-from-prime-pieces
+                           (cons (car *example-problem-9*) (cdr *example-problem-9*)))
+                          nil))
+
+|#
