@@ -19,20 +19,21 @@
 
 
 (defun whole-set-of-point-and-edge-selections-piece-piece (piece1 piece2)
-  (apply #'append
-         (mapcar
-          #'(lambda (cp12) ;; cp: coordinate points 1,2
-              (list
-               (mapcar #'(lambda (sign)
-                           `((:p1 . ,piece1) (:n1 . ,(car  cp12)) (:pm1 . ,(car sign))
-                             (:p2 . ,piece2) (:n2 . ,(cadr cp12)) (:pm2 . ,(cdr sign))))
-                       '((+1 . +1) (+1 . -1) (-1 . +1) (-1 . -1)))))
-          (cartesian ;; A x B of {0,1, ... , (n_points-1)}.
-           (from-m-to-n-list 0 (1- (length (piece-points piece1))))
-           (from-m-to-n-list 0 (1- (length (piece-points piece2))))))))
+  (flatten
+   (apply #'append
+          (mapcar
+           #'(lambda (cp12) ;; cp: coordinate points 1,2
+               (list
+                (mapcar #'(lambda (sign)
+                            `((:p1 . ,piece1) (:n1 . ,(car  cp12)) (:pm1 . ,(car sign))
+                              (:p2 . ,piece2) (:n2 . ,(cadr cp12)) (:pm2 . ,(cdr sign))))
+                        '((+1 . +1) (+1 . -1) (-1 . +1) (-1 . -1)))))
+           (cartesian ;; A x B of both {0,1, ... , (n_points-1)}.
+            (from-m-to-n-list 0 (1- (length (piece-points piece1))))
+            (from-m-to-n-list 0 (1- (length (piece-points piece2)))))))))
 
 (defun whole-set-of-point-and-edge-selections-pieces-to-frame (frame-piece piece-list)
-  (flat-2d-nest-list
+  (flatten
    (mapcar #'(lambda (p) (whole-set-of-point-and-edge-selections-piece-piece frame-piece p))
            piece-list)))
 

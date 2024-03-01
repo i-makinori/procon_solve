@@ -12,7 +12,13 @@
                    (whole-set-of-point-and-edge-selections-pieces-to-frame
                     frame piece-list)))))
 
-
+(defun all-synthesizeable-patterns-of-piece-to-piece (piece1 piece2)
+  (flatten
+   (remove nil
+           (mapcar #'synthesize-piece-to-frame-by-selection-piece-or-fail
+                   (whole-set-of-point-and-edge-selections-piece-piece 
+                    piece1 piece2)))))
+  
 ;;; 
 ;;; set theoretical manipulations
 
