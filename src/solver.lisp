@@ -171,13 +171,16 @@
        (mapcar #'(lambda (state) (assocdr :frame state))
                next-stack))
       ;; finish or recursive
-      (cond (;; solution is car
+      (cond (;; no methods
+             (null next-stack)
+             (format t "there is no solutions. IDs: ~A~%" (mapcar #'piece-id primary-piece-list))
+             ;; car is solution
              (zero-shape-piece-p (assocdr :frame (car next-stack))) ;; todo
-             (list (car next-stack)))
-            (t
-             (search-solution-aux
-              next-stack primary-piece-list)))
-       ;;
+             (list (car next-stack))
+             ;; search-next
+             (t
+              (search-solution-aux
+               next-stack primary-piece-list))))
       )) ;; and report at last
   )
 
