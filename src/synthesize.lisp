@@ -107,42 +107,52 @@
                                       '()) ;; none of approx-points.
    ))
 
-(defun all-contains-detection-piece-in-frame (frame-shape piece-shape)
-  (let ((frame-coords (shape-coord-points frame-shape)))
-    (and
-     ;; edges of frame and piece are not collisioned.
-     (not (shape-shape-boundary-collision-detection frame-shape piece-shape))
-     ;; every point of piece are contained to frame
-     (every #'(lambda (p) (point-inner-domain-p p frame-coords))
-            (shape-approx-points piece-shape)))))
 
-(defun none-contains-detection-piece-to-piece (piece-shape1 piece-shape2)
+;;; shape's containing detection, which is used for synthesize operations.
+
+(defun none-contains-detection-piece1-and-piece2 (piece-shape1 piece-shape2)
   (let ((piece1-coords (shape-coord-points piece-shape1))
         (piece2-coords (shape-coord-points piece-shape2)))
     (and
+     ;; if pm-sign(P1) == pm-sign(P2), P1 + P2 = P2 + P1
+     ;; (+, +) || (-, -)
+     (eq (shape-pm-sign piece-shape1) (shape-pm-sign piece-shape1))
      ;; edges of piece1 and piece2 are not collisioned.
      (not (shape-shape-boundary-collision-detection piece-shape1 piece-shape2))
      ;; none point of piece_X are contained to piece_Y
-     (notany #'(lambda (p1p) (point-inner-domain-p p1p piece2-coords))
-             (shape-approx-points piece-shape1))
-     (notany #'(lambda (p2p) (point-inner-domain-p p2p piece1-coords))
-             (shape-approx-points piece-shape2)))))
+     (and
+      (notany #'(lambda (p1p) (point-inner-domain-p p1p piece2-coords))
+              (shape-approx-points piece-shape1))
+      (notany #'(lambda (p2p) (point-inner-domain-p p2p piece1-coords))
+              (shape-approx-points piece-shape2))))))
+
+(defun all-contains-detection-piece2-in-piece1 (piece-shape1 piece-shape2)
+  (let ((piece1-coords (shape-coord-points piece-shape1)))
+    (and
+     ;; if pm-sign(P1) !== pm-sign(P2), P1 + P2 != P2 + P1
+     ;; (-, +) || (+, -)
+     (not (eq (shape-pm-sign piece-shape1) (shape-pm-sign piece-shape1)))
+     ;; edges of frame and piece are not collisioned.
+     (not (shape-shape-boundary-collision-detection piece-shape1 piece-shape2))
+     ;; piece2 ⊂ piece1
+     ;; every points of piece2 are contained in piece1
+     (and 
+      (every #'(lambda (p2p) (point-inner-domain-p p2p piece1-coords))
+             (shape-approx-points piece-shape2))))))
 
 (defun detect-proper-contain-for-synthesize-piece-and-piece (piece-shape1 piece-shape2)
   ;; shape's synthesizeable (points and edges) containing detection case by piece or frame.
   (let ((pm_1 (shape-pm-sign piece-shape1))
         (pm_2 (shape-pm-sign piece-shape2)))
-    (cond (;; (+, +) || (-, -) ;; "piece to piece" or "hole to hole" where "frame" ⊂ "hole"
+    ;; where "frame" is "hole",
+    (cond (;; (+, +) || (-, -) ;; "piece and piece" or "hole and hole"
            (or (and (shape-plus-p  pm_1) (shape-plus-p  pm_2))
                (and (shape-minus-p pm_1) (shape-minus-p pm_2)))
            (none-contains-detection-piece-to-piece piece-shape1 piece-shape2))
-          (;; (-, +) ;; "piece to frame"
-           (and (shape-minus-p pm_1) (shape-plus-p  pm_2))
+          (;; (-, +) || (+, -) ;; "piece in hole" or "hole in piece"
+           (or (and (shape-minus-p pm_1) (shape-plus-p  pm_2))
+               (and (shape-plus-p  pm_1) (shape-minus-p pm_2)))
            (all-contains-detection-piece-in-frame  piece-shape1 piece-shape2))
-          (;; (+, -) ;; flip and bring to "piece to frame"
-           (and (shape-plus-p  pm_1) (shape-minus-p pm_2))
-           ;; (warn "pm-pattern may wrong")
-           (all-contains-detection-piece-in-frame piece-shape2 piece-shape1))
           (;; impossible piece.
            t
            (warn "piece has impossible sign")
@@ -177,29 +187,14 @@
 (defun synthesize-piece-and-piece-by-selection-piece-or-fail (select-piece1.piece2)
   ;; make new (Common) piece if piece detection for collisioning is successed.
   ;; and filter disabled-transforms.
-  (labels
-      ((pm-sign-replaced-p (sd_1 sd_2)
-         ;; (pm_1, pm_2) = (+, -) => flip it
-         (if (and (shape-plus-p  (shape-pm-sign sd_1))
-                  (shape-minus-p (shape-pm-sign sd_2)))
-             t nil)))
-    (remove
-     nil
-     (map-to-combination-selection-piece1.piece2
-      #'(lambda (sd_f tm_f sd_px tm_px)
-          (apply ;; flip if specific pm-sign pattern (describe this below)
-           #'(lambda (sd_1 tm_1 sd_2 tm_2)
-               (if (detect-proper-contain-for-synthesize-piece-and-piece sd_1 sd_2)
-                   (synthesize-syntheable-piece-and-piece sd_1 tm_1 sd_2 tm_2)
-                   nil))
-           (if (pm-sign-replaced-p sd_f sd_px)
-               (list sd_px tm_px sd_f  tm_f )
-               (list sd_f  tm_f  sd_px tm_px)
-               ;; if it is "frame to piece (+, -)" pattern (flipped pattern), 
-               ;; it may cause wrong result at all-contains-detection,
-               ;; flip its "frame to piece (+, -)" pattern into "piece to frame (-, +)" pattern.
-               )))
-      select-piece1.piece2))))
+  (remove
+   nil
+   (map-to-combination-selection-piece1.piece2
+    #'(lambda (sd_f tm_f sd_px tm_px)
+        (if (detect-proper-contain-for-synthesize-piece-and-piece sd_f sd_px)
+            (synthesize-syntheable-piece-and-piece sd_f tm_f sd_px tm_px)
+            nil))
+    select-piece1.piece2)))
 
 ;;;; synthesize
 
@@ -247,12 +242,10 @@
          ;; pm-sign
          (pm-sign 
            ((lambda (pm_1 pm_2)
-              (cond ((and (shape-plus-p  pm_1) (shape-plus-p  pm_2)) *+shape*) ;; "piece and piece"
-                    ((and (shape-minus-p pm_1) (shape-plus-p  pm_2)) *-shape*) ;; "piece to frame"
+              (cond ((and (shape-plus-p  pm_1) (shape-plus-p  pm_2)) *+shape*) ;; "piece to piece"
+                    ((and (shape-minus-p pm_1) (shape-plus-p  pm_2)) *-shape*) ;; "piece in hole"
                     ((and (shape-minus-p pm_1) (shape-minus-p pm_2)) *-shape*) ;; "hole and hole"
-                    ;; ((and (shape-plus-p  pm_1) (shape-minus-p pm_2)) *+shape*) ;; "hole to piece"
-                    ;; where P1 - P2 is not implemented,
-                    ((and (shape-plus-p  pm_1) (shape-minus-p pm_2)) *-shape*) ;; "frame to piece" into "piece to frame"
+                    ((and (shape-plus-p  pm_1) (shape-minus-p pm_2)) *+shape*) ;; "hole in piece"
                     ))
             (shape-pm-sign new-shape1)
             (shape-pm-sign new-shape2)))
@@ -261,7 +254,7 @@
            (shape :pm-sign pm-sign
                   :coord-points synthed-coord-points
                   :approx-points approx-points)))
-
+    ;;
     (incf-id-counter!)
     ;;(format t "~A, ~A, (~A: ~A)~%"
     ;;  (length synthed-coord-points) (length approx-points)
