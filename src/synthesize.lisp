@@ -153,10 +153,10 @@
   ;; in some appears of,
   ;; (car . cdr) means (frame_shape . piece_maybely_shape_list)
   (let* ((sel select-frame.piece)
-         ;; transforms, transform matrixes(Array)
+         ;; TransforMS, transform matrixes(Array)
          (tms (make-transforms-by-point-and-edge-selection-piece-to-frame sel))
          (tmas (mapcar #'transform-transformation-matrix tms))
-         ;; SapeS before transform
+         ;; ShapeS before transform
          (ss (mapcar #'piece-shape 
                      (cons (assocdr :p1 sel) (list (assocdr :p2 sel) (assocdr :p2 sel)))))
          ;; Spape'(Dush) eS. shapes after transforms.
@@ -175,17 +175,47 @@
 (defun synthesize-piece-to-frame-by-selection-piece-or-fail (select-frame.piece)
   ;; make new (frame-)piece if piece is contained to frame
   ;; and filter disabled-transforms.
-  (remove
-   nil
-   (map-to-combination-selection-frame.piece
-    #'(lambda (sd_f tm_f sd_px tm_px)
-        (if (all-contains-detection-piece-in-frame sd_f sd_px) ;; piece to frame
-            ;;(none-contains-detection-piece-to-piece sd_f sd_px) ;; piece and piece
-            ;; able to put piece into frame
-            (synthesize-syntheable-piece-to-frame  sd_f tm_f sd_px tm_px)
-            ;; diable to put piece into frame
-            nil))
-    select-frame.piece)))
+  (labels
+      ((pm (tm_x)
+         (piece-pm-sign (transform-piece tm_x)))
+       (pm-sign-replaced-p (tm1 tm2)
+         ;; (pm_1, pm_2) = (+, -) => flip it
+           (if (and (eq (pm tm1) '+) (eq (pm tm2) '-))
+               t nil))
+       (contains-detection-function-for-synthesize (tm1 tm2)
+         ;; pm sign have {+, -}, pattern(tm1) * pattern(tm2) = 2 * 2 = 4 cases there.
+         (cond (;; (+, +) || (-, -) ;; "piece to piece" or "hole to hole" where "frame" ⊂ "hole"
+                (or (and (eq (pm tm1) '+) (eq (pm tm2) '+))
+                    (and (eq (pm tm1) '-) (eq (pm tm2) '-)))
+                #'(lambda (sd_1 sd_2) (none-contains-detection-piece-to-piece sd_1 sd_2)))
+               (;; (-, +) ;; "piece to frame"
+                (and (eq (pm tm1) '-) (eq (pm tm2) '+))
+                #'(lambda (sd_1 sd_2) (all-contains-detection-piece-in-frame sd_1 sd_2)))
+               (;; (+, -) ;; flip and bring to "piece to frame"
+                (and (eq (pm tm1) '+) (eq (pm tm2) '-))
+                (warn "pm-pattern may wrong")
+                #'(lambda (sd_1 sd_2) (all-contains-detection-piece-in-frame sd_2 sd_1)))
+               (;; impossible piece.
+                t
+                #'(lambda (bottom1 bottom2) (declare (ignore bottom1 bottom2)) nil)))))
+    (remove
+     nil
+     (map-to-combination-selection-frame.piece
+      #'(lambda (sd_f tm_f sd_px tm_px)
+          (apply
+           #'(lambda (sd_1 tm_1 sd_2 tm_2)
+               (if (funcall (contains-detection-function-for-synthesize tm_1 tm_2) sd_1 sd_2)
+                   (synthesize-syntheable-piece-to-frame sd_1 tm_1 sd_2 tm_2)
+                   nil))
+           (if (pm-sign-replaced-p tm_f tm_px)
+               (list sd_px tm_px sd_f  tm_f )
+               (list sd_f  tm_f  sd_px tm_px)
+               ;; if it is "frame to piece (+, -)" pattern (flipped pattern), 
+               ;; it may cause wrong result at all-contains-detection,
+               ;; flip its "frame to piece (+, -)" pattern into "piece to frame (-, +)" pattern.
+               )
+           ))
+      select-frame.piece))))
 
 
 ;;;; synthesize
