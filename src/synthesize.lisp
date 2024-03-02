@@ -1,22 +1,9 @@
 (in-package :puzzle-1617)
 
-;;;; Synthesize piece to frame now.
-;;;; Synthesize piece with piece is future thing.
 
+;;;; Synthesize (Common) piece with (Common) piece
 
 ;;; group set of points selections for synthesize
-
-#| cutten duplicated selections
-;; consider fill frame by pieces, selection patten is,
-;; frame piece2 piece3 piece4 ...
-.  0 1 1 1 ... ;; list of synthable pattern of piece to frame
-.  0 0 0 0 ... ;; piece and piece is omitted
-.  0 0 0 0 ... ;;
-.  0 0 0 0 ... ;;
-...
-...
-|#
-
 
 (defun whole-set-of-point-and-edge-selections-piece-piece (piece1 piece2)
   (flatten
@@ -31,11 +18,6 @@
            (cartesian ;; A x B of both {0,1, ... , (n_points-1)}.
             (from-m-to-n-list 0 (1- (length (piece-points piece1))))
             (from-m-to-n-list 0 (1- (length (piece-points piece2)))))))))
-
-(defun whole-set-of-point-and-edge-selections-pieces-to-frame (frame-piece piece-list)
-  (flatten
-   (mapcar #'(lambda (p) (whole-set-of-point-and-edge-selections-piece-piece frame-piece p))
-           piece-list)))
 
 
 ;;; transform by point selection
@@ -87,23 +69,23 @@
                       (gen-transform (transform-matrix-{+p2.me.r.-p1} p1+0 v1 p2+0 v2 mirrorp)))
                   mirror-and-empty)))))
 
-(defun make-transforms-by-point-and-edge-selection-piece-to-frame (select-frame.piece)
-  " (cons an-transform-of-frame multiple-transforms-of-piece) "
-  (let* (;; :*1 => frame, :*2 => piece
-         ;; frame does not move. Identity.
-         (sel select-frame.piece)
-         (transforms-frame
+(defun make-transforms-by-point-and-edge-selection-piece-and-piece (select-piece1.piece2)
+  " (cons an-transform-of-piece1 multiple-transforms-of-piece2) "
+  (let* (;; :*1 => piece1, :*2 => piece2
+         ;; piece1 does not move. Identity.
+         (sel select-piece1.piece2)
+         (transforms-piece1
            (make-transforms-by-point-and-edge-selection-parameters
             nil
             (assocdr :n1 sel) (assocdr :pm1 sel) (assocdr :p1 sel)
             (assocdr :n2 sel) (assocdr :pm2 sel) (assocdr :p2 sel)))
          ;; piece-moves
-         (transforms-piece
+         (transforms-piece2
            (make-transforms-by-point-and-edge-selection-parameters
             t
             (assocdr :n2 sel) (assocdr :pm2 sel) (assocdr :p2 sel)
             (assocdr :n1 sel) (assocdr :pm1 sel) (assocdr :p1 sel))))
-    (cons (car transforms-frame) (identity transforms-piece))))
+    (cons (car transforms-piece1) (identity transforms-piece2))))
 
 (defun transform-shape-by-transformation-matrix
     (shape transformation-matrix
@@ -147,14 +129,14 @@
              (shape-approx-points piece-shape2)))))
 
 
-(defun map-to-combination-selection-frame.piece
-    (func select-frame.piece
+(defun map-to-combination-selection-piece1.piece2
+    (func select-piece1.piece2
      &key (shape-transformer #'transform-shape-by-transformation-matrix))
   ;; in some appears of,
-  ;; (car . cdr) means (frame_shape . piece_maybely_shape_list)
-  (let* ((sel select-frame.piece)
+  ;; (car . cdr) means (piece1_shape . piece2_maybely_shape_list)
+  (let* ((sel select-piece1.piece2)
          ;; TransforMS, transform matrixes(Array)
-         (tms (make-transforms-by-point-and-edge-selection-piece-to-frame sel))
+         (tms (make-transforms-by-point-and-edge-selection-piece-and-piece sel))
          (tmas (mapcar #'transform-transformation-matrix tms))
          ;; ShapeS before transform
          (ss (mapcar #'piece-shape 
@@ -172,8 +154,9 @@
                 (funcall func sd_f tm_f sd_px tm_px))
             (list sd_p1 sd_p2) (list tm_p1 tm_p2))))
 
-(defun synthesize-piece-to-frame-by-selection-piece-or-fail (select-frame.piece)
-  ;; make new (frame-)piece if piece is contained to frame
+
+(defun synthesize-piece-and-piece-by-selection-piece-or-fail (select-piece1.piece2)
+  ;; make new (Common) piece if piece detection for collisioning is successed.
   ;; and filter disabled-transforms.
   (labels
       ((pm (tm_x)
@@ -200,7 +183,7 @@
                 #'(lambda (bottom1 bottom2) (declare (ignore bottom1 bottom2)) nil)))))
     (remove
      nil
-     (map-to-combination-selection-frame.piece
+     (map-to-combination-selection-piece1.piece2
       #'(lambda (sd_f tm_f sd_px tm_px)
           (apply
            #'(lambda (sd_1 tm_1 sd_2 tm_2)
@@ -215,8 +198,7 @@
                ;; flip its "frame to piece (+, -)" pattern into "piece to frame (-, +)" pattern.
                )
            ))
-      select-frame.piece))))
-
+      select-piece1.piece2))))
 
 ;;;; synthesize
 
@@ -277,8 +259,6 @@
            :function-sign '+
            :transform1 transform1
            :transform2 transform2)))
-
-
 
 
 ;;; split line segment at the collisioning another shape's point coordinate.
@@ -345,11 +325,6 @@
 
 #|
 ;;;; test
-(mapcar #'piece-coord-points (synthesize-piece-to-frame-by-selection-piece-or-fail
-                              (nth 0 (whole-set-of-point-and-edge-selections-pieces-to-frame
-                                         (car *example-problem-10*)
-                                         (cdr *example-problem-10*)))))
-
 (insert-point-at-collisioning-edges
               '(#(2 5 0) #(0.1 0 0) #(0 4 0))
               '(#(0 0 1) #(5 0 0) #(5 5 0) #(0 5 0)))

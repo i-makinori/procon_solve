@@ -117,7 +117,7 @@
 
 (defun detect-piece-point-selection-makes-congruent-transform (select-piece.piece)
   (let ((detect_1_2
-          (map-to-combination-selection-frame.piece
+          (map-to-combination-selection-piece1.piece2
            #'(lambda (sd_1 tm_1 sd_2 tm_2) ;; Shape_Dush, TransforM
                sd_1 sd_2
                (let* (;; Coordinates[List]
@@ -139,8 +139,8 @@
   ;; in other words,
   ;; whether if the exist of transform which makes perfectly overlapping or not.
   (some #'detect-piece-point-selection-makes-congruent-transform
-          (whole-set-of-point-and-edge-selections-pieces-to-frame
-           piece1 (list piece2))))
+        (whole-set-of-point-and-edge-selections-piece-piece
+         piece1 piece2)))
 
 (defun detect-piece-congruent (piece1 piece2)
   ;; detect piece1 === piece2
