@@ -109,7 +109,7 @@
                   (piece-shape piece)
                   (reduce #'matrix3x3-product transformation-matrixes)))
                (frame?
-                 (if (eq '- (piece-pm-sign piece)) t nil)))
+                 (if (shape-minus-p (piece-pm-sign piece)) t nil)))
            (shape-svg-element-text transfomed-shape :frame-piece-p frame?)))
         (t
          (let ((trans1 (piece-transform1 piece))

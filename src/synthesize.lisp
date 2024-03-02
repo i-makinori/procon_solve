@@ -43,7 +43,7 @@
   ;; side which receives another => no transforms
   ;; side which sends to another => transforms
   (labels ((gen-transform (matrix)
-             (transform :function-sign '+
+             (transform :function-sign *s-add*
                         :point-from point-from1
                         :direction direction1
                         :piece piece1
@@ -133,14 +133,14 @@
   (let ((pm_1 (shape-pm-sign piece-shape1))
         (pm_2 (shape-pm-sign piece-shape2)))
     (cond (;; (+, +) || (-, -) ;; "piece to piece" or "hole to hole" where "frame" ⊂ "hole"
-           (or (and (eq pm_1 '+) (eq pm_2 '+))
-               (and (eq pm_1 '-) (eq pm_2 '-)))
+           (or (and (shape-plus-p  pm_1) (shape-plus-p  pm_2))
+               (and (shape-minus-p pm_1) (shape-minus-p pm_2)))
            (none-contains-detection-piece-to-piece piece-shape1 piece-shape2))
           (;; (-, +) ;; "piece to frame"
-           (and (eq pm_1 '-) (eq pm_2 '+))
+           (and (shape-minus-p pm_1) (shape-plus-p  pm_2))
            (all-contains-detection-piece-in-frame  piece-shape1 piece-shape2))
           (;; (+, -) ;; flip and bring to "piece to frame"
-           (and (eq pm_1 '+) (eq pm_2 '-))
+           (and (shape-plus-p  pm_1) (shape-minus-p pm_2))
            ;; (warn "pm-pattern may wrong")
            (all-contains-detection-piece-in-frame piece-shape2 piece-shape1))
           (;; impossible piece.
@@ -180,7 +180,8 @@
   (labels
       ((pm-sign-replaced-p (sd_1 sd_2)
          ;; (pm_1, pm_2) = (+, -) => flip it
-         (if (and (eq (shape-pm-sign sd_1) '+) (eq (shape-pm-sign sd_2) '-))
+         (if (and (shape-plus-p  (shape-pm-sign sd_1))
+                  (shape-minus-p (shape-pm-sign sd_2)))
              t nil)))
     (remove
      nil
@@ -246,12 +247,12 @@
          ;; pm-sign
          (pm-sign 
            ((lambda (pm_1 pm_2)
-              (cond ((and (eq pm_1 '+) (eq pm_2 '+)) '+) ;; "piece and piece"
-                    ((and (eq pm_1 '-) (eq pm_2 '+)) '-) ;; "piece to frame"
-                    ((and (eq pm_1 '-) (eq pm_2 '-)) '-) ;; "hole and hole"
-                    ;;((and (eq pm_1 '+) (eq pm_2 '-)) '+) ;; "hole to piece"
+              (cond ((and (shape-plus-p  pm_1) (shape-plus-p  pm_2)) *+shape*) ;; "piece and piece"
+                    ((and (shape-minus-p pm_1) (shape-plus-p  pm_2)) *-shape*) ;; "piece to frame"
+                    ((and (shape-minus-p pm_1) (shape-minus-p pm_2)) *-shape*) ;; "hole and hole"
+                    ;; ((and (shape-plus-p  pm_1) (shape-minus-p pm_2)) *+shape*) ;; "hole to piece"
                     ;; where P1 - P2 is not implemented,
-                    ((and (eq pm_1 '+) (eq pm_2 '-)) '-) ;; "frame to piece" into "piece to frame"
+                    ((and (shape-plus-p  pm_1) (shape-minus-p pm_2)) *-shape*) ;; "frame to piece" into "piece to frame"
                     ))
             (shape-pm-sign new-shape1)
             (shape-pm-sign new-shape2)))
@@ -268,7 +269,7 @@
     (piece :leaf-or-synthed :synthed
            :shape synthed-new-shape
            :id *id-counter*
-           :function-sign '+
+           :function-sign *s-add*
            :transform1 transform1
            :transform2 transform2)))
 

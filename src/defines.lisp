@@ -2,10 +2,24 @@
 (in-package :puzzle-1617)
 
 
+;; +shape, -shape
+(defparameter *+shape* '*+shape*)  ;; normal (primary and synthesized) piece
+(defparameter *-shape* '*-shape*) ;; hole, frame or minused-part
+
+(defun shape-plus-p (pm-sign)
+  (eq pm-sign *+shape*))
+
+(defun shape-minus-p (pm-sign)
+  (eq pm-sign *-shape*))
+
+;; synthesize function-sign
+(defparameter *S-ADD* 'S-ADD "synthesize sign in ADD")
+(defparameter *S-NEG* 'S-NEG "synthesize sign in NEGative add")
+
 ;; piece
 
 (defstruct (piece-shape (:conc-name shape-) (:constructor shape))
-  (pm-sign '+) ;; '+ or '-
+  (pm-sign *+shape*) ;; *+shape* or *-shape*
   (coord-points nil)
   ;; memo for detection
   (approx-points nil)        ;; piece's shape filling approx-points.
@@ -13,7 +27,7 @@
   )
 
 (defstruct (transform (:conc-name transform-) (:constructor transform))
-  (function-sign '+)
+  (function-sign *s-add*)
   (point-from 0)
   (direction +1)
   (piece (piece))
@@ -47,7 +61,7 @@
   (piece-coord-points piece))
 
 (defun piece-approx-points (piece)
-  (shape-approx-points (piece-shape piece)))
+  (shape-approx-points (piece-shape piece)))  
 
 
 ;; zero element 

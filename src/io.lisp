@@ -55,8 +55,9 @@
                   (split-string (uiop:read-file-string file-path)
                                 #'(lambda (c) (char= c #\NewLine)))))
                (ids (from-m-to-n-list 0 (1- (length line-texts))))
-               (pms (cons '- ;; (i=0)=>frame, (i>=1)=>piece
-                          (cdr (mapcar #'(lambda (i) i '+) ids)))))
+               (pms ;; (i=0)=>frame, (i>=1)=>piece
+                 (cons *-shape*
+                       (mapcar #'(lambda (i) i *+shape*) (cdr ids)))))
           ;; piece list
           (mapcar #'(lambda (id pm text) (line-string-into-piece id pm text))
                   ids pms line-texts))

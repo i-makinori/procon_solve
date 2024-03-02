@@ -214,7 +214,8 @@
 
 (defun search-solution-from-prime-pieces (whole-primary-piece-list)
   (let* ((primary-pieces (remove-if-not #'primary-piece-p whole-primary-piece-list))
-         (frame-pieces   (remove-if-not #'(lambda (p) (eq '- (piece-pm-sign p))) primary-pieces)))
+         (frame-pieces   (remove-if-not #'(lambda (p) (shape-minus-p (piece-pm-sign p)))
+                                        primary-pieces)))
     (cond
       ((not (= 1 (length frame-pieces)))
        (warn (format nil "whole-piece-list has multiple frames. IDs: ~A~%"
