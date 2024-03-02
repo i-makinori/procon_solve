@@ -110,13 +110,13 @@
 
 ;;; shape's containing detection, which is used for synthesize operations.
 
-(defun none-contains-detection-piece1-and-piece2 (piece-shape1 piece-shape2)
+(defun none-contains-detection-piece2-to-piece1 (piece-shape1 piece-shape2)
   (let ((piece1-coords (shape-coord-points piece-shape1))
         (piece2-coords (shape-coord-points piece-shape2)))
     (and
      ;; if pm-sign(P1) == pm-sign(P2), P1 + P2 = P2 + P1
      ;; (+, +) || (-, -)
-     (eq (shape-pm-sign piece-shape1) (shape-pm-sign piece-shape1))
+     (eq (shape-pm-sign piece-shape1) (shape-pm-sign piece-shape2))
      ;; edges of piece1 and piece2 are not collisioned.
      (not (shape-shape-boundary-collision-detection piece-shape1 piece-shape2))
      ;; none point of piece_X are contained to piece_Y
@@ -131,12 +131,12 @@
     (and
      ;; if pm-sign(P1) !== pm-sign(P2), P1 + P2 != P2 + P1
      ;; (-, +) || (+, -)
-     (not (eq (shape-pm-sign piece-shape1) (shape-pm-sign piece-shape1)))
+     (not (eq (shape-pm-sign piece-shape1) (shape-pm-sign piece-shape2)))
      ;; edges of frame and piece are not collisioned.
      (not (shape-shape-boundary-collision-detection piece-shape1 piece-shape2))
      ;; piece2 ⊂ piece1
      ;; every points of piece2 are contained in piece1
-     (and 
+     (and
       (every #'(lambda (p2p) (point-inner-domain-p p2p piece1-coords))
              (shape-approx-points piece-shape2))))))
 
@@ -145,14 +145,14 @@
   (let ((pm_1 (shape-pm-sign piece-shape1))
         (pm_2 (shape-pm-sign piece-shape2)))
     ;; where "frame" is "hole",
-    (cond (;; (+, +) || (-, -) ;; "piece and piece" or "hole and hole"
+    (cond (;; (+, +) || (-, -) ;; "piece to piece" or "hole to hole"
            (or (and (shape-plus-p  pm_1) (shape-plus-p  pm_2))
                (and (shape-minus-p pm_1) (shape-minus-p pm_2)))
-           (none-contains-detection-piece-to-piece piece-shape1 piece-shape2))
+           (none-contains-detection-piece2-to-piece1 piece-shape1 piece-shape2))
           (;; (-, +) || (+, -) ;; "piece in hole" or "hole in piece"
            (or (and (shape-minus-p pm_1) (shape-plus-p  pm_2))
                (and (shape-plus-p  pm_1) (shape-minus-p pm_2)))
-           (all-contains-detection-piece-in-frame  piece-shape1 piece-shape2))
+           (all-contains-detection-piece2-in-piece1  piece-shape1 piece-shape2))
           (;; impossible piece.
            t
            (warn "piece has impossible sign")

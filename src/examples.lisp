@@ -13,3 +13,14 @@
 
 (defparameter *example-problem-10*
   (load-problem-file-into-puzzle "puzzle_10.txt"))
+
+
+#|
+(defparameter *piece-hole1*
+  ((lambda (p_dush)
+     (setf (shape-pm-sign (piece-shape p_dush)) *-shape*)
+     p_dush)
+   (copy-piece (nth 1 *example-problem-10*))))
+|#
+
+
