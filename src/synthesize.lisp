@@ -126,13 +126,26 @@
    ))
 
 (defun all-contains-detection-piece-in-frame (frame-shape piece-shape)
-  (and
-   ;; edges of frame and piece are not collisioned.
-   (not (shape-shape-boundary-collision-detection frame-shape piece-shape))
-   ;; every point of piece are contained to frame
-   (every #'(lambda (p) (point-inner-domain-p p 
-                                              (shape-coord-points frame-shape)))
-          (shape-approx-points piece-shape))))
+  (let ((frame-coords (shape-coord-points frame-shape)))
+    (and
+     ;; edges of frame and piece are not collisioned.
+     (not (shape-shape-boundary-collision-detection frame-shape piece-shape))
+     ;; every point of piece are contained to frame
+     (every #'(lambda (p) (point-inner-domain-p p frame-coords))
+            (shape-approx-points piece-shape)))))
+
+(defun none-contains-detection-piece-to-piece (piece-shape1 piece-shape2)
+  (let ((piece1-coords (shape-coord-points piece-shape1))
+        (piece2-coords (shape-coord-points piece-shape2)))
+    (and
+     ;; edges of piece1 and piece2 are not collisioned.
+     (not (shape-shape-boundary-collision-detection piece-shape1 piece-shape2))
+     ;; none point of piece_X are contained to piece_Y
+     (notany #'(lambda (p1p) (point-inner-domain-p p1p piece2-coords))
+             (shape-approx-points piece-shape1))
+     (notany #'(lambda (p2p) (point-inner-domain-p p2p piece1-coords))
+             (shape-approx-points piece-shape2)))))
+
 
 (defun map-to-combination-selection-frame.piece
     (func select-frame.piece
@@ -166,7 +179,8 @@
    nil
    (map-to-combination-selection-frame.piece
     #'(lambda (sd_f tm_f sd_px tm_px)
-        (if (all-contains-detection-piece-in-frame sd_f sd_px)
+        (if (all-contains-detection-piece-in-frame sd_f sd_px) ;; piece to frame
+            ;;(none-contains-detection-piece-to-piece sd_f sd_px) ;; piece and piece
             ;; able to put piece into frame
             (synthesize-syntheable-piece-to-frame  sd_f tm_f sd_px tm_px)
             ;; diable to put piece into frame
