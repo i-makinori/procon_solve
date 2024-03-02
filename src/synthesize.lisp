@@ -295,23 +295,29 @@
 
 ;;; ommit edge points
 
-(defun ommit-edge-points-aux (3tuple-points)
-  (let* ((pp0 (car  (car 3tuple-points)))  ;; point n plus 0
-         (pp1 (cadr (car 3tuple-points)))  ;; point n plus 1
-         (pp2 (cddr (car 3tuple-points)))) ;; point n plus 2
+(defun ommit-edge-points-aux (3tuple-points pp-1)
+  (let* ((pp+0 (car  (car 3tuple-points)))  ;; point n plus 0
+         (pp+1 (cadr (car 3tuple-points)))  ;; point n plus 1
+         (pp+2 (cddr (car 3tuple-points)))) ;; point n plus 2
     ;;(format t "~A ~A ~A,  : ~A~%" pp0 pp1 pp2 nil)
     (cond ((null 3tuple-points) nil)
-          ((vec3-ser= pp0 pp1) ;; (0,1)---(2) => (m1)... ;; Maybe 1. decide after check
-           (identity (ommit-edge-points-aux (cdr 3tuple-points))))
-          ((vec3-ser= pp0 pp2) ;; (0,2)---(1) => (2)--...
-           (cons pp2 (ommit-edge-points-aux (cddr 3tuple-points))))
-          (t                   ;; (1)-- => (1)--...
-           (cons pp0 (ommit-edge-points-aux (cdr 3tuple-points)))))))
-
+          ((vec3-ser= pp+0 pp+1) ;; (0,1)---(2) => (m1)... ;; Maybe 1. decide after check
+           (identity (ommit-edge-points-aux (cdr 3tuple-points) pp+0)))
+          ((vec3-ser= pp+0 pp+2) ;; (0,2)---(1) => (2)--...
+           (cons pp+2 (ommit-edge-points-aux (cddr 3tuple-points) pp+0)))
+          (                    ;; on Lined :(-1):--:(0):--:(1): => (1)--(2)--...
+           (point-on-line-segment-detection pp+0 pp-1 pp+1)
+           (identity (ommit-edge-points-aux (cdr 3tuple-points)
+                                            pp-1 #| save starting point of line |#)))
+          (t                   ;; otherwise (0)-- => (0)--...
+           (cons pp+0 (ommit-edge-points-aux (cdr 3tuple-points) pp+0))))))
 
 (defun ommit-edge-points (coord-points)
   ;; usage example
-  ;; (ommit-edge-points '(#(0 0 1) #(0 5 0) #(5 5 0) #(4 0 0) #(5 5 0) #(5 0 0) #(0 0 1)))
+  ;; > (ommit-edge-points '(#(0 0 1) #(0 5 0) #(5 5 0) #(4 0 0) #(5 5 0) #(5 0 0) #(0 0 1)))
+  ;; (#(0 0 1) #(0 5 0) #(5 5 0) #(5 0 0))
+  ;; > (ommit-edge-points '(#(10/3 8/3 1) #(10/4 8/4 1) #(0 0 1) #(10 0 1) #(10 2 1) #(10 8 1) #(10/2 8/2 1)))
+  ;; (#(0 0 1) #(10 0 1) #(10 8 1))
   (cond
     ;; null
     ((null (cdr coord-points)) coord-points)
@@ -322,7 +328,8 @@
     ;; on modular condition
     (t
      (let ((ommit-once
-             (ommit-edge-points-aux (make-3tuple-list coord-points))))
+             (ommit-edge-points-aux (make-3tuple-list coord-points) 
+                                    (car (last coord-points)))))
        ;; if is maybely not needed
        (if (equalp ommit-once coord-points)
            ommit-once
