@@ -188,7 +188,7 @@
           (apply
            #'(lambda (sd_1 tm_1 sd_2 tm_2)
                (if (funcall (contains-detection-function-for-synthesize tm_1 tm_2) sd_1 sd_2)
-                   (synthesize-syntheable-piece-to-frame sd_1 tm_1 sd_2 tm_2)
+                   (synthesize-syntheable-piece-and-piece sd_1 tm_1 sd_2 tm_2)
                    nil))
            (if (pm-sign-replaced-p tm_f tm_px)
                (list sd_px tm_px sd_f  tm_f )
@@ -220,7 +220,7 @@
           (t 
            (cons (car rot-list) (reverse (cdr rot-list)))))))
 
-(defun synthesize-syntheable-piece-to-frame (new-shape1 transform1 new-shape2 transform2)
+(defun synthesize-syntheable-piece-and-piece (new-shape1 transform1 new-shape2 transform2)
   ;; synthesize OK transforms
   ;;
   ;; 1. get transform parameter and append edge points at coordinate.
@@ -233,7 +233,7 @@
          ;; rotated C, where δ1 = -(δ2)
          (rc1 (re-order-coordinate-points-by-transform transform1 c1 nil))
          (rc2 (re-order-coordinate-points-by-transform transform2 c2 t))
-         ;; insert pointed RC
+         ;; points Inserted RC
          (irc1 (insert-point-at-collisioning-edges rc2 rc1))
          (irc2 (insert-point-at-collisioning-edges rc1 rc2))
          ;; next coordintae-points is ommited append two IRCs.
@@ -243,9 +243,21 @@
          (approx-points
            ;; A-B (Set theory Subset) may be faster than 1ce below line
            (fill-shape-domain-by-approx-loading-points synthed-coord-points))
+         ;; pm-sign
+         (pm-sign 
+           ((lambda (pm_1 pm_2)
+              (cond ((and (eq pm_1 '+) (eq pm_2 '+)) '+) ;; "piece and piece"
+                    ((and (eq pm_1 '-) (eq pm_2 '+)) '-) ;; "piece to frame"
+                    ((and (eq pm_1 '-) (eq pm_2 '-)) '-) ;; "hole and hole"
+                    ;;((and (eq pm_1 '+) (eq pm_2 '-)) '+) ;; "hole to piece"
+                    ;; where P1 - P2 is not implemented,
+                    ((and (eq pm_1 '+) (eq pm_2 '-)) '-) ;; "frame to piece" into "piece to frame"
+                    ))
+            (piece-pm-sign (transform-piece transform1))
+            (piece-pm-sign (transform-piece transform2))))
          ;; shape
          (synthed-new-shape
-           (shape :pm-sign '-
+           (shape :pm-sign pm-sign
                   :coord-points synthed-coord-points
                   :approx-points approx-points)))
 
