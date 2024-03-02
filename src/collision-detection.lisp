@@ -111,9 +111,60 @@
   p1 p2 nil
   )
 
+;;; detect congruent of piece and piece
+;;; new implement. faster
 
+(defun detect-rot-list-exists-all-equal-index (rot-list1 rot-list2
+                                               &key (test #'equal) (also-reverse nil))
+  (labels ((aux (rot1_ab rot1_d)
+             (let ((rot1_da (append (cdr rot1_d) (list (car rot1_ab)))))
+               (cond ((every test rot1_da rot-list2) t)
+                     ((null rot1_ab)                 nil)
+                     (t                              (aux (cdr rot1_ab) rot1_da))))))
+    (cond ((not (= (length rot-list1) (length rot-list2))) nil)
+          (also-reverse 
+           (or (aux rot-list1 rot-list1)
+               (aux (reverse rot-list1) (reverse rot-list1))))
+          (t
+           (aux rot-list1 rot-list1)))))
+
+(defun piece-angle-list (piece)
+  (if (zero-shape-piece-p piece)
+      nil
+      (let ((n-points (length (piece-coord-points piece)))
+            (angle-list
+              (mapcar #'(lambda (c_pcn) ;; Coordinate_Previous, Current, Next
+                          (;; positive angle. (avoid negative range). from -pi to pi into 0 to 2 pi .
+                           (lambda (a) (mod a *pi*2*))
+                           (angle (cadr c_pcn) (car c_pcn) (cddr c_pcn))))
+                      ;; 3tuple-list, rot-right 1 .
+                      (make-3tuple-list ((lambda (l) (append (cdr l) (list (car l))))
+                                         (piece-coord-points piece))))))
+        (if (ser= (* (- n-points 2) *pi*) ;; sum of interior angle = (N-2) * 180°
+                  (reduce #'+ angle-list)) 
+            (identity angle-list)
+            (mapcar #'(lambda (angle) (- *pi*2* angle)) angle-list)))))
+
+(defun piece-line-segments-length-xy^2-list (piece)
+  (mapcar #'(lambda (c_cn) ;; Coordinate_Current, Next
+              (vec3-length-xy^2 (vec3-sub-xy (cdr c_cn) (car c_cn))))
+          (make-tuple-list (piece-coord-points piece))))
+
+(defun detect-piece-exist-congruent-corresponding-index (piece1 piece2)
+  ;; 
+  (and (detect-rot-list-exists-all-equal-index
+        (piece-line-segments-length-xy^2-list piece1)
+        (piece-line-segments-length-xy^2-list piece2)
+        :test #'ser= :also-reverse t)
+       (detect-rot-list-exists-all-equal-index
+        (piece-angle-list piece1)
+        (piece-angle-list piece2)
+        :test #'ser= :also-reverse t)))
 
 ;;; detect congruent of piece and piece
+;;; old implement. slow
+
+#|
 
 (defun detect-piece-point-selection-makes-congruent-transform (select-piece.piece)
   (let ((detect_1_2
@@ -141,6 +192,9 @@
   (some #'detect-piece-point-selection-makes-congruent-transform
         (whole-set-of-point-and-edge-selections-piece-piece
          piece1 piece2)))
+|#
+
+;;; detect congruent of piece and piece call
 
 (defun detect-piece-congruent (piece1 piece2)
   ;; detect piece1 === piece2
@@ -154,14 +208,27 @@
    ;; == primary piecese which composes its piece.
    (set-equal (mapcar #'piece-id (list-of-primary-piece-list-of-synthesized-piece piece1))
               (mapcar #'piece-id (list-of-primary-piece-list-of-synthesized-piece piece2)))
-   ;; or 
+
+   ;; new implement
+   (or
+    ;;(and (zero-shape-piece-p piece1)
+    ;;     (zero-shape-piece-p piece2))
+    (detect-piece-exist-congruent-corresponding-index piece1 piece2))
+
+   ;; old implement
+   #|
    (or
     ;; root is zero shape
     (and (zero-shape-piece-p piece1)
          (zero-shape-piece-p piece2))
     ;; exist of congruent transform
     (detect-piece-exist-congruent-transform piece1
-                                            piece2))))
+                                            piece2))
+   |#
+   ))
+
+
+;;; 
 
 #|
 

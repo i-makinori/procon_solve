@@ -98,14 +98,12 @@
     (- n-points-of-primary n-points-of-synthesized-piece)))
 
 (defun remove-congruent-from-synthesized-piece-list (synthesized-piece-list)
-  (labels ((aux (lis)
-             (cond ((null lis) '())
-                   (t ;;(format t "~A:~%" (piece-id (car lis)))
-                    (cons (car lis)
-                          (aux
-                           (remove-if #'(lambda (p) (detect-piece-congruent (car lis) p))
-                                      (cdr lis))))))))
-    (aux synthesized-piece-list)))
+  (let ((lis synthesized-piece-list))
+    (cond ((null lis) '())
+          (t (cons  (car lis)
+                    (remove-congruent-from-synthesized-piece-list
+                     (remove-if #'(lambda (p) (detect-piece-congruent (car lis) p))
+                                (cdr lis))))))))
 
 
 ;;; evaluation functions for evaluate values
