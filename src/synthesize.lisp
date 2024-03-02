@@ -128,6 +128,25 @@
      (notany #'(lambda (p2p) (point-inner-domain-p p2p piece1-coords))
              (shape-approx-points piece-shape2)))))
 
+(defun detect-proper-contain-for-synthesize-piece-and-piece (piece-shape1 piece-shape2)
+  ;; shape's synthesizeable (points and edges) containing detection case by piece or frame.
+  (let ((pm_1 (shape-pm-sign piece-shape1))
+        (pm_2 (shape-pm-sign piece-shape2)))
+    (cond (;; (+, +) || (-, -) ;; "piece to piece" or "hole to hole" where "frame" ⊂ "hole"
+           (or (and (eq pm_1 '+) (eq pm_2 '+))
+               (and (eq pm_1 '-) (eq pm_2 '-)))
+           (none-contains-detection-piece-to-piece piece-shape1 piece-shape2))
+          (;; (-, +) ;; "piece to frame"
+           (and (eq pm_1 '-) (eq pm_2 '+))
+           (all-contains-detection-piece-in-frame  piece-shape1 piece-shape2))
+          (;; (+, -) ;; flip and bring to "piece to frame"
+           (and (eq pm_1 '+) (eq pm_2 '-))
+           ;; (warn "pm-pattern may wrong")
+           (all-contains-detection-piece-in-frame piece-shape2 piece-shape1))
+          (;; impossible piece.
+           t
+           (warn "piece has impossible sign")
+           nil))))
 
 (defun map-to-combination-selection-piece1.piece2
     (func select-piece1.piece2
@@ -159,45 +178,26 @@
   ;; make new (Common) piece if piece detection for collisioning is successed.
   ;; and filter disabled-transforms.
   (labels
-      ((pm (tm_x)
-         (piece-pm-sign (transform-piece tm_x)))
-       (pm-sign-replaced-p (tm1 tm2)
+      ((pm-sign-replaced-p (sd_1 sd_2)
          ;; (pm_1, pm_2) = (+, -) => flip it
-           (if (and (eq (pm tm1) '+) (eq (pm tm2) '-))
-               t nil))
-       (contains-detection-function-for-synthesize (tm1 tm2)
-         ;; pm sign have {+, -}, pattern(tm1) * pattern(tm2) = 2 * 2 = 4 cases there.
-         (cond (;; (+, +) || (-, -) ;; "piece to piece" or "hole to hole" where "frame" ⊂ "hole"
-                (or (and (eq (pm tm1) '+) (eq (pm tm2) '+))
-                    (and (eq (pm tm1) '-) (eq (pm tm2) '-)))
-                #'(lambda (sd_1 sd_2) (none-contains-detection-piece-to-piece sd_1 sd_2)))
-               (;; (-, +) ;; "piece to frame"
-                (and (eq (pm tm1) '-) (eq (pm tm2) '+))
-                #'(lambda (sd_1 sd_2) (all-contains-detection-piece-in-frame sd_1 sd_2)))
-               (;; (+, -) ;; flip and bring to "piece to frame"
-                (and (eq (pm tm1) '+) (eq (pm tm2) '-))
-                (warn "pm-pattern may wrong")
-                #'(lambda (sd_1 sd_2) (all-contains-detection-piece-in-frame sd_2 sd_1)))
-               (;; impossible piece.
-                t
-                #'(lambda (bottom1 bottom2) (declare (ignore bottom1 bottom2)) nil)))))
+         (if (and (eq (shape-pm-sign sd_1) '+) (eq (shape-pm-sign sd_2) '-))
+             t nil)))
     (remove
      nil
      (map-to-combination-selection-piece1.piece2
       #'(lambda (sd_f tm_f sd_px tm_px)
-          (apply
+          (apply ;; flip if specific pm-sign pattern (describe this below)
            #'(lambda (sd_1 tm_1 sd_2 tm_2)
-               (if (funcall (contains-detection-function-for-synthesize tm_1 tm_2) sd_1 sd_2)
+               (if (detect-proper-contain-for-synthesize-piece-and-piece sd_1 sd_2)
                    (synthesize-syntheable-piece-and-piece sd_1 tm_1 sd_2 tm_2)
                    nil))
-           (if (pm-sign-replaced-p tm_f tm_px)
+           (if (pm-sign-replaced-p sd_f sd_px)
                (list sd_px tm_px sd_f  tm_f )
                (list sd_f  tm_f  sd_px tm_px)
                ;; if it is "frame to piece (+, -)" pattern (flipped pattern), 
                ;; it may cause wrong result at all-contains-detection,
                ;; flip its "frame to piece (+, -)" pattern into "piece to frame (-, +)" pattern.
-               )
-           ))
+               )))
       select-piece1.piece2))))
 
 ;;;; synthesize
@@ -253,8 +253,8 @@
                     ;; where P1 - P2 is not implemented,
                     ((and (eq pm_1 '+) (eq pm_2 '-)) '-) ;; "frame to piece" into "piece to frame"
                     ))
-            (piece-pm-sign (transform-piece transform1))
-            (piece-pm-sign (transform-piece transform2))))
+            (shape-pm-sign new-shape1)
+            (shape-pm-sign new-shape2)))
          ;; shape
          (synthed-new-shape
            (shape :pm-sign pm-sign
