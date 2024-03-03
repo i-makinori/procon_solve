@@ -209,14 +209,29 @@
         (no-future-shape-p (piece-shape synthesized-piece)
                            primary-params))))
 
+
+;;; detect domains of plus-synthesized-piece[+] overs frame[-]
+
+(defun detect-domain1-overs-domain2 (domain1 domain2)
+  (let ((l1_x (abs (- (nth 2 domain1) (nth 0 domain1))))
+        (l1_y (abs (- (nth 3 domain1) (nth 1 domain1))))
+        (l2_x (abs (- (nth 2 domain2) (nth 0 domain2))))
+        (l2_y (abs (- (nth 3 domain2) (nth 1 domain2)))))
+    (or (ser> l1_x l2_x)
+        (ser> l1_y l2_y))))
+
+(defun detect-domain-of-plus-piece-overs-frame (synthesized-piece frame-piece)
+  (cond ((shape-plus-p (piece-shape synthesized-piece))
+         ((lambda (piece_shape[+] hole_shape[-])
+            (detect-domain1-overs-domain2
+             (shape-domain-rect (piece-coord-points piece_shape[+]))
+             (shape-domain-rect (piece-coord-points hole_shape[-] ))))
+          synthesized-piece
+          frame-piece))
+        (t nil)))
+
+
 ;;; call filter functions
-
-(defun remove-no-future-shaped-piece-from-synthesized-piece-list
-    (synthesized-piece-list primary-piece-list)
-  (remove-if #'(lambda (synthed-piece)
-                 (detect-no-future-piece synthed-piece primary-piece-list))
-             synthesized-piece-list))
-
 
 (defun remove-congruent-from-synthesized-piece-list (synthesized-piece-list)
   (let ((lis synthesized-piece-list))
@@ -226,3 +241,18 @@
                     (remove-if #'(lambda (p)
                                    (detect-piece-congruent (car lis) p))
                                (cdr lis))))))))
+
+(defun remove-no-future-shaped-piece-from-synthesized-piece-list
+    (synthesized-piece-list primary-piece-list)
+  (remove-if #'(lambda (synthed-piece)
+                 (detect-no-future-piece synthed-piece primary-piece-list))
+             synthesized-piece-list))
+
+(defun remove-plus-piece-overs-frame-from-synthesized-piece-list
+    (synthesized-piece-list primary-piece-list)
+  (let ((primary-frame-piece
+          (find-if #'(lambda (p) (shape-minus-p (piece-shape p))) primary-piece-list)))
+    (remove-if #'(lambda (synthed-piece)
+                   (detect-domain-of-plus-piece-overs-frame synthed-piece primary-frame-piece))
+               synthesized-piece-list)))
+

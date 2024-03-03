@@ -31,12 +31,14 @@
             (mapcar #'piece-id primary-piece-using)
             (length primary-piece-using))
     (let* ((patterns-of-step
-             (remove-no-future-shaped-piece-from-synthesized-piece-list
-              (remove-congruent-from-synthesized-piece-list
-               (sort-by-delta_points
-                (all-synthesizeable-patterns-of-pieces-to-frame
-                 piece-frame primary-piece-rests)))
-               primary-piece-list))
+             (remove-plus-piece-overs-frame-from-synthesized-piece-list
+              (remove-no-future-shaped-piece-from-synthesized-piece-list
+               (remove-congruent-from-synthesized-piece-list
+                (sort-by-delta_points
+                 (all-synthesizeable-patterns-of-pieces-to-frame
+                  piece-frame primary-piece-rests)))
+               primary-piece-list)
+              primary-piece-list))
            (states-of-step! (mapcar #'(lambda (next-frame)
                                         `((:frame . ,next-frame)))
                                     patterns-of-step))
