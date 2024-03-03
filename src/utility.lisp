@@ -54,8 +54,19 @@
 
 ;; standard error
 (defun ser= (val1 val2 &optional (standard-error *standard-error*))
-  "standard error rounded equal"
+  "standard error rounded equal (=)"
   (< (abs (- val2 val1)) standard-error))
+
+(defun ser> (val1 val2 &optional (standard-error *standard-error*))
+  "standard error rounded greater-than (>)"
+  (and (> val1 val2)
+       (not (ser= val1 val2 standard-error))))
+
+(defun ser< (val1 val2 &optional (standard-error *standard-error*))
+  "standard error rounded less-than (<)"
+  (and (< val1 val2)
+       (not (ser= val1 val2 standard-error))))
+
 
 
 ;; cycled list into tuple list

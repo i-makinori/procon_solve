@@ -7,10 +7,16 @@
 (defparameter *-shape* '*-shape*) ;; hole, frame or minused-part
 
 (defun shape-plus-p (pm-sign)
-  (eq pm-sign *+shape*))
+  ;; Todo split function by type
+  (if (typep pm-sign 'piece-shape)
+      (eq (shape-pm-sign pm-sign) *+shape*)
+      (eq pm-sign *+shape*)))
 
 (defun shape-minus-p (pm-sign)
-  (eq pm-sign *-shape*))
+  ;; Todo split function by type
+  (if (typep pm-sign 'piece-shape)
+      (eq (shape-pm-sign pm-sign) *-shape*)
+      (eq pm-sign *-shape*)))
 
 ;; synthesize function-sign
 (defparameter *S-ADD* 'S-ADD "synthesize sign in ADD")

@@ -97,13 +97,62 @@
           (length (piece-coord-points synthesized-piece))))
     (- n-points-of-primary n-points-of-synthesized-piece)))
 
+
+;;; no-future-shape
+
+(defun primary-params-from-primary-piece-list (primary-piece-list)
+  (let ((minimal-angle
+          (apply #'min (flatten (mapcar #'(lambda (p)
+                                            (shape-angle-list-reverse-when-hole (piece-shape p)))
+                                        primary-piece-list))))
+        (longest-line^2
+          (apply #'max (flatten (mapcar #'(lambda (p)
+                                            (shape-line-segments-length-xy^2-list (piece-shape p)))
+                                        primary-piece-list)))))
+    `((:minimal-angle . ,minimal-angle)
+      (:longest-line^2 . ,longest-line^2))))
+
+(defun no-future-shape-p (shape primary-params)
+  (let ((minimal-angle  (assocdr :minimal-angle   primary-params))
+        (longest-line^2 (assocdr :longest-line^2  primary-params))
+        ;;
+        (angle-list (shape-angle-list-reverse-when-hole shape))
+        (length^2-list (shape-line-segments-length-xy^2-list shape)))
+    (or
+     ;; ∃(angle_n + min_angle > 360°)
+     (find-if #'(lambda (a_n) (ser> (+ a_n minimal-angle) *pi*2*))
+             angle-list)
+     (find-if #'(lambda (l^2_n) (ser> l^2_n longest-line^2))
+              length^2-list))
+    ))
+
+(defun detect-no-future-piece (synthesized-piece primary-piece-list)
+  (if (zero-shape-piece-p synthesized-piece)
+      nil
+      (let ((primary-params (primary-params-from-primary-piece-list
+                             (list-of-unused-primary-piece-list-of-synthesized-piece
+                              synthesized-piece primary-piece-list))))
+        ;;(format t "~A~%" primary-params)
+        (no-future-shape-p (piece-shape synthesized-piece)
+                           primary-params))))
+
+;; filter
+
+(defun remove-no-future-shaped-piece-from-synthesized-piece-list
+    (synthesized-piece-list primary-piece-list)
+  (remove-if #'(lambda (synthed-piece)
+                 (detect-no-future-piece synthed-piece primary-piece-list))
+             synthesized-piece-list))
+
+
 (defun remove-congruent-from-synthesized-piece-list (synthesized-piece-list)
   (let ((lis synthesized-piece-list))
     (cond ((null lis) '())
-          (t (cons  (car lis)
-                    (remove-congruent-from-synthesized-piece-list
-                     (remove-if #'(lambda (p) (detect-piece-congruent (car lis) p))
-                                (cdr lis))))))))
+          (t (cons (car lis)
+                   (remove-congruent-from-synthesized-piece-list
+                    (remove-if #'(lambda (p)
+                                   (detect-piece-congruent (car lis) p))
+                               (cdr lis))))))))
 
 
 ;;; evaluation functions for evaluate values
@@ -177,10 +226,12 @@
             (mapcar #'piece-id primary-piece-using)
             (length primary-piece-using))
     (let* ((patterns-of-step
-             (remove-congruent-from-synthesized-piece-list
-              (sort-by-delta_points
-               (all-synthesizeable-patterns-of-pieces-to-frame
-                piece-frame primary-piece-rests))))
+             (remove-no-future-shaped-piece-from-synthesized-piece-list
+              (remove-congruent-from-synthesized-piece-list
+               (sort-by-delta_points
+                (all-synthesizeable-patterns-of-pieces-to-frame
+                 piece-frame primary-piece-rests)))
+               primary-piece-list))
            (states-of-step! (mapcar #'(lambda (next-frame)
                                         `((:frame . ,next-frame)))
                                     patterns-of-step))
@@ -198,10 +249,11 @@
       ;; finish or recursive
       (cond (;; no methods
              (null next-stack)
-             (format t "there is no solutions. IDs: ~A~%" (mapcar #'piece-id primary-piece-list)))
-            (;; car is solution
-             (zero-shape-piece-p (assocdr :frame (car next-stack))) ;; todo
-             (list (car next-stack)))
+             (format t "there is no solutions. IDs: ~A~%" (mapcar #'piece-id primary-piece-list))
+             nil)
+            (;; car is solution, however return all
+             (zero-shape-piece-p (assocdr :frame (car next-stack)))
+             next-stack)
             (;; search-next
              t
              (search-solution-aux
@@ -224,6 +276,8 @@
               ;;
               (none-frame-pieces (remove frame-piece primary-pieces :test #'equalp))
               (stack-of-states_t0
-                (list `((:frame . ,frame-piece)))))
-         (search-solution-aux stack-of-states_t0 none-frame-pieces))))))
+                (list `((:frame . ,frame-piece))))
+              (solution-and-paths (search-solution-aux stack-of-states_t0 none-frame-pieces)))
+         (mapcar #'(lambda (s) (assocdr :frame s)) solution-and-paths)
+)))))
 
