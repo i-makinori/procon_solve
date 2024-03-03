@@ -6,12 +6,86 @@
   </head>
 
   <body>
+      <script>
+
+       function gen_svg_panzoom_script_text (id_name) {
+           return '\n' +
+                  '\n' +
+                  '<script>\n' +
+                  'svgPanZoomElements = [];\n' +
+                  '\n' +
+                  'function register_to_svgPanZoomElements (id) {\n' +
+                  '  window.svgPanZoomElements[id] = svgPanZoom(id, {\n' +
+                  '    zoomEnabled: true,\n' +
+                  '    controlIconsEnabled: true,\n' +
+                  '    fit: true,\n' +
+                  '    center: true\n' +
+                  '  });\n' +
+                  '};\n'  +
+                  '\n' +
+                  'window.onload = function() {\n'+
+                  '  register_to_svgPanZoomElements('+id_name+')\n' +
+                  '};\n' +
+                  '<\/script>\n';
+       };
+           
+       function open_SVG_in_new_tab(id_name) {
+           
+           var loc = window.location.pathname;
+           var dir = loc.substring(0, loc.lastIndexOf('/'));
+           var panzoom_script_path =  dir + "/../htmlpage-assets/svg-pan-zoom.js"
+           //svgWindow.document.write(dir);
+           
+           let svg_panzoom_script = gen_svg_panzoom_script_text(id_name);
+           
+
+           let tab_html = 
+               '<!DOCTYPE html>\n' +
+               '\n' +
+               '<html>\n' +
+               '  <head>\n' +
+               '    <script src=\"'+panzoom_script_path+'\"><\/script>\n' +
+               '  </head>\n' +
+               '  <body>\n' +
+               '    <h1>Specific Piece Window</h1>' +
+               '    <script>alert("hgoe")<\/script>\n' +
+               '    ' + id_name + ' \n' +
+               '    ' + document.getElementById("tml_"+id_name).innerHTML + ' \n' +
+               '    ' + svg_panzoom_script + ' \n' +
+               '  </body>\n' +
+               '</html>\n'
+           ;
+
+           //var svgWindow = window.open("./dummy.html", "_blank");
+           var svgWindow = window.open("./dummy.html");
+
+           svgWindow.focus();
+           svgWindow.document.write(tab_html)
+           
+           
+       };
+      </script>
+
+    <button onclick="myFunction()">aaa</button>
+
+    <div id='hoge'>
+      hoge
+        <button onclick="myFunction('hoge')">Try it</button>
+    </div>
+
     <h1>solution</h1>
 
     <% loop for svg in (@ svgs) do %>
-      <pre><%= (cdr (assoc :id svg)) %>
-      <%= (cdr (assoc :describe-text svg)) %></pre>
-      <%= (cdr (assoc :svg-text svg)) %>
+      <div id='tml_<%= (cdr (assoc :id svg)) %>'>
+        <pre><%= (cdr (assoc :id svg)) %>
+        <%= (cdr (assoc :describe-text svg)) %></pre>
+        <%= (cdr (assoc :svg-text svg)) %>
+      </div>
+      <div id='button_<%= (cdr (assoc :id svg)) %>'>
+        <button onclick="open_SVG_in_new_tab('<%= (cdr (assoc :id svg)) %>')">
+          open in new Tab
+        </button>
+      </div>
     <% end %>
 
     <hr />
@@ -19,6 +93,9 @@
 
     <hr />
     solution contents end.
+
+
+
     
     <script>
       // Don't use window.onLoad like this in production, because it can only listen to one function.
