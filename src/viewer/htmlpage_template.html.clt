@@ -6,64 +6,65 @@
   </head>
 
   <body>
-      <script>
+    <script>
+      
+      var loc = window.location.pathname;
+      var dir = loc.substring(0, loc.lastIndexOf('/'));
+      
+      function gen_svg_panzoom_script_text (id_name) {
+          return '\n' +
+              '\n' +
+              '<script>\n' +
+              'svgPanZoomElements = [];\n' +
+              '\n' +
+              'function register_to_svgPanZoomElements (id) {\n' +
+              '  window.svgPanZoomElements[id] = svgPanZoom(id, {\n' +
+              '    zoomEnabled: true,\n' +
+              '    controlIconsEnabled: true,\n' +
+              '    fit: true,\n' +
+              '    center: true\n' +
+              '  });\n' +
+              '};\n'  +
+              '\n' +
+              '' + // register to svgPanZoom
+              '' + // wait seconds for page loading. 0.5sec, 5sec.
+              '' + // todo: rewrite into callback form.
+              'setTimeout(function() {register_to_svgPanZoomElements('+id_name+')}, \n' +
+              '           0.5*1000);' + 
+              'setTimeout(function() {register_to_svgPanZoomElements('+id_name+')}, \n' +
+              '           1*5000);' + 
+              '<\/script>\n';
+      };
 
-       function gen_svg_panzoom_script_text (id_name) {
-           return '\n' +
-                  '\n' +
-                  '<script>\n' +
-                  'svgPanZoomElements = [];\n' +
-                  '\n' +
-                  'function register_to_svgPanZoomElements (id) {\n' +
-                  '  window.svgPanZoomElements[id] = svgPanZoom(id, {\n' +
-                  '    zoomEnabled: true,\n' +
-                  '    controlIconsEnabled: true,\n' +
-                  '    fit: true,\n' +
-                  '    center: true\n' +
-                  '  });\n' +
-                  '};\n'  +
-                  '\n' +
-                  'window.onload = function() {\n'+
-                  '  register_to_svgPanZoomElements('+id_name+')\n' +
-                  '};\n' +
-                  '<\/script>\n';
-       };
-           
-       function open_SVG_in_new_tab(id_name) {
-           
-           var loc = window.location.pathname;
-           var dir = loc.substring(0, loc.lastIndexOf('/'));
-           var panzoom_script_path =  dir + "/../htmlpage-assets/svg-pan-zoom.js"
-           //svgWindow.document.write(dir);
-           
-           let svg_panzoom_script = gen_svg_panzoom_script_text(id_name);
-           
+      function gen_tab_html_text (id_name) {
+          let panzoom_script_path =  dir + "/../htmlpage-assets/svg-pan-zoom.js"
+          let svg_panzoom_script = gen_svg_panzoom_script_text(id_name);
+          
+          let tab_html = 
+              '<!DOCTYPE html>\n' +
+              '\n' +
+              '<html>\n' +
+              '  <head>\n' +
+              '    <script src=\"'+panzoom_script_path+'\"><\/script>\n' +
+              '  </head>\n' +
+              '  <body>\n' +
+              '    <h1>Specific Piece Window</h1>' +
+              '    ' + id_name + ' \n' +
+              '    ' + document.getElementById("tml_"+id_name).innerHTML + ' \n' +
+              '    ' + svg_panzoom_script + ' \n' +
+              '  </body>\n' +
+              '</html>\n';
+          
+          return tab_html
+      };
+      
+      function open_SVG_in_new_tab(id_name) {    
+          var svgWindow = window.open("", "_blank");
+          var tab_html = gen_tab_html_text(id_name);
 
-           let tab_html = 
-               '<!DOCTYPE html>\n' +
-               '\n' +
-               '<html>\n' +
-               '  <head>\n' +
-               '    <script src=\"'+panzoom_script_path+'\"><\/script>\n' +
-               '  </head>\n' +
-               '  <body>\n' +
-               '    <h1>Specific Piece Window</h1>' +
-               '    <script>alert("hgoe")<\/script>\n' +
-               '    ' + id_name + ' \n' +
-               '    ' + document.getElementById("tml_"+id_name).innerHTML + ' \n' +
-               '    ' + svg_panzoom_script + ' \n' +
-               '  </body>\n' +
-               '</html>\n'
-           ;
-
-           //var svgWindow = window.open("./dummy.html", "_blank");
-           var svgWindow = window.open("./dummy.html");
-
-           svgWindow.focus();
-           svgWindow.document.write(tab_html)
-           
-           
-       };
+          svgWindow.focus();
+          svgWindow.document.write(tab_html)
+      };
       </script>
 
     <button onclick="myFunction()">aaa</button>
