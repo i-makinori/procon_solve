@@ -26,10 +26,14 @@
              (:file "defines") ;; "data-types"
              ;; I/O, viewer render
              (:file "io")
-             ;; solver
+             ;; piece, synthesize
              (:file "linear-algebra")
              (:file "collision-detection")
              (:file "synthesize")
+             ;; solve
+             (:file "solver-functions")
+             (:file "evaluation-functions")
+             (:file "filter-functions")
              (:file "solver")
              ;; SVG viwer
              (:file "render-html")
