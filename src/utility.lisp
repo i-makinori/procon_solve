@@ -20,6 +20,9 @@
 (defparameter *pi/2* (/ *pi* 2))
 (defparameter *pi*2* (* *pi* 2))
 
+(defparameter *num-divergent* 999999)
+(defparameter *num-zero* 0)
+
 ;; list, number collection from m to n.
 (defun from-m-to-n-list (from-m to-n)
   (loop for i from from-m to to-n

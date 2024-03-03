@@ -100,43 +100,72 @@
 
 ;;; no-future-shape
 
-(defun primary-params (synthesized-piece primary-piece-list)
-  (let ((minimal-angle
-          (apply #'min (flatten (mapcar #'(lambda (p)
-                                            (shape-angle-list-reverse-when-hole (piece-shape p)))
-                                        primary-piece-list))))
-        #| ;; line-length limitation ignored
-        (longest-line^2
-          ((lambda (frame-piece)
-             (apply #'max (shape-line-segments-length-xy^2-list (piece-shape frame-piece))))
-           (if (shape-minus-p (piece-shape synthesized-piece))
-               synthesized-piece
-               (find-if #'(lambda (pp) (shape-minus-p (piece-shape pp)))
-                        primary-piece-list))))
-        |#
-        )
-    `((:minimal-angle . ,minimal-angle)
-      ;;(:longest-line^2 . ,longest-line^2))
-      )
-    ))
 
+(defun primary-params (synthesized-piece primary-piece-list)
+  (labels ((afcl (most-f restriction-constant lis)
+             (apply most-f (cons restriction-constant lis))))
+    (let* ((minimal-angle
+             (afcl #'min *num-divergent*
+                   (flatten
+                    (mapcar #'(lambda (p)
+                                (shape-angle-list-reverse-when-hole (piece-shape p)))
+                            primary-piece-list))))
+           (objective-length^2
+             (cond (;; if subjective is hole[-], minimal line-length of piece[+] is objective
+                    (shape-minus-p (piece-shape synthesized-piece))
+
+                    (afcl #'min *num-divergent*
+                          (flatten
+                           (mapcar #'(lambda (p)
+                                       (shape-line-segments-length-xy^2-list (piece-shape p)))
+                                   (remove-if-not #'(lambda (p) (shape-plus-p (piece-shape p)))
+                                                  primary-piece-list)))))
+                   (;; if subjective is piece[+], maximum line-length of hole[-] is objective
+                    (shape-plus-p (piece-shape synthesized-piece))
+                    (afcl #'max *num-zero*
+                          (flatten
+                           (mapcar #'(lambda (p)
+                                       (shape-line-segments-length-xy^2-list (piece-shape p)))
+                                   (remove-if-not #'(lambda (p) (shape-minus-p (piece-shape p)))
+                                                  primary-piece-list)))))
+                   (;; something none Real
+                    t
+                    (warn "Wrong Sign Piece")
+                    ;; (format nil "Wrong Sign Piece: ~A~%" synthesized-piece))
+                    nil))))
+      `((:minimal-angle . ,minimal-angle)
+        (:objective-length^2 . ,objective-length^2))
+      )))
+
+(defun no-future-angles-p (angle-list minimal-angle)
+  ;; Cut if ∃(angle_n + min_angle > 360°)
+  (find-if #'(lambda (a_n)   (ser> (+ a_n minimal-angle) *pi*2*)) angle-list))
+
+(defun no-future-hole-lines-p (hole-length^2-list minimal-length^2)
+  ;; Cut if ∃(hole_length_n < min_length)
+  (find-if #'(lambda (l^2_n) (ser< l^2_n minimal-length^2)) hole-length^2-list))
+
+(defun no-future-piece-lines-p (piece-length^2-list hole-maximum-length^2)
+  ;; Cut if ∃(piece_length_n > hole_max_length)
+  (find-if #'(lambda (l^2_n) (ser> l^2_n hole-maximum-length^2)) piece-length^2-list))
 
 (defun no-future-shape-p (shape primary-params)
   (let ((minimal-angle  (assocdr :minimal-angle   primary-params))
-        ;;(longest-line^2 (assocdr :longest-line^2  primary-params))
+        (objective-length^2 (assocdr :objective-length^2 primary-params))
         ;;
         (angle-list (shape-angle-list-reverse-when-hole shape))
-        ;;(length^2-list (shape-line-segments-length-xy^2-list shape))
-        )
+        (length^2-list (shape-line-segments-length-xy^2-list shape)))
     (or
-     ;; ∃(angle_n + min_angle > 360°)
-     (find-if #'(lambda (a_n)
-                  (ser> (+ a_n minimal-angle) *pi*2*))
-             angle-list)
-     ;;(find-if #'(lambda (l^2_n)
-     ;;             (ser> (+ l^2_n ) longest-line^2))
-     ;;         length^2-list)
-    )))
+     ;; angle
+     (no-future-angles-p angle-list minimal-angle)
+     ;; line length
+     (cond ((shape-minus-p shape) ;; if subjective is hole [-] ,
+            (no-future-hole-lines-p  length^2-list objective-length^2))
+           ((shape-plus-p shape)  ;; if subjective is piece[+] ,
+            (no-future-piece-lines-p length^2-list objective-length^2) )
+           (t                     ;; if none Real sign
+            t)))))
+
 
 (defun detect-no-future-piece (synthesized-piece primary-piece-list)
   (if (zero-shape-piece-p synthesized-piece)
