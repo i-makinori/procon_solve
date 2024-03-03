@@ -100,36 +100,49 @@
 
 ;;; no-future-shape
 
-(defun primary-params-from-primary-piece-list (primary-piece-list)
+(defun primary-params (synthesized-piece primary-piece-list)
   (let ((minimal-angle
           (apply #'min (flatten (mapcar #'(lambda (p)
                                             (shape-angle-list-reverse-when-hole (piece-shape p)))
                                         primary-piece-list))))
+        #| ;; line-length limitation ignored
         (longest-line^2
-          (apply #'max (flatten (mapcar #'(lambda (p)
-                                            (shape-line-segments-length-xy^2-list (piece-shape p)))
-                                        primary-piece-list)))))
+          ((lambda (frame-piece)
+             (apply #'max (shape-line-segments-length-xy^2-list (piece-shape frame-piece))))
+           (if (shape-minus-p (piece-shape synthesized-piece))
+               synthesized-piece
+               (find-if #'(lambda (pp) (shape-minus-p (piece-shape pp)))
+                        primary-piece-list))))
+        |#
+        )
     `((:minimal-angle . ,minimal-angle)
-      (:longest-line^2 . ,longest-line^2))))
+      ;;(:longest-line^2 . ,longest-line^2))
+      )
+    ))
+
 
 (defun no-future-shape-p (shape primary-params)
   (let ((minimal-angle  (assocdr :minimal-angle   primary-params))
-        (longest-line^2 (assocdr :longest-line^2  primary-params))
+        ;;(longest-line^2 (assocdr :longest-line^2  primary-params))
         ;;
         (angle-list (shape-angle-list-reverse-when-hole shape))
-        (length^2-list (shape-line-segments-length-xy^2-list shape)))
+        ;;(length^2-list (shape-line-segments-length-xy^2-list shape))
+        )
     (or
      ;; ∃(angle_n + min_angle > 360°)
-     (find-if #'(lambda (a_n) (ser> (+ a_n minimal-angle) *pi*2*))
+     (find-if #'(lambda (a_n)
+                  (ser> (+ a_n minimal-angle) *pi*2*))
              angle-list)
-     (find-if #'(lambda (l^2_n) (ser> l^2_n longest-line^2))
-              length^2-list))
-    ))
+     ;;(find-if #'(lambda (l^2_n)
+     ;;             (ser> (+ l^2_n ) longest-line^2))
+     ;;         length^2-list)
+    )))
 
 (defun detect-no-future-piece (synthesized-piece primary-piece-list)
   (if (zero-shape-piece-p synthesized-piece)
       nil
-      (let ((primary-params (primary-params-from-primary-piece-list
+      (let ((primary-params (primary-params
+                             synthesized-piece
                              (list-of-unused-primary-piece-list-of-synthesized-piece
                               synthesized-piece primary-piece-list))))
         (no-future-shape-p (piece-shape synthesized-piece)
