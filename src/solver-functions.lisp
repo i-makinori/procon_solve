@@ -48,6 +48,9 @@
   ;; piece- null?
   (eq 'leaf (piece-leaf-or-synthed piece-common)))
 
+(defun frame-piece-of-primary-list (primary-piece-list)
+  (find-if #'(lambda (p) (shape-minus-p (piece-shape p))) primary-piece-list))
+
 (defun list-of-primary-piece-list-of-synthesized-piece (synthesized-piece)
   (labels ((aux (p_n)
              (cond ((primary-piece-p p_n) (list p_n))
@@ -80,5 +83,7 @@
    (list-of-primary-piece-list-of-synthesized-piece 
     synthesized-piece)
    :test #'(lambda (p1 p2) (equal (piece-id p1) (piece-id p2)))))
+
+
 
 

@@ -244,15 +244,20 @@
 
 (defun remove-no-future-shaped-piece-from-synthesized-piece-list
     (synthesized-piece-list primary-piece-list)
-  (remove-if #'(lambda (synthed-piece)
-                 (detect-no-future-piece synthed-piece primary-piece-list))
-             synthesized-piece-list))
+  (remove-if
+   #'(lambda (synthed-piece)
+       (detect-no-future-piece
+        synthed-piece
+        ;; todo select: all primary piece-list
+        ;; primary-piece-list))
+        ;; todo select: resting primary piece-list
+        (list-of-unused-primary-piece-list-of-synthesized-piece synthed-piece primary-piece-list)
+        ))
+   synthesized-piece-list))
 
 (defun remove-plus-piece-overs-frame-from-synthesized-piece-list
-    (synthesized-piece-list primary-piece-list)
-  (let ((primary-frame-piece
-          (find-if #'(lambda (p) (shape-minus-p (piece-shape p))) primary-piece-list)))
-    (remove-if #'(lambda (synthed-piece)
-                   (detect-domain-of-plus-piece-overs-frame synthed-piece primary-frame-piece))
-               synthesized-piece-list)))
+    (synthesized-piece-list frame-piece)
+  (remove-if #'(lambda (synthed-piece)
+                 (detect-domain-of-plus-piece-overs-frame synthed-piece frame-piece))
+             synthesized-piece-list))
 

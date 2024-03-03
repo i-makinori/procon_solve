@@ -38,7 +38,8 @@
                  (all-synthesizeable-patterns-of-pieces-to-frame
                   piece-frame primary-piece-rests)))
                primary-piece-list)
-              primary-piece-list))
+              ;; todo. this is once old frame. frame of this step is may be better
+              (assocdr :frame state)))
            (states-of-step! (mapcar #'(lambda (next-frame)
                                         `((:frame . ,next-frame)))
                                     patterns-of-step))
