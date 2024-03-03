@@ -63,6 +63,9 @@ synth-list to: 1416, using-pieces [len]: (0 2)[2]
 ;; access to HTML file updated, you can view the solution or searching-progress
 ;; of piece synthesizing (maybely)
 
+> ;; also, you can play by *problem-list*
+> (search-solution-from-prime-pieces (nth 4 *problem-list*))
+
 PUZZLE-1617>
 
 ```
