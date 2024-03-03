@@ -147,7 +147,6 @@
 
 (defun shape-angle-list-reverse-when-hole (shape)
   (let ((angle-list1 (shape-angle-list shape)))
-    (print (shape-pm-sign shape))
     (cond ((shape-minus-p shape)
            (mapcar #'(lambda (a) (- *pi*2* a))
                    angle-list1))

@@ -132,7 +132,6 @@
       (let ((primary-params (primary-params-from-primary-piece-list
                              (list-of-unused-primary-piece-list-of-synthesized-piece
                               synthesized-piece primary-piece-list))))
-        ;;(format t "~A~%" primary-params)
         (no-future-shape-p (piece-shape synthesized-piece)
                            primary-params))))
 
