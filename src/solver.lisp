@@ -109,7 +109,8 @@
             (funcall *evaluation-function* fs1 primary-piece-list))
       fs1)))
 
-
+(defparameter *n-search-iter* 0)
+(defparameter *n-search-iter-max* 4000)
 
 (defun search-solution-aux (stack-of-states primary-piece-list)
   (let* ((state (car stack-of-states))
@@ -124,12 +125,16 @@
       (write-piece-list-as-html 
        (mapcar #'(lambda (state) (fs-frame-piece state)) next-stack))
       ;; finish or recursive
+      (incf *n-search-iter*)
       (cond ((null next-stack) ;; no methods
              (format t "there is no solutions. IDs: ~A~%" (mapcar #'piece-id primary-piece-list))
              nil)
             ((zero-shape-piece-p (fs-frame-piece (car next-stack)))
              ;; car is solution, however return all
              next-stack)
+            ((> *n-search-iter* *n-search-iter-max*)
+             (format t "could not get solutions in ~A trial.~%" *n-search-iter*)
+             nil)
             (t ;; search-next
              (search-solution-aux next-stack primary-piece-list)))
       )))
@@ -138,6 +143,7 @@
   (let* ((primary-pieces (remove-if-not #'primary-piece-p whole-primary-piece-list))
          (frame-pieces   (remove-if-not #'(lambda (p) (shape-minus-p (piece-pm-sign p)))
                                         primary-pieces)))
+    (setf *n-search-iter* 0)
     (cond
       ((not (= 1 (length frame-pieces)))
        (warn (format nil "whole-piece-list has multiple frames. IDs: ~A~%"
