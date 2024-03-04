@@ -198,7 +198,17 @@
            (t                     ;; if none Real sign
             t)))))
 
+(defun detect-no-future-state (state)
+  (if (zero-shape-piece-p (fs-frame-piece state))
+      nil
+      (let ((primary-params (primary-params
+                             (fs-frame-piece state)
+                             (fs-primary-rest state))))
+        (no-future-shape-p (piece-shape (fs-frame-piece state))
+                           primary-params))))
 
+#|
+;; old implement
 (defun detect-no-future-piece (synthesized-piece primary-piece-list)
   (if (zero-shape-piece-p synthesized-piece)
       nil
@@ -208,7 +218,7 @@
                               synthesized-piece primary-piece-list))))
         (no-future-shape-p (piece-shape synthesized-piece)
                            primary-params))))
-
+|#
 
 ;;; detect domains of plus-synthesized-piece[+] overs frame[-]
 
@@ -232,6 +242,39 @@
 
 
 ;;; call filter functions
+
+(defun remove-congruent-from-state-list (fs-list) ;; (state-list)
+  (let ((lis fs-list))
+    (cond ((null lis) '())
+          (t (cons (car lis)
+                   (remove-congruent-from-state-list
+                    (remove-if #'(lambda (s)
+                                   (detect-piece-congruent (fs-frame-piece (car lis)) 
+                                                           (fs-frame-piece s)))
+                               (cdr lis))))))))
+
+
+
+
+(defun remove-no-future-state-from-state-list (fs-list) ;; (state-list)
+  (remove-if #'(lambda (fs) (detect-no-future-state fs))
+             fs-list))
+
+
+
+
+(defun remove-plus-piece-overs-frame-from-state-list (state-list frame-state) ;; (state-list)
+  (remove-if #'(lambda (piece-state)
+                 (detect-domain-of-plus-piece-overs-frame 
+                  (fs-frame-piece piece-state) ;; todo: [±]piece is not only frame-piece
+                  (fs-frame-piece frame-state)))
+             state-list))
+
+
+
+;; old implement.      args synthed-piece-list
+;; where new implement args state-list
+#|
 
 (defun remove-congruent-from-synthesized-piece-list (synthesized-piece-list)
   (let ((lis synthesized-piece-list))
@@ -260,4 +303,4 @@
   (remove-if #'(lambda (synthed-piece)
                  (detect-domain-of-plus-piece-overs-frame synthed-piece frame-piece))
              synthesized-piece-list))
-
+|#

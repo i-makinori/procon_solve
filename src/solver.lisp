@@ -24,15 +24,14 @@
 
 (defun format-search-status-before (state-of-this-step primary-piece-list)
   primary-piece-list
-  (let* ((piece-frame (fs-frame-piece state-of-this-step))
-         (primary-piece-using (list-of-primary-piece-list-of-synthesized-piece piece-frame)))
     (format t "~%============~%")
     (format t "synth-list to: ~A,~%"
-            (piece-id piece-frame))
+            (piece-id (fs-frame-piece state-of-this-step)))
     (format t "using-pieces [len]: ~A[~A]~%"
-            (mapcar #'piece-id primary-piece-using)
-            (length primary-piece-using))))
+            (mapcar #'piece-id (fs-primary-used state-of-this-step))
+            (length (fs-primary-used state-of-this-step))))
 
+#|
 (defun filter-piece-list-from-synthesized-piece-list
     (state primary-piece-list synthesized-piece-list)
   ;; call filter functions, and sort.
@@ -42,22 +41,32 @@
     primary-piece-list)
    ;; todo. this is once old frame. frame of this step is may be better
    (fs-frame-piece state)))
+|#
 
-(defun states-of-next-step-from-1-state (state primary-piece-list)
+(defun filter-fs-list (fs-list state-this-step) ;; (state-list)
+  ;; call filter functions, and sort.
+  (remove-plus-piece-overs-frame-from-state-list
+   (remove-no-future-state-from-state-list
+    (remove-congruent-from-state-list fs-list))
+   ;; todo. this is once old frame. frame of this step is may be better
+   state-this-step))
+
+
+(defun states-of-next-step-from-1-state (state-this-step primary-piece-list)
   (let* (;; Synthesized Piece List
          (spl-all-combinations
-           ;; todo: select function for combination of step
            (funcall *step-function*
-            (fs-frame-piece state)
-            (list-of-unused-primary-piece-list-of-synthesized-piece (fs-frame-piece state) 
-                                                                    primary-piece-list)))
+                    (fs-frame-piece state-this-step)
+                    (fs-primary-rest state-this-step)))
+         (fs-all-combinations
+           (mapcar #'(lambda (next-piece)
+                       (make-fs-from-piece next-piece primary-piece-list))
+                   spl-all-combinations))
          (spl-filtered ;; patterns-of-step
-           (filter-piece-list-from-synthesized-piece-list
-            state primary-piece-list spl-all-combinations))
+           (filter-fs-list fs-all-combinations state-this-step))
          ;; stack of states
-         (states-of-next-step (mapcar #'(lambda (next-frame)
-                                          (make-fs-from-piece next-frame primary-piece-list))
-                                      spl-filtered)))
+         (states-of-next-step spl-filtered)
+         )
     states-of-next-step))
 
 (defun format-search-status-after (next-stack)

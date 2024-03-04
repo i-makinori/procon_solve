@@ -59,7 +59,6 @@
   (delta_points-of-synthesize_delta (fs-frame-piece state)))
 
 (defun evaluation-value-by-div1-nomials (state primary-piece-list)
-  ;;(let* ((synth-prims (list-of-primary-piece-list-of-synthesized-piece (fs-frame-piece state))))
   ;;primaries
   primary-piece-list
   state
