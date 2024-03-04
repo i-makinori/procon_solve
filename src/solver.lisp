@@ -42,8 +42,8 @@
             (length primary-piece-using))
     (let* (;; Synthesized Piece List
            (spl-all-combinations
-             ;;(all-synthesizeable-patterns-of-pieces-to-frame
-             (all-synthesizeables-of-pieces-to-piece_del-if-e-jam-edge
+             (all-synthesizeable-patterns-of-pieces-to-frame
+              ;;(all-synthesizeables-of-pieces-to-piece_del-if-e-jam-edge
               (assocdr :frame state) primary-piece-list))
            (spl-filtered ;; patterns-of-step
              (filter-piece-list-from-synthesized-piece-list

@@ -368,9 +368,9 @@
              (ommit-edge-points-aux (make-3tuple-list coord-points))))
        ;; if is maybely not needed
        (if (equalp ommit-once coord-points)
-           (ommit-edge-points-for-point-on-line-segment ommit-once
-                                                        (car (last ommit-once))
-                                                        (car ommit-once))
+           ;;(ommit-edge-points-for-point-on-line-segment ;; point on line
+           ;; ommit-once (car (last ommit-once)) (car ommit-once))
+           ommit-once ;; ignore point on line
            (ommit-edge-points ommit-once))))))
 
 
