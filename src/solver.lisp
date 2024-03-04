@@ -110,14 +110,117 @@
       fs1)))
 
 (defparameter *n-search-iter* 0)
-(defparameter *n-search-iter-max* 4000)
+(defparameter *n-search-iter-max* 100)
+
+(defparameter *beam-width* 6)
+(defparameter *beam-current-index* 0)
+
+(defstruct beam
+  ;; statement of beam, used for beam search.
+  (:index nil)
+  (:depth 0)
+  ;; (:solution-p nil)
+  (:stack nil))
+
+(defun state-is-solution-p (fs) ;; (state)
+  (zero-shape-piece-p (fs-frame-piece fs)))
+
+(defun select-head-n-of-stack-into-n-beams (n next-stack-by-previous beam-previous)
+  (remove
+   nil
+   (mapcar
+    #'(lambda (n) n
+        (cond ((null (nthcdr n next-stack-by-previous)) ;; no futures
+               nil)
+              (t
+               (let ((next-index (if (> n 0)
+                                     (progn (incf *beam-current-index*)
+                                            *beam-current-index*)
+                                     (beam-index beam-previous))))
+                 (make-beam :index next-index
+                            :depth (1+ (beam-depth beam-previous))
+                            :stack (nthcdr n next-stack-by-previous))))))
+    (from-m-to-n-list 0 (- n 1)))))
+
+(defun search-solution-aux-beam (beam-queue primary-piece-list)
+  (let* (;; 
+         (beam-of-this-step (car beam-queue))
+         (rest-queue (cdr beam-queue))
+         ;;
+         (state-of-this-step (car (beam-stack beam-of-this-step)))
+         (stacking-of-this-step (cdr (beam-stack beam-of-this-step))))
+    ;; format before once list 
+    (format-search-status-before state-of-this-step primary-piece-list)
+    (let* ((states-of-next-step (states-of-next-step-from-1-state state-of-this-step
+                                                                  primary-piece-list))
+           (next-stack-of-this-step (next-state-stack states-of-next-step stacking-of-this-step))
+           ;;
+           (next-queues-by-this-step
+             (select-head-n-of-stack-into-n-beams
+              (- *beam-width* (length beam-queue) -1) ;; -1 is this-step
+              next-stack-of-this-step
+              beam-of-this-step))
+                     
+           (next-queue (append rest-queue next-queues-by-this-step)))
+      ;; format after once list
+      (format-search-status-after next-stack-of-this-step)
+      (format t "beam {type, depth}: {~A, ~A}~%"
+              (beam-index beam-of-this-step)
+              (beam-depth beam-of-this-step))
+
+      ;; HTML
+      (write-piece-list-as-html 
+       (mapcar #'(lambda (state) (fs-frame-piece state)) next-stack-of-this-step))
+      ;;(incf *n-search-iter*)
+      (cond ((null next-stack-of-this-step) ;; no methods
+             (format t "there is no solutions. IDs: ~A~%" (mapcar #'piece-id primary-piece-list))
+             nil)
+            ((state-is-solution-p (car next-stack-of-this-step))
+             ;; car is solution, however return all
+             next-stack-of-this-step
+             )
+            ;; todo: cut by n-count and restart again
+            ;;((> *n-search-iter* *n-search-iter-max*)
+            ;;(format t "could not get solutions in ~A trial.~%" *n-search-iter*)
+            ;;nil)
+            (t ;; search-next
+             (search-solution-aux-beam next-queue primary-piece-list))))))
+
+
+(defun search-solution-from-prime-pieces-beam (whole-primary-piece-list)
+  (let* ((primary-pieces (remove-if-not #'primary-piece-p whole-primary-piece-list))
+         (frame-pieces   (remove-if-not #'(lambda (p) (shape-minus-p (piece-pm-sign p)))
+                                        primary-pieces)))
+    (setf *n-search-iter* 0)
+    (setf *beam-current-index* 0)
+    (cond
+      ((not (= 1 (length frame-pieces)))
+       (warn (format nil "whole-piece-list has multiple frames. IDs: ~A~%"
+                     (mapcar #'piece-id frame-pieces)))
+       nil)
+      (t 
+       (let* ((frame-piece    (car frame-pieces))
+              ;;
+              (none-frame-pieces (remove frame-piece primary-pieces :test #'equalp))
+              (stack0 (list (make-fs-from-piece frame-piece none-frame-pieces)))
+              ;;
+              (stack-of-states_t0
+                (list (make-beam :index 0
+                                 :stack stack0)))
+              (solution-and-paths (search-solution-aux-beam
+                                   stack-of-states_t0 none-frame-pieces)))
+         (mapcar #'(lambda (s) (fs-frame-piece s)) solution-and-paths)
+)))))
+
+
 
 (defun search-solution-aux (stack-of-states primary-piece-list)
-  (let* ((state (car stack-of-states))
+  (let* ((state-of-this-step (car stack-of-states))
          (stacking (cdr stack-of-states)))
     ;; format before once list 
-    (format-search-status-before state primary-piece-list)
-    (let* ((states-of-next-step (states-of-next-step-from-1-state state primary-piece-list))
+    (format-search-status-before state-of-this-step primary-piece-list)
+    (let* ((states-of-next-step (states-of-next-step-from-1-state state-of-this-step
+                                                                  primary-piece-list))
            (next-stack (next-state-stack states-of-next-step stacking)))
       ;; format after once list
       (format-search-status-after next-stack)
@@ -129,7 +232,7 @@
       (cond ((null next-stack) ;; no methods
              (format t "there is no solutions. IDs: ~A~%" (mapcar #'piece-id primary-piece-list))
              nil)
-            ((zero-shape-piece-p (fs-frame-piece (car next-stack)))
+            ((state-is-solution-p (car next-stack))
              ;; car is solution, however return all
              next-stack)
             ((> *n-search-iter* *n-search-iter-max*)
