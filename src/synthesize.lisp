@@ -5,20 +5,39 @@
 
 ;;; group set of points selections for synthesize
 
-(defun whole-set-of-point-and-edge-selections-piece-piece (piece1 piece2)
-  (flatten
-   (apply #'append
-          (mapcar
-           #'(lambda (cp12) ;; cp: coordinate points 1,2
-               (list
-                (mapcar #'(lambda (sign)
-                            `((:p1 . ,piece1) (:n1 . ,(car  cp12)) (:pm1 . ,(car sign))
-                              (:p2 . ,piece2) (:n2 . ,(cadr cp12)) (:pm2 . ,(cdr sign))))
-                        '((+1 . +1) (+1 . -1) (-1 . +1) (-1 . -1)))))
-           (cartesian ;; A x B of both {0,1, ... , (n_points-1)}.
-            (from-m-to-n-list 0 (1- (length (piece-points piece1))))
-            (from-m-to-n-list 0 (1- (length (piece-points piece2)))))))))
+(defun whole-set-of-point-and-edge-selections-piece-piece 
+    (piece1 piece2 &key (piece1-by-nth_point-only nil))
+  (let ((combinations
+          ;; (or {A[n]} (A_l)) X (B_l) X {A+, A-} X {B+, B-}
+          ;; where (A_l), (B_l) types of {0,1, ... , (n_points-1)}.
+          (cartesian
+           (if piece1-by-nth_point-only
+               (list (mod piece1-by-nth_point-only (length (piece-points piece1)))) ;; {A[n]}
+               (from-m-to-n-list 0 (1-             (length (piece-points piece1)))) ;; (A_l)
+               )
+           (from-m-to-n-list 0 (1- (length (piece-points piece2))))
+           (list '+1 '-1)
+           (list '+1 '-1))))
+  (mapcar
+   #'(lambda (cp12_pm12) ;; [cp1, cp2, pm1, pm2]
+       `((:p1 . ,piece1) (:n1 . ,(nth 0 cp12_pm12)) (:pm1 . ,(nth 2 cp12_pm12))
+         (:p2 . ,piece2) (:n2 . ,(nth 1 cp12_pm12)) (:pm2 . ,(nth 3 cp12_pm12))))
+   combinations)))
 
+#|
+;;; note: test 
+(defun tester-of-whole-set-of-point-and-edge-selections-piece-piece*
+   (&optional (index_piece_i 1) (index_piece_j 2) (by-nth_point-only nil))
+  (let ((piece_i (nth index_piece_i *example-problem-10*))
+        (piece_j (nth index_piece_j *example-problem-10*)))
+    (mapcar #'(lambda (s)
+                (mapcar #'(lambda (key) (assocdr key s))
+                        '(:n1 :pm1 :n2 :pm2)))
+            (whole-set-of-point-and-edge-selections-piece-piece
+             piece_i piece_j
+             :piece1-by-nth_point-only by-nth_point-only
+            ))))
+|#
 
 ;;; transform by point selection
 
