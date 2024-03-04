@@ -14,6 +14,17 @@
  (cons (car *example-problem-9*) (cdr *example-problem-9*)))
 |#
 
+(defun format-search-status-before (state-of-this-step primary-piece-list)
+  primary-piece-list
+  (let* ((piece-frame (assocdr :frame state-of-this-step))
+         (primary-piece-using (list-of-primary-piece-list-of-synthesized-piece piece-frame)))
+    (format t "~%============~%")
+    (format t "synth-list to: ~A,~%"
+            (piece-id piece-frame))
+    (format t "using-pieces [len]: ~A[~A]~%"
+            (mapcar #'piece-id primary-piece-using)
+            (length primary-piece-using))))
+
 (defun filter-piece-list-from-synthesized-piece-list
     (state primary-piece-list synthesized-piece-list)
   ;; call filter functions, and sort.
@@ -26,56 +37,65 @@
    ;; todo. this is once old frame. frame of this step is may be better
    (assocdr :frame state)))
 
+(defun states-of-next-step-from-1-state (state primary-piece-list)
+  (let* (;; Synthesized Piece List
+         (spl-all-combinations
+           ;;(all-synthesizeable-patterns-of-pieces-to-frame
+           (all-synthesizeables-of-pieces-to-piece_del-if-e-jam-edge
+            (assocdr :frame state) primary-piece-list))
+         (spl-filtered ;; patterns-of-step
+           (filter-piece-list-from-synthesized-piece-list
+            state primary-piece-list spl-all-combinations))
+         ;; stack of states
+         (states-of-next-step (mapcar #'(lambda (next-frame)
+                                          `((:frame . ,next-frame)))
+                                      spl-filtered)))
+    states-of-next-step))
+
+
+(defun format-search-status-after (next-stack)
+  next-stack
+  ;;(format t "~A~%" (mapcar #'(lambda (s) (assocdr :evaluation-value s)) next-stack))
+  nil
+  )
+
+#|
+;; memo
+(let ((piece-frame         (assocdr :frame state))
+      (primary-piece-using (list-of-primary-piece-list-of-synthesized-piece piece-frame))
+      (primary-piece-rests (list-of-unused-primary-piece-list-of-synthesized-piece 
+                            piece-frame primary-piece-list))))
+|#
+
+(defun next-state-stack (states-new states-rest primary-piece-list)
+  ;; todo: merge sort. because states rest are sorted and values stored in logically.
+  (sorted-states-by-evaluation-function
+   #'evaluation-value-by-delta-points
+   (append states-new states-rest)
+   primary-piece-list))
+
 (defun search-solution-aux (stack-of-states primary-piece-list)
   (let* ((state (car stack-of-states))
-         (stacking (cdr stack-of-states))
-         ;;
-         (piece-frame         (assocdr :frame state))
-         (primary-piece-using (list-of-primary-piece-list-of-synthesized-piece piece-frame))
-         ;;(primary-piece-rests (list-of-unused-primary-piece-list-of-synthesized-piece 
-         ;;piece-frame primary-piece-list))
-         ;;
-         )
-    (format t "synth-list to: ~A, using-pieces [len]: ~A[~A]~%"
-            (piece-id piece-frame)
-            (mapcar #'piece-id primary-piece-using)
-            (length primary-piece-using))
-    (let* (;; Synthesized Piece List
-           (spl-all-combinations
-             (all-synthesizeable-patterns-of-pieces-to-frame
-              ;;(all-synthesizeables-of-pieces-to-piece_del-if-e-jam-edge
-              (assocdr :frame state) primary-piece-list))
-           (spl-filtered ;; patterns-of-step
-             (filter-piece-list-from-synthesized-piece-list
-              state primary-piece-list spl-all-combinations))
-           (states-of-step! (mapcar #'(lambda (next-frame)
-                                        `((:frame . ,next-frame)))
-                                    spl-filtered))
-           (next-stack (sorted-states-by-evaluation-function
-                        #'evaluation-value-by-delta-points
-                        (append states-of-step! stacking)
-                        primary-piece-list)))
-      ;; debugging format
-      ;;(format t "~A" (mapcar #'(lambda (s) (assocdr :evaluation-value s)) next-stack))
-      (format t "~%~%")
+         (stacking (cdr stack-of-states)))
+    ;; format before once list 
+    (format-search-status-before state primary-piece-list)
+    (let* ((states-of-next-step (states-of-next-step-from-1-state state primary-piece-list))
+           (next-stack (next-state-stack states-of-next-step stacking primary-piece-list)))
+      ;; format after once list
+      (format-search-status-after next-stack)
       ;; HTML
-      (write-piece-list-as-html
-       (mapcar #'(lambda (state) (assocdr :frame state))
-               next-stack))
+      (write-piece-list-as-html 
+       (mapcar #'(lambda (state) (assocdr :frame state)) next-stack))
       ;; finish or recursive
-      (cond (;; no methods
-             (null next-stack)
+      (cond ((null next-stack) ;; no methods
              (format t "there is no solutions. IDs: ~A~%" (mapcar #'piece-id primary-piece-list))
              nil)
-            (;; car is solution, however return all
-             (zero-shape-piece-p (assocdr :frame (car next-stack)))
+            ((zero-shape-piece-p (assocdr :frame (car next-stack)))
+             ;; car is solution, however return all
              next-stack)
-            (;; search-next
-             t
-             (search-solution-aux
-              next-stack primary-piece-list)))
-      )) ;; and report at last
-  )
+            (t ;; search-next
+             (search-solution-aux next-stack primary-piece-list)))
+      )))
 
 
 (defun search-solution-from-prime-pieces (whole-primary-piece-list)
