@@ -52,30 +52,24 @@
 
 (defun evaluation-value-by-delta-points_sum (state primary-piece-list)
   primary-piece-list
-  (delta_points-of-synthesize_sum (assocdr :frame state)))
+  (delta_points-of-synthesize_sum (fs-frame-piece state)))
 
 (defun evaluation-value-by-delta-points_delta (state primary-piece-list)
   primary-piece-list
-  (delta_points-of-synthesize_delta (assocdr :frame state)))
+  (delta_points-of-synthesize_delta (fs-frame-piece state)))
 
 (defun evaluation-value-by-div1-nomials (state primary-piece-list)
-  ;;(let* ((synth-prims (list-of-primary-piece-list-of-synthesized-piece (assocdr :frame state))))
+  ;;(let* ((synth-prims (list-of-primary-piece-list-of-synthesized-piece (fs-frame-piece state))))
   ;;primaries
   primary-piece-list
   state
   0)
 
-(defun sorted-states-by-evaluation-function (evaluation-function state-list! primary-piece-list)
-  (let ((states-added-evaluation-value
-          (mapcar #'(lambda (state)
-                      (if (null (assocdr :evaluation-value state))
-                          (cons `(:evaluation-value 
-                                  . ,(funcall evaluation-function state primary-piece-list))
-                                state)
-                          state))
-                  state-list!)))
-    (sort
-     states-added-evaluation-value
-     #'(lambda (state1 state2)
-         (> (assocdr :evaluation-value state1)
-            (assocdr :evaluation-value state2))))))
+(defun sorted-states-by-evaluation-function (state-list-new state-list-resting)
+  ;; todo: merge sort. because states rest are sorted and values stored in logically.
+  (sort
+   ;; sort is unneeded if sorted before
+   (append state-list-new state-list-resting)
+   #'(lambda (state1 state2)
+       (> (fs-evaluation-value state1)
+          (fs-evaluation-value state2)))))

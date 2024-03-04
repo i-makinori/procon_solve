@@ -14,9 +14,17 @@
  (cons (car *example-problem-9*) (cdr *example-problem-9*)))
 |#
 
+(defstruct (fs-node (:constructor make-fs) (:conc-name fs-))
+  ;; frame-state of node
+  (:frame-piece nil)
+  (:evaluation-value nil)
+  (:primary-used nil) ;; primary pieces used
+  (:primary-rest nil) ;; primary pieces resting
+  )
+
 (defun format-search-status-before (state-of-this-step primary-piece-list)
   primary-piece-list
-  (let* ((piece-frame (assocdr :frame state-of-this-step))
+  (let* ((piece-frame (fs-frame-piece state-of-this-step))
          (primary-piece-using (list-of-primary-piece-list-of-synthesized-piece piece-frame)))
     (format t "~%============~%")
     (format t "synth-list to: ~A,~%"
@@ -33,54 +41,66 @@
     (remove-congruent-from-synthesized-piece-list synthesized-piece-list)
     primary-piece-list)
    ;; todo. this is once old frame. frame of this step is may be better
-   (assocdr :frame state)))
+   (fs-frame-piece state)))
 
 (defun states-of-next-step-from-1-state (state primary-piece-list)
   (let* (;; Synthesized Piece List
          (spl-all-combinations
            ;; todo: select function for combination of step
-           ;;(all-synthesizeable-patterns-of-pieces-to-frame
-           (all-synthesizeables-of-pieces-to-piece_del-if-e-jam-edge
-            (assocdr :frame state)
-            (list-of-unused-primary-piece-list-of-synthesized-piece (assocdr :frame state) 
+           (funcall *step-function*
+            (fs-frame-piece state)
+            (list-of-unused-primary-piece-list-of-synthesized-piece (fs-frame-piece state) 
                                                                     primary-piece-list)))
          (spl-filtered ;; patterns-of-step
            (filter-piece-list-from-synthesized-piece-list
             state primary-piece-list spl-all-combinations))
          ;; stack of states
          (states-of-next-step (mapcar #'(lambda (next-frame)
-                                          `((:frame . ,next-frame)))
+                                          (make-fs-from-piece next-frame primary-piece-list))
                                       spl-filtered)))
     states-of-next-step))
-
 
 (defun format-search-status-after (next-stack)
   next-stack
   (format t "EvalValues:")
-  (mapcar #'(lambda (s) (format t " ~,4f" (assocdr :evaluation-value s)))
+  (mapcar #'(lambda (s) (format t " ~,4f" (fs-evaluation-value s)))
           (first-n 20 next-stack))
   (format t "~%")
   nil)
 
-#|
-;; memo
-(let ((piece-frame         (assocdr :frame state))
-      (primary-piece-using (list-of-primary-piece-list-of-synthesized-piece piece-frame))
-      (primary-piece-rests (list-of-unused-primary-piece-list-of-synthesized-piece 
-                            piece-frame primary-piece-list))))
-|#
 
-(defun next-state-stack (states-new states-rest primary-piece-list)
-  ;; todo: merge sort. because states rest are sorted and values stored in logically.
-  (sorted-states-by-evaluation-function ;; sort is unneeded if sorted before
-   #'evaluation-value-by-delta-points_sum
-   ;;#'evaluation-value-by-delta-points_delta
-   (append states-new states-rest)
-   primary-piece-list)
-
-)
+(defun next-state-stack (states-new states-rest)
+  (sorted-states-by-evaluation-function
+   states-new states-rest))
 
 ;;; greede DFS
+
+(defparameter *step-function*
+  ;;#'all-synthesizeable-patterns-of-pieces-to-frame
+  #'all-synthesizeables-of-pieces-to-piece_del-if-e-jam-edge
+  "step function to get next pieces"
+  )
+
+(defparameter *evaluation-function*
+  #'evaluation-value-by-delta-points_sum
+  ;;#'evaluation-value-by-delta-points_delta
+  "evaluation funciton of step (node or edge is not determined)"
+  )
+
+
+(defun make-fs-from-piece (synthed-frame-piece primary-piece-list)
+  (let ((fs1
+          (make-fs :frame-piece synthed-frame-piece
+                   :primary-used (list-of-primary-piece-list-of-synthesized-piece
+                                  synthed-frame-piece)
+                   :primary-rest (list-of-unused-primary-piece-list-of-synthesized-piece
+                                  synthed-frame-piece primary-piece-list))))
+    (progn
+      (setf (fs-evaluation-value fs1)
+            (funcall *evaluation-function* fs1 primary-piece-list))
+      fs1)))
+
+
 
 (defun search-solution-aux (stack-of-states primary-piece-list)
   (let* ((state (car stack-of-states))
@@ -88,23 +108,22 @@
     ;; format before once list 
     (format-search-status-before state primary-piece-list)
     (let* ((states-of-next-step (states-of-next-step-from-1-state state primary-piece-list))
-           (next-stack (next-state-stack states-of-next-step stacking primary-piece-list)))
+           (next-stack (next-state-stack states-of-next-step stacking)))
       ;; format after once list
       (format-search-status-after next-stack)
       ;; HTML
       (write-piece-list-as-html 
-       (mapcar #'(lambda (state) (assocdr :frame state)) next-stack))
+       (mapcar #'(lambda (state) (fs-frame-piece state)) next-stack))
       ;; finish or recursive
       (cond ((null next-stack) ;; no methods
              (format t "there is no solutions. IDs: ~A~%" (mapcar #'piece-id primary-piece-list))
              nil)
-            ((zero-shape-piece-p (assocdr :frame (car next-stack)))
+            ((zero-shape-piece-p (fs-frame-piece (car next-stack)))
              ;; car is solution, however return all
              next-stack)
             (t ;; search-next
              (search-solution-aux next-stack primary-piece-list)))
       )))
-
 
 (defun search-solution-from-prime-pieces (whole-primary-piece-list)
   (let* ((primary-pieces (remove-if-not #'primary-piece-p whole-primary-piece-list))
@@ -120,66 +139,18 @@
               ;;
               (none-frame-pieces (remove frame-piece primary-pieces :test #'equalp))
               (stack-of-states_t0
-                (list `((:frame . ,frame-piece))))
+                (list (make-fs-from-piece frame-piece none-frame-pieces)))
               (solution-and-paths (search-solution-aux stack-of-states_t0 none-frame-pieces)))
-         (mapcar #'(lambda (s) (assocdr :frame s)) solution-and-paths)
+         (mapcar #'(lambda (s) (fs-frame-piece s)) solution-and-paths)
 )))))
 
 
 
 ;;;; BFS (delta_edge > 2)
 
+#|
 (defparameter *state1*
   `(;; list of state
     (:evaluation-of-edge 0)
     (:piece (piece))))
-
-;;(defun bfs-search-solution-aux (state-priority-queue primary-piece-list)
-;;(let* (next-)
-;;(cond (
-
-#|
-(defun bfs-search-solution-aux (stack-of-states primary-piece-list)
-  (let* ((state (car stack-of-states))
-         (stacking (cdr stack-of-states)))
-    ;; format before once list 
-    (format-search-status-before state primary-piece-list)
-    (let* ((states-of-next-step (states-of-next-step-from-1-state state primary-piece-list))
-           (next-stack (next-state-stack states-of-next-step stacking primary-piece-list)))
-      ;; format after once list
-      (format-search-status-after next-stack)
-      ;; HTML
-      (write-piece-list-as-html 
-       (mapcar #'(lambda (state) (assocdr :frame state)) next-stack))
-      ;; finish or recursive
-      (cond ((null next-stack) ;; no methods
-             (format t "there is no solutions. IDs: ~A~%" (mapcar #'piece-id primary-piece-list))
-             nil)
-            ((zero-shape-piece-p (assocdr :frame (car next-stack)))
-             ;; car is solution, however return all
-             next-stack)
-            (t ;; search-next
-             (bfs-search-solution-aux next-stack primary-piece-list)))
-      )))
-
-
-
-(defun bfs-search-solution-from-prime-pieces (whole-primary-piece-list)
-  (let* ((primary-pieces (remove-if-not #'primary-piece-p whole-primary-piece-list))
-         (frame-pieces   (remove-if-not #'(lambda (p) (shape-minus-p (piece-pm-sign p)))
-                                        primary-pieces)))
-    (cond
-      ((not (= 1 (length frame-pieces)))
-       (warn (format nil "whole-piece-list has multiple frames. IDs: ~A~%"
-                     (mapcar #'piece-id frame-pieces)))
-       nil)
-      (t 
-       (let* ((frame-piece    (car frame-pieces))
-              ;;
-              (none-frame-pieces (remove frame-piece primary-pieces :test #'equalp))
-              (stack-of-states_t0
-                (list `((:frame . ,frame-piece))))
-              (solution-and-paths (bfs-search-solution-aux stack-of-states_t0 none-frame-pieces)))
-         (mapcar #'(lambda (s) (assocdr :frame s)) solution-and-paths)
-         )))))
 |#
