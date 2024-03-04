@@ -58,6 +58,7 @@
 
 (defun all-synthesizeables-of-pieces-to-piece_del-if-e-jam-edge (piece1 piece-list)
   "all-synthesizeable-patterns-of-pieces-to-piece_delete-if-exists-jammed-edge"
+  ;; piece-list need to be unused primary pieces
   (let ((synths-of-each-edges
            (mapcar #'(lambda (nth_point-n) (all-synthesizeable-patterns-of-pieces-to-piece-point
                                             nth_point-n piece1 piece-list))

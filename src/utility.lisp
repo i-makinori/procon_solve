@@ -4,6 +4,10 @@
 
 ;;;; utility
 
+;; list
+(defun first-n (n lst)
+  (subseq lst 0 (min (length lst) n)))
+
 ;; assoc
 (defun assocdr (item alist)
   (cdr (assoc item alist))) 
