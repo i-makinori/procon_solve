@@ -28,6 +28,13 @@
 ...
 |#
 
+
+
+(defun whole-set-of-point-and-edge-selections-pieces-to-frame (frame-piece piece-list)
+  (flatten
+   (mapcar #'(lambda (p) (whole-set-of-point-and-edge-selections-piece-piece frame-piece p))
+           piece-list)))
+
 (defun all-synthesizeable-patterns-of-pieces-to-frame (frame piece-list)
   (flatten
    (remove nil 
@@ -35,10 +42,33 @@
                    (whole-set-of-point-and-edge-selections-pieces-to-frame
                     frame piece-list)))))
 
-(defun whole-set-of-point-and-edge-selections-pieces-to-frame (frame-piece piece-list)
+
+
+;;; all synthesizeable patterns (piece as point-list to piece)
+
+(defun all-synthesizeable-patterns-of-pieces-to-piece-point (piece1-nth_point-n piece1 piece-list)
   (flatten
-   (mapcar #'(lambda (p) (whole-set-of-point-and-edge-selections-piece-piece frame-piece p))
-           piece-list)))
+   (remove nil
+           (mapcar
+            #'synthesize-piece-and-piece-by-selection-piece-or-fail
+            (flatten (mapcar #'(lambda (piece2) (whole-set-of-point-and-edge-selections-piece-piece
+                                                 piece1 piece2
+                                                 :piece1-by-nth_point-only piece1-nth_point-n))
+                             piece-list))))))
+
+(defun all-synthesizeables-of-pieces-to-piece_del-if-e-jam-edge (piece1 piece-list)
+  "all-synthesizeable-patterns-of-pieces-to-piece_delete-if-exists-jammed-edge"
+  (let ((synths-of-each-edges
+           (mapcar #'(lambda (nth_point-n) (all-synthesizeable-patterns-of-pieces-to-piece-point
+                                            nth_point-n piece1 piece-list))
+                   (from-m-to-n-list 0 (1- (length (piece-points piece1)))))))
+    (format t "LenLen: ~A~%" (mapcar #'length synths-of-each-edges))
+    (cond ((member nil synths-of-each-edges) ;; Exists nil?
+           (format t "Cut~%")
+           nil)
+          (t
+           (format t "Deepin~%")
+           (flatten synths-of-each-edges)))))
 
   
 ;;; 

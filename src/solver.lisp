@@ -4,8 +4,6 @@
 ;;;; solver
 
 
-
-
 ;;;; search solution
 
 ;; minus to frame method
@@ -16,8 +14,9 @@
  (cons (car *example-problem-9*) (cdr *example-problem-9*)))
 |#
 
-(defun remove-piece-list-from-synthesized-piece-list
+(defun filter-piece-list-from-synthesized-piece-list
     (state primary-piece-list synthesized-piece-list)
+  ;; call filter functions, and sort.
   (remove-plus-piece-overs-frame-from-synthesized-piece-list
    (remove-no-future-shaped-piece-from-synthesized-piece-list
     (remove-congruent-from-synthesized-piece-list
@@ -43,10 +42,11 @@
             (length primary-piece-using))
     (let* (;; Synthesized Piece List
            (spl-all-combinations
-             (all-synthesizeable-patterns-of-pieces-to-frame
+             ;;(all-synthesizeable-patterns-of-pieces-to-frame
+             (all-synthesizeables-of-pieces-to-piece_del-if-e-jam-edge
               (assocdr :frame state) primary-piece-list))
            (spl-filtered ;; patterns-of-step
-             (remove-piece-list-from-synthesized-piece-list
+             (filter-piece-list-from-synthesized-piece-list
               state primary-piece-list spl-all-combinations))
            (states-of-step! (mapcar #'(lambda (next-frame)
                                         `((:frame . ,next-frame)))
@@ -56,7 +56,7 @@
                         (append states-of-step! stacking)
                         primary-piece-list)))
       ;; debugging format
-      (format t "~A" (mapcar #'(lambda (s) (assocdr :evaluation-value s)) next-stack))
+      ;;(format t "~A" (mapcar #'(lambda (s) (assocdr :evaluation-value s)) next-stack))
       (format t "~%~%")
       ;; HTML
       (write-piece-list-as-html
