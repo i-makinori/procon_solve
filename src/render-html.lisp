@@ -9,7 +9,7 @@
 ;; SVG parts
 
 (defun tml-coord-text (number)
-  (float (* number *display-scale-multiply*)))
+  (round (* number *display-scale-multiply*)))
 
 (defun point-list-into-svg-polygon (point-list)
   (let* ((points-text
@@ -123,10 +123,27 @@
                     (transform-piece trans2)
                     (cons (transform-transformation-matrix trans2) transformation-matrixes)))))))
 
+(defun piece-svg-viewbox-string (piece)
+  ;; viewBox="X_min Y_min X_length Y_length" (without dimentions).
+  ;; <svg viewBox="0 0 200 200"> ;; , for example.
+  (let* ((pd ;; Piece_Domain
+           (mapcar #'tml-coord-text (shape-domain-rect (piece-coord-points piece))))
+         (pad *display-scale-multiply*) ;; padding
+         ;; viw box ranges
+         (x_min (- (min 0 (domain-rect-x-min pd)) (* pad 1)))
+         (y_min (- (min 0 (domain-rect-y-min pd)) (* pad 1)))
+         (x_max (+ (max 0 (domain-rect-x-max pd)) (* pad 2)))
+         (y_max (+ (max 0 (domain-rect-y-max pd)) (* pad 2)))
+         (x_len (- x_max x_min))
+         (y_len (- y_max y_min)))
+    (format nil "viewbox='~A ~A ~A ~A'" x_min y_min x_len y_len)))
+
+
 
 (defun piece-into-svg-element (piece)
   (let* (;; meta
-         (template "<svg id='~A' width='600' height='600'>~%~A~%~A~%</svg>~%")
+         (template "<svg id='~A' ~A width='600' height='600'>~%~A~%~A~%</svg>~%")
+         (viewbox (piece-svg-viewbox-string piece))
          (id-text (piece-id-tml-string piece))
          (elm-memo "<circle r='5' cx='0' cy='0' fill='red' />~%") ;; origin point
          ;; elements
@@ -135,7 +152,7 @@
            ;;(piece-into-svg-element-aux piece))
            (piece-into-svg-element-aux1 piece (list *identity-matrix-3x3*))))
     ;;(format nil template id-text elm-shape elm-memo )))
-    (format nil template id-text
+    (format nil template id-text viewbox
             tree-elements elm-memo)))
 
 (defun piece-into-html-describe (piece)
