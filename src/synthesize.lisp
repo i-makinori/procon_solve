@@ -5,6 +5,13 @@
 
 ;;; group set of points selections for synthesize
 
+(defstruct sy-select
+  ;; selection for synthesize
+  ;; x of {:px piece, :nx nth_point, :pmx plus-minus} ++ y of it
+  (:p1 nil) (:n1 nil) (:pm1 nil) 
+  (:p2 nil) (:n2 nil) (:pm2 nil) 
+  )
+
 (defun whole-set-of-point-and-edge-selections-piece-piece 
     (piece1 piece2 &key (piece1-by-nth_point-only nil))
   (let ((combinations
@@ -20,23 +27,24 @@
            (list '+1 '-1))))
   (mapcar
    #'(lambda (cp12_pm12) ;; [cp1, cp2, pm1, pm2]
-       `((:p1 . ,piece1) (:n1 . ,(nth 0 cp12_pm12)) (:pm1 . ,(nth 2 cp12_pm12))
-         (:p2 . ,piece2) (:n2 . ,(nth 1 cp12_pm12)) (:pm2 . ,(nth 3 cp12_pm12))))
+       (make-sy-select :p1  piece1 :n1 (nth 0 cp12_pm12) :pm1 (nth 2 cp12_pm12)
+                       :p2  piece2 :n2 (nth 1 cp12_pm12) :pm2 (nth 3 cp12_pm12)))
    combinations)))
 
+
+;;; note: test
 #|
-;;; note: test 
 (defun tester-of-whole-set-of-point-and-edge-selections-piece-piece*
    (&optional (index_piece_i 1) (index_piece_j 2) (by-nth_point-only nil))
   (let ((piece_i (nth index_piece_i *example-problem-10*))
         (piece_j (nth index_piece_j *example-problem-10*)))
     (mapcar #'(lambda (s)
-                (mapcar #'(lambda (key) (assocdr key s))
-                        '(:n1 :pm1 :n2 :pm2)))
+                (mapcar #'(lambda (key-f) (funcall key-f s))
+                        (list #'sy-select-n1 #'sy-select-pm1 #'sy-select-n2 #'sy-select-pm2)))
             (whole-set-of-point-and-edge-selections-piece-piece
              piece_i piece_j
              :piece1-by-nth_point-only by-nth_point-only
-            ))))
+             ))))
 |#
 
 ;;; transform by point selection
@@ -96,14 +104,14 @@
          (transforms-piece1
            (make-transforms-by-point-and-edge-selection-parameters
             nil
-            (assocdr :n1 sel) (assocdr :pm1 sel) (assocdr :p1 sel)
-            (assocdr :n2 sel) (assocdr :pm2 sel) (assocdr :p2 sel)))
+            (sy-select-n1 sel) (sy-select-pm1 sel) (sy-select-p1 sel)
+            (sy-select-n2 sel) (sy-select-pm2 sel) (sy-select-p2 sel)))
          ;; piece-moves
          (transforms-piece2
            (make-transforms-by-point-and-edge-selection-parameters
             t
-            (assocdr :n2 sel) (assocdr :pm2 sel) (assocdr :p2 sel)
-            (assocdr :n1 sel) (assocdr :pm1 sel) (assocdr :p1 sel))))
+            (sy-select-n2 sel) (sy-select-pm2 sel) (sy-select-p2 sel)
+            (sy-select-n1 sel) (sy-select-pm1 sel) (sy-select-p1 sel))))
     (cons (car transforms-piece1) (identity transforms-piece2))))
 
 (defun transform-shape-by-transformation-matrix
@@ -188,7 +196,7 @@
          (tmas (mapcar #'transform-transformation-matrix tms))
          ;; ShapeS before transform
          (ss (mapcar #'piece-shape 
-                     (cons (assocdr :p1 sel) (list (assocdr :p2 sel) (assocdr :p2 sel)))))
+                     (cons (sy-select-p1 sel) (list (sy-select-p2 sel) (sy-select-p2 sel)))))
          ;; Spape'(Dush) eS. shapes after transforms.
          (sds (mapcar #'(lambda (shape transform)
                           (funcall shape-transformer shape transform))
