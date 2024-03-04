@@ -82,6 +82,11 @@
 (defun piece-id-tml-string (piece)
   (format nil "Piece_~A_~A_" (piece-id piece) *tml-id*))
 
+(defun piece-id-tml-string-svg (piece)
+  (format nil "svg_~A" (piece-id-tml-string piece)))
+
+(defun piece-id-tml-string-describe (piece)
+  (format nil "describe_~A" (piece-id-tml-string piece)))
 
 #|
 (defun piece-into-svg-element-aux (piece)
@@ -126,8 +131,17 @@
 (defun piece-svg-viewbox-string (piece)
   ;; viewBox="X_min Y_min X_length Y_length" (without dimentions).
   ;; <svg viewBox="0 0 200 200"> ;; , for example.
-  (let* ((pd ;; Piece_Domain
-           (mapcar #'tml-coord-text (shape-domain-rect (piece-coord-points piece))))
+  (let* ((max-piece
+           (cond ((or (shape-minus-p (piece-shape piece))
+                      (zero-shape-p  (piece-shape piece)))
+                  (frame-piece-of-primary-list
+                   (list-of-primary-piece-list-of-synthesized-piece piece)))
+                 ((shape-plus-p (piece-shape piece))
+                  piece)))
+         (domain-rect ((lambda (cs) (if (null cs) '(0 0 0 0) (shape-domain-rect cs)))
+                       (piece-coord-points max-piece)))
+         (pd ;; Piece_Domain
+           (mapcar #'tml-coord-text domain-rect))
          (pad *display-scale-multiply*) ;; padding
          ;; viw box ranges
          (x_min (- (min 0 (domain-rect-x-min pd)) (* pad 1)))
@@ -139,12 +153,11 @@
     (format nil "viewbox='~A ~A ~A ~A'" x_min y_min x_len y_len)))
 
 
-
 (defun piece-into-svg-element (piece)
   (let* (;; meta
          (template "<svg id='~A' ~A width='600' height='600'>~%~A~%~A~%</svg>~%")
          (viewbox (piece-svg-viewbox-string piece))
-         (id-text (piece-id-tml-string piece))
+         (id-text (piece-id-tml-string-svg piece))
          (elm-memo "<circle r='5' cx='0' cy='0' fill='red' />~%") ;; origin point
          ;; elements
          ;;(elm-shape (shape-svg-element-text (piece-shape piece)))
@@ -158,7 +171,9 @@
 (defun piece-into-html-describe (piece)
   (let* ((coords (piece-coord-points piece))
          (id (piece-id piece)))
-    (format nil "Length: ~A [n edge points],~%id: ~A,~%shapee: ~A"
+    (format nil
+            "<pre id='~A'>~%Length: ~A [n edge points],~%id: ~A,~%shapee: ~A</pre>"
+            (piece-id-tml-string-describe piece)
             (length coords) id coords)))
 
 (defun html-of-piece-list (piece-list)
