@@ -73,8 +73,8 @@
 (defun next-state-stack (states-new states-rest primary-piece-list)
   ;; todo: merge sort. because states rest are sorted and values stored in logically.
   (sorted-states-by-evaluation-function ;; sort is unneeded if sorted before
-   ;;#'evaluation-value-by-delta-points_sum
-   #'evaluation-value-by-delta-points_delta
+   #'evaluation-value-by-delta-points_sum
+   ;;#'evaluation-value-by-delta-points_delta
    (append states-new states-rest)
    primary-piece-list)
 

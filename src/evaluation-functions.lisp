@@ -38,13 +38,14 @@
           (if (or (null (piece-coord-points piece_t1))
                   (null (piece-coord-points piece_t2)))
               0
-              (+ ;; body term
+              (+ 
+               ;; body term
                (+ (length (piece-coord-points piece_t1)))
                (+ (length (piece-coord-points piece_t1)))
                (- (length (piece-coord-points piece_root)))
                ;; fix by step
-               (+ (/ 1 (piece-id piece_root)
-                     ))))))))
+               ;;(+ (/ 1 (piece-id piece_root)))
+                     ))))))
 
 
 ;;; evaluation functions for evaluate values
