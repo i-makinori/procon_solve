@@ -69,8 +69,7 @@
   (sorted-states-by-evaluation-function
    states-new states-rest))
 
-
-;;; Beam Search with "cutten access to gradient stack"
+;;; 
 
 (defparameter *step-function*
   ;;#'all-synthesizeable-patterns-of-pieces-to-frame
@@ -141,6 +140,133 @@
                    (null (nthcdr n next-stack-by-previous))) ;; no future
                (from-m-to-n-list 0 (- n 1)))))
 
+;;; Beam Search with "cutten access to gradient stack"
+
+
+(defun insert (thing into &key (older-function #'<))
+  "if you use insert for the as sort, into need to be sorted"
+  (labels ((aux (rest memo)
+             (cond 
+               ((or (null rest)
+                    (funcall older-function thing (car rest)))
+                (append (reverse (cons thing memo)) rest))
+               (t 
+                (aux (cdr rest) (cons (car rest) memo))))))
+    (aux into '())))
+
+
+(defun insert-state-into-stack-by-grad (fs stack-by-grad) ;; (state)
+  (insert fs stack-by-grad
+          :older-function #'(lambda (fs stack_n)
+                              (> (fs-d/dt-evaluation-value fs)
+                                 (fs-d/dt-evaluation-value stack_n)))))
+
+
+
+(defun insert-state-list-into-stack-by-grad (fs-list stack-by-grad) 
+#|
+  (stable-sort (append fs-list stack-by-grad)
+        #'(lambda (fs1 fs2)
+            (> (fs-d/dt-evaluation-value fs1)
+               (fs-d/dt-evaluation-value fs2)))))
+|#
+
+  (reduce #'(lambda (fs stack-by-grad)
+              (insert-state-into-stack-by-grad 
+               fs stack-by-grad))
+          fs-list :initial-value stack-by-grad 
+                  :from-end t))
+
+
+(defun search-solution-aux-grad-beam (beam-queue primary-piece-list gradient-stack)
+  (let* (;; 
+         (beam-of-this-step (car beam-queue))
+         (rest-queue (cdr beam-queue))
+         ;;
+         (state-of-this-step (car (beam-stack beam-of-this-step)))
+         (stacking-of-this-step (cdr (beam-stack beam-of-this-step))))
+    ;; format before once list 
+    (format t "  , ~A~%"
+            (mapcar #'(lambda (s) (fs-d/dt-evaluation-value s))
+                    (first-n 30 gradient-stack)))
+    (format-search-status-before state-of-this-step primary-piece-list)
+    (format t "d/dt: ~A~%" (fs-d/dt-evaluation-value state-of-this-step))
+    (let* ((states-of-next-step (states-of-next-step-from-1-state state-of-this-step
+                                                                  primary-piece-list))
+           (next-stack-of-this-step (next-state-stack states-of-next-step stacking-of-this-step))
+           ;;
+           (next-queues-by-this-step
+             (select-head-n-of-stack-into-n-beams
+              (- *beam-width* (length beam-queue) -1) ;; -1 is this-step
+              next-stack-of-this-step
+              beam-of-this-step))
+           (next-queue (append rest-queue next-queues-by-this-step))
+           ;; 
+           (next-gradient-stack
+             ;;(first-n *width-cut-const*
+             (insert-state-list-into-stack-by-grad next-stack-of-this-step gradient-stack)
+             ))
+      ;; reset gradient by local
+      ;; format after once list
+      (format-search-status-after next-stack-of-this-step)
+      (format t "beam {type, depth}: {~A, ~A}~%"
+              (beam-index beam-of-this-step)
+              (beam-depth beam-of-this-step))
+      (format t "grad length: ~A~%"
+              (length next-gradient-stack))
+      (format t "  {first_30-d/dt ...}: {~A ...} ~%"
+              (mapcar #'(lambda (s) (fs-d/dt-evaluation-value s))
+                      (first-n 30 next-gradient-stack)))
+      ;; HTML
+      (write-piece-list-as-html 
+       (mapcar #'(lambda (state) (fs-frame-piece state)) next-stack-of-this-step))
+      ;;(incf *n-search-iter*)
+      (cond ((null next-stack-of-this-step) ;; no methods
+             (format t "there is no solutions. IDs: ~A~%" (mapcar #'piece-id primary-piece-list))
+             nil)
+            ((state-is-solution-p (car next-stack-of-this-step))
+             ;; car is solution, however return all
+             next-stack-of-this-step
+             )
+            ;; todo: cut by n-count and restart again
+            ;;((> *n-search-iter* *n-search-iter-max*)
+            ;;(format t "could not get solutions in ~A trial.~%" *n-search-iter*)
+            ;;nil)
+            (t ;; search-next
+             (search-solution-aux-grad-beam next-queue primary-piece-list next-gradient-stack))))))
+
+(defun search-solution-grad-beam (whole-primary-piece-list)
+  (let* ((primary-pieces (remove-if-not #'primary-piece-p whole-primary-piece-list))
+         (frame-pieces   (remove-if-not #'(lambda (p) (shape-minus-p (piece-pm-sign p)))
+                                        primary-pieces)))
+    (setf *n-search-iter* 0)
+    (setf *beam-current-index* 0)
+
+    (cond
+      ((not (= 1 (length frame-pieces)))
+       (warn (format nil "whole-piece-list has multiple frames. IDs: ~A~%"
+                     (mapcar #'piece-id frame-pieces)))
+       nil)
+      (t 
+       (let* ((frame-piece    (car frame-pieces))
+              ;;
+              (none-frame-pieces
+                (list-of-unused-primary-piece-list-of-synthesized-piece frame-piece primary-pieces))
+              (stack0 (list (make-fs-from-piece frame-piece none-frame-pieces)))
+              ;;
+              (stack-of-states_t0
+                (list (make-beam :index 0
+                                 :stack stack0)))
+              (gradient-stack_t0
+                (insert-state-list-into-stack-by-grad stack0 '()))
+              (solution-and-paths (search-solution-aux-grad-beam
+                                   stack-of-states_t0 none-frame-pieces gradient-stack_t0)))
+         
+         (mapcar #'(lambda (s) (fs-frame-piece s)) solution-and-paths)
+)))))
+    
+
+;;; Beam Search
 
 (defun search-solution-aux-beam (beam-queue primary-piece-list)
   (let* (;; 
@@ -212,70 +338,6 @@
                                    stack-of-states_t0 none-frame-pieces)))
          (mapcar #'(lambda (s) (fs-frame-piece s)) solution-and-paths)
 )))))
-
-;;; Beam Search
-
-#|
-(defun select-head-n-of-stack-into-n-beams (n next-stack-by-previous beam-previous)
-   (mapcar
-    #'(lambda (n) n
-
-        (let ((next-index (if (> n 0)
-                              (progn (incf *beam-current-index*)
-                                     *beam-current-index*)
-                              (beam-index beam-previous))))
-          (make-beam :index next-index
-                     :depth (1+ (beam-depth beam-previous))
-                     :stack (nthcdr n next-stack-by-previous))))
-    (remove-if #'(lambda (n) 
-                   (null (nthcdr n next-stack-by-previous))) ;; no future
-               (from-m-to-n-list 0 (- n 1)))))
-
-(defun search-solution-aux-beam (beam-queue primary-piece-list)
-  (let* (;; 
-         (beam-of-this-step (car beam-queue))
-         (rest-queue (cdr beam-queue))
-         ;;
-         (state-of-this-step (car (beam-stack beam-of-this-step)))
-         (stacking-of-this-step (cdr (beam-stack beam-of-this-step))))
-    ;; format before once list 
-    (format-search-status-before state-of-this-step primary-piece-list)
-    (let* ((states-of-next-step (states-of-next-step-from-1-state state-of-this-step
-                                                                  primary-piece-list))
-           (next-stack-of-this-step (next-state-stack states-of-next-step stacking-of-this-step))
-           ;;
-           (next-queues-by-this-step
-             (select-head-n-of-stack-into-n-beams
-              (- *beam-width* (length beam-queue) -1) ;; -1 is this-step
-              next-stack-of-this-step
-              beam-of-this-step))
-                     
-           (next-queue (append rest-queue next-queues-by-this-step)))
-      ;; format after once list
-      (format-search-status-after next-stack-of-this-step)
-      (format t "beam {type, depth}: {~A, ~A}~%"
-              (beam-index beam-of-this-step)
-              (beam-depth beam-of-this-step))
-
-      ;; HTML
-      (write-piece-list-as-html 
-       (mapcar #'(lambda (state) (fs-frame-piece state)) next-stack-of-this-step))
-      ;;(incf *n-search-iter*)
-      (cond ((null next-stack-of-this-step) ;; no methods
-             (format t "there is no solutions. IDs: ~A~%" (mapcar #'piece-id primary-piece-list))
-             nil)
-            ((state-is-solution-p (car next-stack-of-this-step))
-             ;; car is solution, however return all
-             next-stack-of-this-step
-             )
-            ;; todo: cut by n-count and restart again
-            ;;((> *n-search-iter* *n-search-iter-max*)
-            ;;(format t "could not get solutions in ~A trial.~%" *n-search-iter*)
-            ;;nil)
-            (t ;; search-next
-             (search-solution-aux-beam next-queue primary-piece-list))))))
-|#
-
 
 
 ;;;; DFS Greede
