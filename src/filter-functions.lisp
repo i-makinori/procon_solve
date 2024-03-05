@@ -330,7 +330,7 @@
   ;; todo: rewrite stack filter for gradient_stack by this function
   ;; call filter functions
   (first-n
-   *width-cut-const* ;; for state
+   *beam-stack-width-const*
    (remove-plus-piece-overs-frame-from-state-list
     (remove-no-future-state-from-state-list
      (remove-by-evaluation-value

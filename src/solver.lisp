@@ -108,7 +108,8 @@
       0))
 
 
-(defparameter *width-cut-const* 1000 "max stack width for search")
+(defparameter *beam-stack-width-const* 1000 "max stack width for search of its beam")
+(defparameter *grad-stack-width-const* 1000 "max stack width for search of its score memo(grad)")
 
 (defparameter *n-search-iter* 0)
 (defparameter *n-search-iter-max* 30)
@@ -286,7 +287,7 @@
                 (next-state-stack states-of-next-step stacking-of-this-step))
               ;;
               (next-gradient-stack
-                (first-n *width-cut-const* ;; width for gradient
+                (first-n *grad-stack-width-const*
                          (insert-state-list-into-stack-by-grad ;; insert list of states
                           next-stack-of-this-step gradient-stack)))
               ;;
