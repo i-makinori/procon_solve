@@ -216,7 +216,7 @@
   ;; lim (n->infinity) => (f(n)->C) , C such as +2
   (setf (fs-d/dt-evaluation-value fs)
         ((lambda (v)
-           (* v (/ 1 (+ 1 0.05))))
+           (* v (/ 1 (+ 1 0.05)))) ;; V_next = V_now * 1 / (1+ε)
          (fs-d/dt-evaluation-value fs)))
   fs)
 
@@ -228,8 +228,7 @@
          ;;
          (state-of-this-step (car (beam-stack beam-of-this-step)))
          (stacking-of-this-step (cdr (beam-stack beam-of-this-step))))
-    ;;
-    (cond
+    (cond ;; not enough beams
       ((< (length beam-queue) *beam-width*)
        (format t "====== new beam ======~%")
        (incf *beam-current-index*)
@@ -243,17 +242,14 @@
                  (identity (cdr gradient-stack)))))
          (search-solution-aux-grad-beam (append beam-queue (list new-beam))
                                         primary-piece-list next-gradient-stack)))
-      ((> (beam-depth beam-of-this-step) *n-search-iter-max*)
+      ((> (beam-depth beam-of-this-step) *n-search-iter-max*) ;; too deep
        (format t "======= restart beam =======~%")
-       (search-solution-aux-grad-beam rest-queue
-                                      primary-piece-list gradient-stack))
-      (t
-       ;; forward beam if beam depth is shallow
+       (search-solution-aux-grad-beam rest-queue primary-piece-list gradient-stack))
+      (t ;; otherwise
        ;; format before once list 
        (format-search-status-before state-of-this-step primary-piece-list)
        (format t "beam {type, depth}: {~A, ~A}~%"
-               (beam-index beam-of-this-step)
-               (beam-depth beam-of-this-step))
+               (beam-index beam-of-this-step) (beam-depth beam-of-this-step))
        (format t "d/dt: ~A~%" (fs-d/dt-evaluation-value state-of-this-step))
        (let* ((states-of-next-step (states-of-next-step-from-1-state 
                                     state-of-this-step primary-piece-list))
@@ -275,7 +271,14 @@
                          (first-n 20 next-gradient-stack)))
          ;; HTML
          (write-piece-list-as-html 
-          (mapcar #'(lambda (state) (fs-frame-piece state)) next-stack-of-this-step))
+          (mapcar #'(lambda (state) (fs-frame-piece state)) next-stack-of-this-step)
+          :file-name "piece-list.html")
+         (write-piece-list-as-html 
+          (mapcar #'(lambda (state) (fs-frame-piece state)) gradient-stack)
+          :file-name "gradient-list.html")
+
+         ;;next-stack-of-this-step))
+         ;; Call nexts or gool
          (cond
            ((null next-stack-of-this-step) ;; no methods in this beam's stack
             (format t "=== the Beam_n is Cut By Dead Twig ===~%")
@@ -295,16 +298,21 @@
   (let* ((primary-pieces (remove-if-not #'primary-piece-p whole-primary-piece-list))
          (frame-pieces   (remove-if-not #'(lambda (p) (shape-minus-p (piece-pm-sign p)))
                                         primary-pieces)))
+    ;; variables
     (setf *n-search-iter* 0)
     (setf *beam-current-index* 0)
-    (setf *n-search-iter-max* 2) ;; n:: depth
+    ;; parameters
+    (setf *beam-width* 6)
+    (setf *n-search-iter-max* 10) ;; n:: depth
 
+    ;; handle problem forms
     (cond
       ((not (= 1 (length frame-pieces)))
        (warn (format nil "whole-piece-list has multiple frames. IDs: ~A~%"
                      (mapcar #'piece-id frame-pieces)))
        nil)
-      (t 
+      (t
+       ;; call search-aux
        (let* ((frame-piece    (car frame-pieces))
               ;;
               (none-frame-pieces
