@@ -37,6 +37,7 @@
              ;; solver
              (:file "search-dfs")
              (:file "search-beam")
+             (:file "search-grad-beam")
              ;;(:file "solver")
              ;; SVG viwer
              (:file "render-html")

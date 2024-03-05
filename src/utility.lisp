@@ -8,6 +8,16 @@
 (defun first-n (n lst)
   (subseq lst 0 (min (length lst) n)))
 
+(defun insert (thing into &key (older-function #'<))
+  "insert thing into list. 
+ if you use insert for the as sort, into need to be sorted"
+  (labels ((aux (rest memo)
+             (cond  ((or (null rest)
+                         (funcall older-function thing (car rest)))
+                     (append (reverse (cons thing memo)) rest))
+                    (t (aux (cdr rest) (cons (car rest) memo))))))
+    (aux into '())))
+
 ;; assoc
 (defun assocdr (item alist)
   (cdr (assoc item alist))) 
