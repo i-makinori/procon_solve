@@ -126,21 +126,20 @@
   (zero-shape-piece-p (fs-frame-piece fs)))
 
 (defun select-head-n-of-stack-into-n-beams (n next-stack-by-previous beam-previous)
-  (remove
-   nil
    (mapcar
     #'(lambda (n) n
-        (cond ((null (nthcdr n next-stack-by-previous)) ;; no futures
-               nil)
-              (t
-               (let ((next-index (if (> n 0)
-                                     (progn (incf *beam-current-index*)
-                                            *beam-current-index*)
-                                     (beam-index beam-previous))))
-                 (make-beam :index next-index
-                            :depth (1+ (beam-depth beam-previous))
-                            :stack (nthcdr n next-stack-by-previous))))))
-    (from-m-to-n-list 0 (- n 1)))))
+
+        (let ((next-index (if (> n 0)
+                              (progn (incf *beam-current-index*)
+                                     *beam-current-index*)
+                              (beam-index beam-previous))))
+          (make-beam :index next-index
+                     :depth (1+ (beam-depth beam-previous))
+                     :stack (nthcdr n next-stack-by-previous))))
+    (remove-if #'(lambda (n) 
+                   (null (nthcdr n next-stack-by-previous))) ;; no future
+               (from-m-to-n-list 0 (- n 1)))))
+
 
 (defun search-solution-aux-beam (beam-queue primary-piece-list)
   (let* (;; 
