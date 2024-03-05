@@ -129,37 +129,37 @@
     (aux into '())))
 
 
+(defun composition-of-filters
+    (fs filters
+     &key (cut-function #'cut-function-for-evaluation-value-by-delta-points_sum))
+  ;; filter written in function composition form
+  cut-function
+  (not ;; do NOT satisfy all conditions == (not (or ...))
+   (or
+    (funcall cut-function fs)
+    (detect-no-future-state fs)
+    (find-if
+     #'(lambda (filter_n)
+         (let ((piece_fs (fs-frame-piece fs))
+               (piece_fn (fs-frame-piece filter_n)))
+           (or (detect-piece-congruent piece_fs piece_fn)
+               (detect-domain-of-plus-piece-overs-frame piece_fs piece_fn))))
+     filters))))
+
+
 (defun insert-state-into-stack-by-grad (fs stack-by-grad) ;; (state)
-  (cond (;; if filter (and ¬∃n(fs≡stack_n), 
-         ;; todo: filter by another functions (?).
-         ;; todo: rewrite this into function composition form.
-         (and (not (find-if #'(lambda (stack_n)
-                                (detect-piece-congruent (fs-frame-piece fs)
-                                                        (fs-frame-piece stack_n)))
-                       stack-by-grad)))
-         ;; then, insert
+  (cond ((composition-of-filters fs stack-by-grad)
          (insert fs stack-by-grad
                  :older-function #'(lambda (fs stack_n)
                                      (> (fs-d/dt-evaluation-value fs)
                                         (fs-d/dt-evaluation-value stack_n)))))
-        ;; otherwise, not changed
         (t stack-by-grad)))
 
 
-
-
-(defun insert-state-list-into-stack-by-grad (fs-list stack-by-grad) 
-#|
-  (stable-sort (append fs-list stack-by-grad)
-        #'(lambda (fs1 fs2)
-            (> (fs-d/dt-evaluation-value fs1)
-               (fs-d/dt-evaluation-value fs2)))))
-|#
+(defun insert-state-list-into-stack-by-grad (fs-list stack-by-grad)
   (reduce #'(lambda (fs stack-by-grad)
-              (insert-state-into-stack-by-grad 
-               fs stack-by-grad))
-          fs-list :initial-value stack-by-grad 
-                  :from-end t))
+              (insert-state-into-stack-by-grad  fs stack-by-grad))
+          fs-list :initial-value stack-by-grad  :from-end t))
 
 ;; beam 
 
@@ -214,6 +214,7 @@
                               (beam-index beam-previous))))
           (make-beam :index next-index
                      :depth (1+ (beam-depth beam-previous))
+                     ;; todo: incorrect restart node
                      ;;:stack (nthcdr n next-stack-by-previous))))
                      :stack (list (nth n next-stack-by-previous)))))
     (remove-if #'(lambda (n) 
@@ -238,8 +239,10 @@
          ;;
          (state-of-this-step (car (beam-stack beam-of-this-step)))
          (stacking-of-this-step (cdr (beam-stack beam-of-this-step))))
-    (cond ;; not enough beams
-      ((< (length beam-queue) *beam-width*)
+    (cond
+      (;; not enough beams
+       (and (< (length beam-queue) *beam-width*)
+            (car gradient-stack)) ;; exists
        (format t "====== new beam ======~%")
        (incf *beam-current-index*)
        (let* ((new-beam
@@ -252,7 +255,8 @@
                  (identity (cdr gradient-stack)))))
          (search-solution-aux-grad-beam (append beam-queue (list new-beam))
                                         primary-piece-list next-gradient-stack)))
-      ((> (beam-depth beam-of-this-step) *n-search-iter-max*) ;; too deep
+      (;; too deep
+       (> (beam-depth beam-of-this-step) *n-search-iter-max*)
        (format t "======= restart beam =======~%")
        (search-solution-aux-grad-beam rest-queue primary-piece-list gradient-stack))
       (t ;; otherwise
@@ -333,6 +337,7 @@
                                  :stack stack0)))
               (gradient-stack_t0
                 (insert-state-list-into-stack-by-grad stack0 '()))
+              ;;
               (solution-and-paths (search-solution-aux-grad-beam
                                    stack-of-states_t0 none-frame-pieces gradient-stack_t0)))
          
