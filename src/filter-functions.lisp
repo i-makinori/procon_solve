@@ -326,6 +326,8 @@
 ;;; filter states
 
 (defun filter-fs-list (fs-list state-this-step) ;; (state-list)
+  ;; todo: rewrite this into function composition form
+  ;; todo: rewrite stack filter for gradient_stack by this function
   ;; call filter functions
   (first-n
    *width-cut-const* ;; for state

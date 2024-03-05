@@ -130,10 +130,21 @@
 
 
 (defun insert-state-into-stack-by-grad (fs stack-by-grad) ;; (state)
-  (insert fs stack-by-grad
-          :older-function #'(lambda (fs stack_n)
-                              (> (fs-d/dt-evaluation-value fs)
-                                 (fs-d/dt-evaluation-value stack_n)))))
+  (cond (;; if filter (and ¬∃n(fs≡stack_n), 
+         ;; todo: filter by another functions (?).
+         ;; todo: rewrite this into function composition form.
+         (and (not (find-if #'(lambda (stack_n)
+                                (detect-piece-congruent (fs-frame-piece fs)
+                                                        (fs-frame-piece stack_n)))
+                       stack-by-grad)))
+         ;; then, insert
+         (insert fs stack-by-grad
+                 :older-function #'(lambda (fs stack_n)
+                                     (> (fs-d/dt-evaluation-value fs)
+                                        (fs-d/dt-evaluation-value stack_n)))))
+        ;; otherwise, not changed
+        (t stack-by-grad)))
+
 
 
 
@@ -144,7 +155,6 @@
             (> (fs-d/dt-evaluation-value fs1)
                (fs-d/dt-evaluation-value fs2)))))
 |#
-
   (reduce #'(lambda (fs stack-by-grad)
               (insert-state-into-stack-by-grad 
                fs stack-by-grad))
@@ -277,7 +287,6 @@
           (mapcar #'(lambda (state) (fs-frame-piece state)) gradient-stack)
           :file-name "gradient-list.html")
 
-         ;;next-stack-of-this-step))
          ;; Call nexts or gool
          (cond
            ((null next-stack-of-this-step) ;; no methods in this beam's stack
