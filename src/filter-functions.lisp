@@ -326,9 +326,9 @@
 ;;; filter states
 
 (defun filter-fs-list (fs-list state-this-step) ;; (state-list)
-  ;; call filter functions, and sort.
+  ;; call filter functions
   (first-n
-   *width-cut-const*
+   *width-cut-const* ;; for state
    (remove-plus-piece-overs-frame-from-state-list
     (remove-no-future-state-from-state-list
      (remove-by-evaluation-value
