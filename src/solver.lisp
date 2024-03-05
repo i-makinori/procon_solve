@@ -52,10 +52,10 @@
 
 (defun format-search-status-after (next-stack)
   next-stack
-  (format t "EvalValues:")
-  (mapcar #'(lambda (s) (format t " ~,4f" (fs-evaluation-value s)))
-          (first-n 20 next-stack))
-  (format t "~%")
+  ;;(format t "EvalValues:")
+  ;;(mapcar #'(lambda (s) (format t " ~,4f" (fs-evaluation-value s)))
+  ;;(first-n 20 next-stack))
+  ;;(format t "~%")
   nil)
 
 

@@ -63,12 +63,12 @@
            (mapcar #'(lambda (nth_point-n) (all-synthesizeable-patterns-of-pieces-to-piece-point
                                             nth_point-n piece1 piece-list))
                    (from-m-to-n-list 0 (1- (length (piece-points piece1)))))))
-    (format t "LenLen: ~A~%" (mapcar #'length synths-of-each-edges))
+    ;;(format t "LenLen: ~A~%" (mapcar #'length synths-of-each-edges))
     (cond ((member nil synths-of-each-edges) ;; Exists nil?
-           (format t "Cut~%")
+           ;;(format t "Cut~%")
            nil)
           (t
-           (format t "Deepin~%")
+           ;;(format t "Deepin~%")
            (flatten synths-of-each-edges)))))
 
   
