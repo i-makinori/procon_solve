@@ -33,29 +33,6 @@
             (mapcar #'piece-id (fs-primary-used state-of-this-step))
             (length (fs-primary-used state-of-this-step))))
 
-#|
-(defun filter-piece-list-from-synthesized-piece-list
-    (state primary-piece-list synthesized-piece-list)
-  ;; call filter functions, and sort.
-  (remove-plus-piece-overs-frame-from-synthesized-piece-list
-   (remove-no-future-shaped-piece-from-synthesized-piece-list
-    (remove-congruent-from-synthesized-piece-list synthesized-piece-list)
-    primary-piece-list)
-   ;; todo. this is once old frame. frame of this step is may be better
-   (fs-frame-piece state)))
-|#
-
-(defun filter-fs-list (fs-list state-this-step) ;; (state-list)
-  ;; call filter functions, and sort.
-  (first-n
-   *width-cut-const*
-   (remove-plus-piece-overs-frame-from-state-list
-    (remove-no-future-state-from-state-list
-     (remove-congruent-from-state-list fs-list))
-    ;; todo. this is once old frame. frame of this step is may be better
-    state-this-step)))
-
-
 (defun states-of-next-step-from-1-state (state-this-step primary-piece-list)
   (let* (;; Synthesized Piece List
          (spl-all-combinations
@@ -324,7 +301,7 @@
             ((state-is-solution-p (car next-stack))
              ;; car is solution, however return all
              next-stack)
-            ((> *n-search-iter* *n-search-iter-max*)
+            ((>= *n-search-iter* *n-search-iter-max*)
              (format t "could not get solutions in ~A trial.~%" *n-search-iter*)
              nil)
             (t ;; search-next

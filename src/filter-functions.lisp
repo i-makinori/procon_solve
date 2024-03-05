@@ -271,6 +271,23 @@
              state-list))
 
 
+(defun cut-function-for-evaluation-value-by-delta-points_sum (fs)
+  (let ((n-steps (1- (length (fs-primary-used fs))))
+        ;; (n-value (fs-evaluation-value fs))
+        (n-d/dt-value (fs-d/dt-evaluation-value fs))
+        (step-const 3))
+    (if (>= n-steps step-const)
+        (< n-d/dt-value 2)
+        nil)))
+
+(defun remove-by-evaluation-value 
+  (fs-list ;; (state-list)
+   &optional (cut-function 
+              #'cut-function-for-evaluation-value-by-delta-points_sum))
+  (remove-if cut-function
+             fs-list))
+
+
 
 ;; old implement.      args synthed-piece-list
 ;; where new implement args state-list
@@ -304,3 +321,31 @@
                  (detect-domain-of-plus-piece-overs-frame synthed-piece frame-piece))
              synthesized-piece-list))
 |#
+
+
+;;; filter states
+
+(defun filter-fs-list (fs-list state-this-step) ;; (state-list)
+  ;; call filter functions, and sort.
+  (first-n
+   *width-cut-const*
+   (remove-plus-piece-overs-frame-from-state-list
+    (remove-no-future-state-from-state-list
+     (remove-by-evaluation-value
+      (remove-congruent-from-state-list fs-list)))
+    ;; todo. this is once old frame. frame of this step is may be better
+    state-this-step)))
+
+
+#|
+(defun filter-piece-list-from-synthesized-piece-list
+    (state primary-piece-list synthesized-piece-list)
+  ;; call filter functions, and sort.
+  (remove-plus-piece-overs-frame-from-synthesized-piece-list
+   (remove-no-future-shaped-piece-from-synthesized-piece-list
+    (remove-congruent-from-synthesized-piece-list synthesized-piece-list)
+    primary-piece-list)
+   ;; todo. this is once old frame. frame of this step is may be better
+   (fs-frame-piece state)))
+|#
+
