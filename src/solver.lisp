@@ -232,6 +232,20 @@
   fs)
 
 
+(defun states-of-next-step-from-1-state-additional-filter
+ (state-this-step primary-piece-list additional-filter)
+  (let* ((states-of-next-step_fat
+           (states-of-next-step-from-1-state state-this-step primary-piece-list))
+         (states-of-next-step
+           (remove-if #'(lambda (state-this-step_i)
+                          (some #'(lambda (filter-state_j)
+                                    (detect-piece-congruent (fs-frame-piece state-this-step_i)
+                                                            (fs-frame-piece filter-state_j)))
+                                additional-filter))
+                      states-of-next-step_fat)))
+    states-of-next-step))
+
+
 (defun search-solution-aux-grad-beam (beam-queue primary-piece-list gradient-stack)
   (let* (;; 
          (beam-of-this-step (car beam-queue))
@@ -265,8 +279,9 @@
        (format t "beam {type, depth}: {~A, ~A}~%"
                (beam-index beam-of-this-step) (beam-depth beam-of-this-step))
        (format t "d/dt: ~A~%" (fs-d/dt-evaluation-value state-of-this-step))
-       (let* ((states-of-next-step (states-of-next-step-from-1-state 
-                                    state-of-this-step primary-piece-list))
+       (let* ((states-of-next-step
+                (states-of-next-step-from-1-state-additional-filter
+                 state-of-this-step primary-piece-list gradient-stack))
               (next-stack-of-this-step
                 (next-state-stack states-of-next-step stacking-of-this-step))
               ;;
