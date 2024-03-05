@@ -30,11 +30,13 @@
              (:file "linear-algebra")
              (:file "collision-detection")
              (:file "synthesize")
-             ;; solve
+             ;; solver-functions
              (:file "solver-functions")
              (:file "evaluation-functions")
              (:file "filter-functions")
-             (:file "solver")
+             ;; solver
+             (:file "search-dfs")
+             ;;(:file "solver")
              ;; SVG viwer
              (:file "render-html")
              ;; test
