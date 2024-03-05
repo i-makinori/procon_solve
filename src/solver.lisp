@@ -45,11 +45,13 @@
 
 (defun filter-fs-list (fs-list state-this-step) ;; (state-list)
   ;; call filter functions, and sort.
-  (remove-plus-piece-overs-frame-from-state-list
-   (remove-no-future-state-from-state-list
-    (remove-congruent-from-state-list fs-list))
-   ;; todo. this is once old frame. frame of this step is may be better
-   state-this-step))
+  (first-n
+   *width-cut-const*
+   (remove-plus-piece-overs-frame-from-state-list
+    (remove-no-future-state-from-state-list
+     (remove-congruent-from-state-list fs-list))
+    ;; todo. this is once old frame. frame of this step is may be better
+    state-this-step)))
 
 
 (defun states-of-next-step-from-1-state (state-this-step primary-piece-list)
@@ -109,8 +111,10 @@
             (funcall *evaluation-function* fs1 primary-piece-list))
       fs1)))
 
+(defparameter *width-cut-const* 50 "max stack width for search")
+
 (defparameter *n-search-iter* 0)
-(defparameter *n-search-iter-max* 100)
+(defparameter *n-search-iter-max* 30)
 
 (defparameter *beam-width* 6)
 (defparameter *beam-current-index* 0)

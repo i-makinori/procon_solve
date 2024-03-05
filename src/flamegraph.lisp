@@ -19,4 +19,9 @@
 (in-package :puzzle-1617)
 
 (flamegraph:save-flame-graph (*flame-file*)
-  (profile-easy-problem))
+  ;;(profile-easy-problem)
+  (time (progn (search-solution-from-prime-pieces
+                           (nth 2 *problem-list*))
+                          nil))
+
+)
