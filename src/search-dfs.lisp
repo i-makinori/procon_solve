@@ -2,7 +2,12 @@
 (in-package :puzzle-1617)
 
 ;;;; Search in DFS (Depth First Search) method.
-
+;;
+;; # about DFS
+;; simple Depth First Search
+;; in one step, step takes best evaluation valued choice from next avaiable choices.
+;; other choices are stored in sorted stack.
+;;
 
 ;;; parameters and variables
 
@@ -10,6 +15,7 @@
 (defparameter *n-search-iter-max* 30) ;; parameter
 
 (defparameter *beam-stack-width-const* 1000 "max stack width for search of its beam") ;; parameter
+
 
 ;;; function configs
 
@@ -59,13 +65,14 @@
              1))
       fs1)))
 
+
 ;; checking if it is solution
 
 (defun state-is-solution-p (fs) ;; (state)
   (zero-shape-piece-p (fs-frame-piece fs)))
 
 
-;;; DFS Greede, functions of it.
+;;; functions for DFS Greede.
 
 (defun format-search-status-before (state-of-this-step primary-piece-list)
   primary-piece-list
@@ -106,7 +113,7 @@
 
 
 
-;;; DFS Greede
+;;; DFS Greede Search
 
 ;; minus to frame method
 

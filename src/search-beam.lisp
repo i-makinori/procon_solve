@@ -2,6 +2,10 @@
 (in-package :puzzle-1617)
 
 ;;;; Search in Beam method.
+;; 
+;; # about Beam Search method.
+;; n of Beams searches different branches each other parallely (in logically).
+;;
 
 ;;; parameters and variables
 
@@ -19,7 +23,7 @@
   (:stack nil))
 
 
-;;; beam functions
+;;; functions for Beam Search
 
 (defun beam-next (beam-previous next-stack-by-previous)
   ;; (make-beam :index :depth :stack)
@@ -73,6 +77,8 @@
 
 
 ;;; Beam Search
+
+;; minus to frame method
 
 (defun search-solution-aux-beam (beam-queue primary-piece-list)
   (let* (;; 
