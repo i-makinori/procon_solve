@@ -64,43 +64,46 @@
 ;; minus to frame method
 
 (defun search-solution-aux-beam (beam-queue primary-piece-list)
-  (let* (;; 
-         (beam-of-this-step (car beam-queue))
-         (rest-queue (cdr beam-queue))
-         ;;
-         (state-of-this-step (car (beam-stack beam-of-this-step)))
-         (stacking-of-this-step (cdr (beam-stack beam-of-this-step))))
-    ;; format before once list 
-    (format-search-status-before state-of-this-step primary-piece-list)
-    (format t "d/dt: ~A~%" (fs-d/dt-evaluation-value state-of-this-step))
-    (let* ((states-of-next-step (states-of-next-step-from-1-state state-of-this-step
-                                                                  primary-piece-list))
-           (next-stack-by-this-step (next-state-stack states-of-next-step stacking-of-this-step))
-           (next-beam-of-this-step (beam-next beam-of-this-step next-stack-by-this-step))
-           ;;
-           (next-queue (append rest-queue (list next-beam-of-this-step))))
-      ;; format after once list
-      (format-search-status-after next-stack-by-this-step)
-      (format t "beam {type, depth}: {~A, ~A}~%"
-              (beam-index beam-of-this-step)
-              (beam-depth beam-of-this-step))
-      ;; HTML
-      (write-piece-list-as-html 
-       (mapcar #'(lambda (state) (fs-frame-piece state)) next-stack-by-this-step))
-      ;;(incf *n-search-iter*)
-      (cond ((null next-stack-by-this-step) ;; no methods in this beam's stack
-             (format t "=== the Beam_n is Cut By Dead Twig ===~%")
-             (search-solution-aux-beam rest-queue primary-piece-list))
-            ((state-is-solution-p (car next-stack-by-this-step))
-             ;; car is solution, however return all
-             next-stack-by-this-step
-             )
-            ;; todo: cut by n-count and restart again
-            ;;((> *n-search-iter* *n-search-iter-max*)
-            ;;(format t "could not get solutions in ~A trial.~%" *n-search-iter*)
-            ;;nil)
-            (t ;; search-next
-             (search-solution-aux-beam next-queue primary-piece-list))))))
+  (cond
+    ((null beam-queue) ;; bottom of search
+     (format t "search end, could not get solutions.~%")
+     nil)
+    (t ;; continue search
+     (let* (;; 
+            (beam-of-this-step (car beam-queue))
+            (rest-queue (cdr beam-queue))
+            ;;
+            (state-of-this-step (car (beam-stack beam-of-this-step)))
+            (stacking-of-this-step (cdr (beam-stack beam-of-this-step))))
+       ;; format before once list
+       (format-search-status-before state-of-this-step primary-piece-list)
+       ;; (format t "d/dt: ~A~%" (fs-d/dt-evaluation-value state-of-this-step))
+       (let* ((states-of-next-step (states-of-next-step-from-1-state state-of-this-step
+                                                                     primary-piece-list))
+              (next-stack-by-this-step (next-state-stack states-of-next-step stacking-of-this-step))
+              (next-beam-of-this-step (beam-next beam-of-this-step next-stack-by-this-step))
+              ;;
+              (next-queue (append rest-queue (list next-beam-of-this-step))))
+         ;; format after once list
+         (format-search-status-after next-stack-by-this-step)
+         (format t "beam {type, depth}: {~A, ~A}~%"
+                 (beam-index beam-of-this-step)
+                 (beam-depth beam-of-this-step))
+         ;; HTML
+         (write-piece-list-as-html 
+          (mapcar #'(lambda (state) (fs-frame-piece state)) next-stack-by-this-step))
+         ;;(incf *n-search-iter*)
+         (cond ((null next-stack-by-this-step) ;; no methods in this beam's stack
+                (format t "=== the Beam_n is Cut By Dead Twig ===~%")
+                (search-solution-aux-beam rest-queue primary-piece-list))
+               ((state-is-solution-p (car next-stack-by-this-step))
+                ;; car is solution, however return all
+                next-stack-by-this-step)
+               ((>= (beam-depth beam-of-this-step) *n-search-iter-max*)
+                (format t "=== the beam_n is Cut By iter-max ===~%")
+                (search-solution-aux-beam rest-queue primary-piece-list))
+               (t ;; search-next
+                (search-solution-aux-beam next-queue primary-piece-list))))))))
 
 
 (defun search-solution-from-prime-pieces-beam (whole-primary-piece-list)
@@ -108,6 +111,7 @@
          (frame-pieces   (remove-if-not #'(lambda (p) (shape-minus-p (piece-pm-sign p)))
                                         primary-pieces)))
     (setf *n-search-iter* 0)
+    ;; (setf *n-search-iter-max* 4)
     (setf *beam-current-index* 0)
     ;;    (setf *beam-width* 6)
 
@@ -123,10 +127,10 @@
               (none-frame-pieces
                 (list-of-unused-primary-piece-list-of-synthesized-piece frame-piece primary-pieces))
               ;; t0
-              (state_t0 (make-fs-from-piece frame-piece none-frame-pieces))
+              (stack_t0 (list (make-fs-from-piece frame-piece none-frame-pieces)))
               ;; t1
               (stack_t1 (next-state-stack 
-                         (states-of-next-step-from-1-state state_t0 none-frame-pieces)
+                         (states-of-next-step-from-1-state (car stack_t0) none-frame-pieces)
                          '()))
               ;; beams by t1
               (beam-queue_t1 ;; first beam queue 
