@@ -72,3 +72,11 @@
    #'(lambda (state1 state2)
        (> (fs-evaluation-value state1)
           (fs-evaluation-value state2)))))
+
+
+;;; differential (d/dt) of evaluation value
+
+(defun d/dt-evaluation-value (evaluation-value_new evaluation-value_previous &optional (delta_t 1))
+  (if (every #'numberp (list evaluation-value_new evaluation-value_previous))
+      (/ (- evaluation-value_new evaluation-value_previous) delta_t)
+      0))
