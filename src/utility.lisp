@@ -84,17 +84,17 @@
   (and (< val1 val2)
        (not (ser= val1 val2 standard-error))))
 
-#|
+
 (defun ser>= (val1 val2 &optional (standard-error *standard-error*))
   "standard error rounded greater-or-equal-than (>=)"
-  (or  (> val1 val2)
-       (not (ser= val1 val2 standard-error))))
+  (or  (>= val1 val2)
+       (ser= val1 val2 standard-error)))
 
 (defun ser<= (val1 val2 &optional (standard-error *standard-error*))
   "standard error rounded less-or-equal-than (=<)"
   (or  (<= val1 val2)
-       (not (ser= val1 val2 standard-error))))
-|#
+       (ser= val1 val2 standard-error)))
+
 
 ;; cycled list into tuple list
 

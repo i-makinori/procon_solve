@@ -54,6 +54,12 @@
         (- (vec3-y V1) (vec3-y V2))
         1))
 
+(defun vec3-factor-xy (scalar Vn)
+  (vec3 (* scalar (vec3-x Vn))
+        (* scalar (vec3-y Vn))
+        1))
+  
+
 (defparameter *vec3-zero-xy* #(0 0 1))
 
 (defun vec3-inverse-xy (Vn)

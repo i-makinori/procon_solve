@@ -93,7 +93,30 @@
            collect (loop for x from x-from to x-to by approx-length
                          collect (vec3 x y 1))))))
 
+(defun fill-inner-line-by-points (p1 p2)
+  "opened interval"
+  (let* ((cfl-const (* 1/2 *default-approx-length*)) ;; 1/root(2) may be metter
+         (l-line (vec3-length-xy (vec3-sub-xy p2 p1))) ;; length of line
+         (n-points (ceiling (/ l-line cfl-const))) ;; n points to fill inner of line domain enoughly.
+         ;; 
+         (delta-vector
+           (vec3-factor-xy (/ l-line (+ n-points 1)) ;; length of delta
+                           (vec3-normalize-xy (vec3-sub-xy p2 p1))))) ;; direction
+    (loop for i from 1 to n-points
+          collect (vec3-add-xy p1 
+                               (vec3-factor-xy i delta-vector)))))
 
+(defun fill-shape-boundary-by-applox-loading-points (coords)
+  (cond ((null coords) ;; zero-shape, it is zero element.
+         '())
+        (t ;; otherwise, there is actual (physical) boundary planes at the plane.
+         (flatten (map-tuple #'fill-inner-line-by-points coords)))))
+         
+
+(defun fill-shape-domain-by-approx-loading-points (coords)
+  (fill-shape-boundary-by-applox-loading-points coords))
+
+#|
 (defun fill-shape-domain-by-approx-loading-points (shape)
   (cond ((null shape) ;; 0 shape, zero-shape, it is zero element.
          nil)
@@ -103,6 +126,7 @@
           #'(lambda (point) (not (point-inner-domain-p point shape)))
           (approx-points-list (shape-domain-rect shape))
           ))))
+|#
 
 ;;; piece piece collision detection
 
