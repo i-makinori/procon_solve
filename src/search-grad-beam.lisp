@@ -72,7 +72,7 @@
 ;; partial procedures for search
 
 (defun states-of-next-step-from-1-state-additional-filter
- (state-this-step primary-piece-list additional-filter)
+    (state-this-step primary-piece-list additional-filter)
   (let* ((states-of-next-step_fat
            (states-of-next-step-from-1-state state-this-step primary-piece-list))
          (states-of-next-step
@@ -188,16 +188,19 @@
               ;;
               (none-frame-pieces
                 (list-of-unused-primary-piece-list-of-synthesized-piece frame-piece primary-pieces))
-              (stack0 (list (make-fs-from-piece frame-piece none-frame-pieces)))
-              ;;
-              (stack-of-states_t0
-                (list (make-beam :index 0
-                                 :stack stack0)))
+              ;; t0
+              (stack_t0 (list (make-fs-from-piece frame-piece none-frame-pieces)))
+              ;; t1
+              (stack_t1 (next-state-stack 
+                         (states-of-next-step-from-1-state (car stack_t0) none-frame-pieces)
+                         '()))
+              (beam-queue_t1
+                (generate-initial-beams *beam-width* stack_t1))
               (gradient-stack_t0
-                (insert-state-list-into-stack-by-grad stack0 '()))
-              ;;
+                (insert-state-list-into-stack-by-grad stack_t1 '()))
+              ;; search solution in tree by beam with gradient-stack
               (solution-and-paths (search-solution-aux-grad-beam
-                                   stack-of-states_t0 none-frame-pieces gradient-stack_t0)))
+                                   beam-queue_t1 none-frame-pieces gradient-stack_t0)))
          
          (mapcar #'(lambda (s) (fs-frame-piece s)) solution-and-paths)
          )))))
