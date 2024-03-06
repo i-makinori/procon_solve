@@ -56,6 +56,12 @@
     nil
     ))
 
+(defun profile-grad-beam (&optional (problem-number 3))
+  (profile-form ()
+    (search-solution-grad-beam
+     (nth problem-number *problem-list*))
+    nil))
+
 
 ;;;; memo
 

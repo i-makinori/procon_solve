@@ -18,10 +18,18 @@
 
 (in-package :puzzle-1617)
 
-(flamegraph:save-flame-graph (*flame-file*)
-  ;;(profile-easy-problem)
-  (time (progn (search-solution-from-prime-pieces
-                           (nth 2 *problem-list*))
-                          nil))
 
-)
+(defun save-profile-into-flamegraph ()
+  (flamegraph:save-flame-graph 
+      (*flame-file*)
+    ;;(profile-easy-problem)
+    #|
+    (time (progn (search-solution-from-prime-pieces
+    (nth 2 *problem-list*))
+    nil))
+    |#
+    (time (progn (search-solution-grad-beam
+                  (nth 6 *problem-list*))
+                 nil))
+
+    ))
