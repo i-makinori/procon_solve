@@ -5,7 +5,7 @@
 ;;
 ;; # about searching method
 ;; this searching method is derivertive of Beam Search method.
-;; when beam reach to timeout (now, tis by n_step) or local solution(it is todo now),
+;; when beam reach to timeout (now, tis by n_step) or local solution(it is not implemented now),
 ;; restart beam which is chosen from gradient stored in stack.
 
 
@@ -69,23 +69,28 @@
           fs-list :initial-value stack-by-grad  :from-end t))
 
 
-;; partial procedures for search
 
+;;; partial procedures for search
 
+;; beam, statement, gradient-stack, and etc.
 
-
-(defun format-search-status-before-grad-beam (beam-of-this-step primary-piece-list)
-  (let ((state-of-this-step (car (beam-stack beam-of-this-step))))
-    (format-search-status-before state-of-this-step primary-piece-list)
-    (format t "beam {type, depth}: {~A, ~A}~%"
-            (beam-index beam-of-this-step) (beam-depth beam-of-this-step))
-    (format t "d/dt: ~A~%" (fs-d/dt-evaluation-value state-of-this-step))))
-
-
+(defun new-beam-and-next-gradient-stack-from-previous-gradient-stack (previous-gradient-stack)
+  (incf *beam-current-index*)
+  (let* ((new-beam
+           (make-beam :index *beam-current-index*
+                      :depth 0
+                      ;; todo take state from once previous synthesize
+                      :stack (list (nth 0 previous-gradient-stack))))
+         (next-gradient-stack
+           (insert-state-into-stack-by-grad ;; reinsert updated grad take/into gradient-stack
+            (fs-decrease-d/dt-evaluation-by-retake (car previous-gradient-stack))
+            (identity (cdr previous-gradient-stack)))))
+    (values new-beam next-gradient-stack)))
 
 
 (defun states-of-next-step-from-1-state-additional-filter
     (state-this-step primary-piece-list additional-filter)
+  ;; todo: treatment congruent piece state between each beam-stack and gradient-stack
   (let* ((states-of-next-step_fat
            (states-of-next-step-from-1-state state-this-step primary-piece-list))
          (states-of-next-step
@@ -97,10 +102,38 @@
                       states-of-next-step_fat)))
     states-of-next-step))
 
+(defun next-gradient-stack (next-stack-of-this-step previous-gradient-stack)
+  (first-n *grad-stack-width-const*
+           (insert-state-list-into-stack-by-grad ;; insert list of states
+            next-stack-of-this-step previous-gradient-stack)))
+
+(defun forward-to-next-beam-and-next-gradient-stack
+    (previous-beam-of-step primary-piece-list previous-gradient-stack)
+  (let ((previous-state-of-step (car (beam-stack previous-beam-of-step)))
+        (previous-stacking-of-step (cdr (beam-stack previous-beam-of-step))))
+    (let* ((states-of-next-step
+             ;; todo: treatment congruent piece state between each beam-stack and gradient-stack
+             (states-of-next-step-from-1-state-additional-filter
+              previous-state-of-step primary-piece-list previous-gradient-stack))
+           (next-stack-of-this-step
+             (next-state-stack states-of-next-step previous-stacking-of-step))
+           (next-beam-of-this-step
+             (beam-next previous-beam-of-step next-stack-of-this-step))
+           (next-gradient-stack
+             (next-gradient-stack next-stack-of-this-step previous-gradient-stack)))
+    (values next-beam-of-this-step next-gradient-stack next-stack-of-this-step))))
 
 
+;; format. I/O
 
-(defun format-search-status-after-grad-beam (next-beam-of-this-step next-gradient-stack)
+(defun format-search-status-before-for-grad-beam (beam-of-this-step primary-piece-list)
+  (let ((state-of-this-step (car (beam-stack beam-of-this-step))))
+    (format-search-status-before state-of-this-step primary-piece-list)
+    (format t "beam {type, depth}: {~A, ~A}~%"
+            (beam-index beam-of-this-step) (beam-depth beam-of-this-step))
+    (format t "d/dt: ~A~%" (fs-d/dt-evaluation-value state-of-this-step))))
+
+(defun format-search-status-after-for-grad-beam (next-beam-of-this-step next-gradient-stack)
   (let ((next-stack-of-this-step (beam-stack next-beam-of-this-step)))
     (format-search-status-after next-stack-of-this-step)
     (format t "grad length: ~A~%"
@@ -118,34 +151,25 @@
    (mapcar #'(lambda (state) (fs-frame-piece state)) gradient-stack)
    :file-name "gradient-list.html"))
 
+  
 
 ;;; Gradient stacked Beam Search
 
 ;; minus to frame method
 
 (defun search-solution-aux-grad-beam (beam-queue primary-piece-list gradient-stack)
-  (let* (;; 
-         (beam-of-this-step (car beam-queue))
-         (rest-queue (cdr beam-queue))
-         ;;
-         (state-of-this-step (car (beam-stack beam-of-this-step)))
-         (stacking-of-this-step (cdr (beam-stack beam-of-this-step))))
+  (let* ((beam-of-this-step (car beam-queue))
+         (rest-queue (cdr beam-queue)))
     (cond
-      ((null gradient-stack) ;; unexists any states
+      ((and (null gradient-stack) (null beam-queue)) ;; unexists any states
        (format t "====== no states, and end ======~%")
        nil)
       (;; not enough beams
-       (< (length beam-queue) *beam-width*)
+       (and (< (length beam-queue) *beam-width*) (not (null gradient-stack)))
        (format t "=== new beam ===~%")
-       (incf *beam-current-index*)
-       (let* ((new-beam
-                (make-beam :index *beam-current-index*
-                           :depth 0
-                           :stack (list (nth 0 gradient-stack))))
-              (next-gradient-stack
-                (insert-state-into-stack-by-grad ;; reinsert updated grad take/into gradient-stack
-                 (fs-decrease-d/dt-evaluation-by-retake (car gradient-stack))
-                 (identity (cdr gradient-stack)))))
+       (multiple-value-bind (new-beam next-gradient-stack)
+           (new-beam-and-next-gradient-stack-from-previous-gradient-stack gradient-stack)
+         ;; search with new beam
          (search-solution-aux-grad-beam (append beam-queue (list new-beam))
                                         primary-piece-list next-gradient-stack)))
       (;; too deep
@@ -153,25 +177,19 @@
        (format t "=== restart beam ===~%")
        (search-solution-aux-grad-beam rest-queue primary-piece-list gradient-stack))
       (t ;; otherwise
-       ;; format before once list 
-       (format-search-status-before-grad-beam beam-of-this-step primary-piece-list)
-       ;; next states, stack, beam, gradient-stack
-       (let* ((states-of-next-step
-                (states-of-next-step-from-1-state-additional-filter
-                 state-of-this-step primary-piece-list gradient-stack))
-              (next-stack-of-this-step
-                (next-state-stack states-of-next-step stacking-of-this-step))
-              (next-beam-of-this-step
-                (beam-next beam-of-this-step next-stack-of-this-step))
-              (next-gradient-stack
-                (first-n *grad-stack-width-const*
-                         (insert-state-list-into-stack-by-grad ;; insert list of states
-                          next-stack-of-this-step gradient-stack))))
-         ;; format after once list
-         (format-search-status-after-grad-beam next-beam-of-this-step next-gradient-stack)
-         ;; HTML
-         (write-piece-list-as-html-from-fs-stacks-for-grad-beam
-          next-stack-of-this-step gradient-stack)
+       ;; "============" ;; format before forward once list
+       (format-search-status-before-for-grad-beam beam-of-this-step primary-piece-list)
+       ;;
+       (multiple-value-bind (next-beam-of-this-step
+                             next-gradient-stack
+                             next-stack-of-this-step)
+           (forward-to-next-beam-and-next-gradient-stack beam-of-this-step
+                                                         primary-piece-list gradient-stack)
+         ;;              ;; format after once list
+         (format-search-status-after-for-grad-beam next-beam-of-this-step next-gradient-stack)
+         ;;              ;; HTML
+         (write-piece-list-as-html-from-fs-stacks-for-grad-beam next-stack-of-this-step
+                                                                next-gradient-stack)
          ;; Call nexts or gool
          (cond
            ((null next-stack-of-this-step) ;; no methods in this beam's stack
@@ -182,7 +200,7 @@
            ((state-is-solution-p (car next-stack-of-this-step))
             ;; car is solution, return all states of its beam.
             next-stack-of-this-step)
-           (t ;; search-next
+           (t ;; search with next beam
             (search-solution-aux-grad-beam (append rest-queue (list next-beam-of-this-step))
                                            primary-piece-list next-gradient-stack)))
          )))))
