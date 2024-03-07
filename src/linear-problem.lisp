@@ -84,3 +84,26 @@
 (#(2 3 4 1) #(0 5/2 0 3/2) #(0 0 1 -4/5) #(0 0 0 16/5))
 
 |#
+
+
+;;; rank of matrix
+
+(defun vector= (vec1 vec2 &key (test #'=))
+  ;; need vec1 and vec2 to be 1Dim
+  (cond ((not (= (array-dimension vec1 0) (array-dimension vec2 0)))
+         nil)
+        (t (every test vec1 vec2))))
+
+(defun rank-of-vector-list-by-upper-triangular-vector-list (upper-triangular-vector-list)
+  (let* ((tv-list upper-triangular-vector-list)
+         (zero-vec-nd (make-array (array-dimension (car tv-list) 0) :initial-element 0)))
+    (length (remove-if #'(lambda (v) 
+                           ;; todo: which is better, = or ser= ?
+                           (vector= v zero-vec-nd :test #'ser=))
+                       tv-list))))
+
+(defun rank-of-vector-list (vector-list)
+  (rank-of-vector-list-by-upper-triangular-vector-list
+   (upper-triangular-vector-list vector-list)))
+
+
