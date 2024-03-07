@@ -44,3 +44,16 @@
     (search-solution-grad-beam
      (nth problem-number *problem-list*))
     nil))
+
+
+(defun profile-by-sb-profile-01 (&optional (problem-number 3))
+  (sb-profile:unprofile )
+  ;; register package
+  (sb-profile:profile "PUZZLE-1617")
+  ;; run program
+  (time
+   (progn 
+     (search-solution-grad-beam (nth problem-number *problem-list*))
+     nil))
+  ;; report
+  (sb-profile:report))

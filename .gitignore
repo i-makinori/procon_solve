@@ -2,6 +2,7 @@
 # puzzle-1617
 
 /test/results/*.html
+/test/profile/
 
 # common lisp
 
