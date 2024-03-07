@@ -41,7 +41,8 @@
              ;;(:file "solver")
              ;; SVG viwer
              (:file "render-html")
-             ;; test
+             ;; test, profile
+             (:file "profile")
              ;; examples
              (:file "examples")
              ;; note, sketches
