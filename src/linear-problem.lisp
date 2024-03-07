@@ -107,3 +107,70 @@
    (upper-triangular-vector-list vector-list)))
 
 
+
+;;; simultaneous domain
+
+(defparameter *infinity-point* (vec3 100003 (exp 1) 1)) ;; (infinity, e, 1)
+
+#|
+(defun domain-of-line-p1p2-dirs-p3 (coord-p1 coord-p2 coord-p3)
+  ;; domain by line is shown us,
+  ;; (C0 * x + C1 * y + C2 * 1 (<||>) 0
+  ;; => (C0 C1 C2 || C3)   ;; returns coefficient vector
+  ;; where C3 is (<||>) which means the  left-than(+1) or right-than(-1).
+  (let* ((v (vec3-sub-xy coord-p2 coord-p1))
+         (dir (vec3-sub-xy coord-p3 coord-p1))
+         (C0 (- (vec3-y v)))
+         (C1 (+ (vec3-x v)))
+         (C2 (+ (- (* (vec3-x v) (vec3-y coord-p1)))
+                (+ (* (vec3-y v) (vec3-x coord-p1)))))
+         (C3 ((lambda (cross) (if (> cross 0) 1 -1)) ;; todo: round standard error
+              (vec3-cross-xy v dir))))
+    `#(,C0 ,C1 ,C2 ,C3) ;;(domain (make-array 4 :initial-contents #(C0 C1 C2 <+1||-1> 0)))
+    ))
+|#
+
+
+(defun domain-of-line-p1p2-contains-p3 (coord-p1 coord-p2 coord-p3)
+  ;; domain by line is shown us,
+  ;; (C0 * x + C1 * y + C2 * 1 (<||>) 0
+  ;; => (C0 C1 C2 || C3)   ;; returns coefficient vector
+  ;; where C3 is (<||>). it means the (>)greater-than::[+1] or(||) (<)less-than::[-1]
+  (let* ((v (vec3-sub-xy coord-p2 coord-p1))
+         (3x  (vec3-x coord-p3))
+         (3y (vec3-y coord-p3))
+         (C0 (- (vec3-y v)))
+         (C1 (+ (vec3-x v)))
+         (C2 (+ (- (* (vec3-x v) (vec3-y coord-p1)))
+                (+ (* (vec3-y v) (vec3-x coord-p1)))))
+         (C3 (cond ((not (ser= 0 C1))
+                    (if (> (+ 3y (* 3x (/ C0 C1)))
+                           (- (/ C2 C1)))
+                        +1 -1))
+                   ((not (ser= 0 C0))
+                    (if (> (+ 3x (* 3y (/ C1 C0)))
+                           (- (/ C2 C0)))
+                        +1 -1))
+                   (t 
+                    (warn "zero direction at the line.")
+                    0))))
+    ;; todo: make-array may be farster.
+    `#(,C0 ,C1 ,C2 ,C3)))
+
+
+#|
+(defun coordinate-points-into-simultaneous-domain (coord-points contains-infinity-point-p)
+  
+  ;;
+  (cond ((< (length coord-points) 3)
+         '())
+        (t
+         (mapcar #'(lambda (cp123) ;; coord poinint 1 2 3
+                     (domain-of-line-p1p2-contains-p3 (car cp123) (cadr cp123) (cddr cp123)))
+                 (make-3tuple-list coord-points)))))
+  
+|#
+
+
+;;; simultaneous equations
+
