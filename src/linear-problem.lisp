@@ -55,8 +55,8 @@
                        (let* ((vn_t (make-array dim-each-vec :initial-element 0))
                               (coef (/ (aref vn_t-1 current-col) (aref v1 current-col))))
                          (loop for i_col from (1+ current-col) to (1- dim-each-vec)
-                               ;; (n)'_i = (n)_i -                 C                 * (1)_i
-                               ;;        = (n)_i - (n)_current_col / (1)_current_col * (1)_i
+                               ;;        (n)'_i_col  = (n)_i_col - Coefficient * (1)_i
+                               ;; where  coefficient = (n)_current_col / (1)_current_col
                                do (setf (aref vn_t i_col)
                                         (- (aref vn_t-1 i_col) (* coef (aref v1 i_col)))))
                          vn_t))

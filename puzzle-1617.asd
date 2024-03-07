@@ -28,6 +28,7 @@
              (:file "io")
              ;; piece, synthesize
              (:file "linear-algebra")
+             (:file "linear-problem")
              (:file "collision-detection")
              (:file "synthesize")
              ;; solver-functions
