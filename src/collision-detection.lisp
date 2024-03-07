@@ -112,11 +112,11 @@
         (t ;; otherwise, there is actual (physical) boundary planes at the plane.
          (flatten (map-tuple #'fill-inner-line-by-points coords)))))
          
-
+#|
 (defun fill-shape-domain-by-approx-loading-points (coords)
   (fill-shape-boundary-by-applox-loading-points coords))
+|#
 
-#|
 (defun fill-shape-domain-by-approx-loading-points (shape)
   (cond ((null shape) ;; 0 shape, zero-shape, it is zero element.
          nil)
@@ -126,7 +126,7 @@
           #'(lambda (point) (not (point-inner-domain-p point shape)))
           (approx-points-list (shape-domain-rect shape))
           ))))
-|#
+
 
 ;;; piece piece collision detection
 

@@ -12,8 +12,8 @@
                                                &key (test #'equal) (also-reverse nil))
   (labels ((aux (rot1_ab rot1_d)
              (let ((rot1_da (append (cdr rot1_d) (list (car rot1_ab)))))
-               (cond ((every test rot1_da rot-list2) t)
-                     ((null rot1_ab)                 nil)
+               (cond ((null (car rot1_ab))           nil)
+                     ((every test rot1_da rot-list2) t)
                      (t                              (aux (cdr rot1_ab) rot1_da))))))
     (cond ((not (= (length rot-list1) (length rot-list2))) nil)
           (also-reverse 
