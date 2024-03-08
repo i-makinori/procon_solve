@@ -35,7 +35,7 @@
 ;;; structure
 
 (defstruct (fs-node (:constructor make-fs) (:conc-name fs-))
-  ;; Frame-Status-of-NODE, 
+  ;; Frame-Status-of-NODE,
   ;; called in fs, fs-node, status, ...
   (:frame-piece (piece))
   (:primary-used nil) ;; primary pieces used
@@ -120,7 +120,7 @@
 (defun search-solution-aux (stack-of-states primary-piece-list)
   (let* ((state-of-this-step (car stack-of-states))
          (stacking (cdr stack-of-states)))
-    ;; format before once list 
+    ;; format before once list
     (format-search-status-before state-of-this-step primary-piece-list)
     (let* ((states-of-next-step (states-of-next-step-from-1-state state-of-this-step
                                                                   primary-piece-list))
@@ -128,7 +128,7 @@
       ;; format after once list
       (format-search-status-after next-stack)
       ;; HTML
-      (write-piece-list-as-html 
+      (write-piece-list-as-html
        (mapcar #'(lambda (state) (fs-frame-piece state)) next-stack))
       ;; finish or recursive
       (incf *n-search-iter*)
@@ -156,7 +156,7 @@
        (warn (format nil "whole-piece-list has multiple frames. IDs: ~A~%"
                      (mapcar #'piece-id frame-pieces)))
        nil)
-      (t 
+      (t
        (let* ((frame-piece    (car frame-pieces))
               ;;
               (none-frame-pieces (remove frame-piece primary-pieces :test #'equalp))

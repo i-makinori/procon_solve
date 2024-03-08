@@ -10,7 +10,7 @@
   (flatten
    (remove nil
            (mapcar #'synthesize-piece-and-piece-by-selection-piece-or-fail
-                   (whole-set-of-point-and-edge-selections-piece-piece 
+                   (whole-set-of-point-and-edge-selections-piece-piece
                     piece1 piece2)))))
 
 ;;; all synthesizeable patterns (piece-list to frame)
@@ -37,7 +37,7 @@
 
 (defun all-synthesizeable-patterns-of-pieces-to-frame (frame piece-list)
   (flatten
-   (remove nil 
+   (remove nil
            (mapcar #'synthesize-piece-and-piece-by-selection-piece-or-fail
                    (whole-set-of-point-and-edge-selections-pieces-to-frame
                     frame piece-list)))))
@@ -71,8 +71,8 @@
            ;;(format t "Deepin~%")
            (flatten synths-of-each-edges)))))
 
-  
-;;; 
+
+;;;
 ;;; set theoretical manipulations
 
 (defun primary-piece-p (piece-common)
@@ -111,7 +111,7 @@
 (defun list-of-unused-primary-piece-list-of-synthesized-piece (synthesized-piece primary-piece-list)
   (set-difference ;; set of (original - used)
    primary-piece-list
-   (list-of-primary-piece-list-of-synthesized-piece 
+   (list-of-primary-piece-list-of-synthesized-piece
     synthesized-piece)
    :test #'(lambda (p1 p2) (equal (piece-id p1) (piece-id p2)))))
 

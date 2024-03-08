@@ -2,7 +2,7 @@
 (in-package :puzzle-1617)
 
 ;;;; Search in Beam method.
-;; 
+;;
 ;; # about Beam Search method.
 ;; n of Beams searches different branches each other parallely (in logically).
 ;;
@@ -54,7 +54,7 @@
        (make-beam :index n
                   :depth 0
                   :stack (list (nth n initial-state-stack))))
-   (remove-if #'(lambda (n) 
+   (remove-if #'(lambda (n)
                   (null (nth n initial-state-stack)))
               (from-m-to-n-list 0 (- n 1)))))
 
@@ -69,7 +69,7 @@
      (format t "search end, could not get solutions.~%")
      nil)
     (t ;; continue search
-     (let* (;; 
+     (let* (;;
             (beam-of-this-step (car beam-queue))
             (rest-queue (cdr beam-queue))
             ;;
@@ -90,7 +90,7 @@
                  (beam-index beam-of-this-step)
                  (beam-depth beam-of-this-step))
          ;; HTML
-         (write-piece-list-as-html 
+         (write-piece-list-as-html
           (mapcar #'(lambda (state) (fs-frame-piece state)) next-stack-by-this-step))
          ;;(incf *n-search-iter*)
          (cond ((null next-stack-by-this-step) ;; no methods in this beam's stack
@@ -121,7 +121,7 @@
        (warn (format nil "whole-piece-list has multiple frames. IDs: ~A~%"
                      (mapcar #'piece-id frame-pieces)))
        nil)
-      (t 
+      (t
        (let* (;; frame and primes
               (frame-piece    (car frame-pieces))
               (none-frame-pieces
@@ -129,11 +129,11 @@
               ;; t0
               (stack_t0 (list (make-fs-from-piece frame-piece none-frame-pieces)))
               ;; t1
-              (stack_t1 (next-state-stack 
+              (stack_t1 (next-state-stack
                          (states-of-next-step-from-1-state (car stack_t0) none-frame-pieces)
                          '()))
               ;; beams by t1
-              (beam-queue_t1 ;; first beam queue 
+              (beam-queue_t1 ;; first beam queue
                 (generate-initial-beams *beam-width* stack_t1))
               ;; search solution in tree by beam
               (solution-and-paths

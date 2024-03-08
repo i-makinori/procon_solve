@@ -13,13 +13,13 @@
 > ;;;; write to HTML piece list in overlap
 > (write-piece-list-as-html "solved-sample.html"
                             (load-problem-file-into-puzzle "puzzle_10.txt"))
-HTML file updated at : /..../procon_solve/test/results/solved-sample.html 
+HTML file updated at : /..../procon_solve/test/results/solved-sample.html
 #P"/..../procon_solve/test/results/solved-sample.html"
 
 > ;;;; write to HTML solution
 > (write-solven-puzzle-as-html "solved-sample.html"
                                (solve-puzzle (load-problem-file-into-puzzle "puzzle_10.txt")))
-HTML file updated at : /..../procon_solve/test/results/solved-sample.html 
+HTML file updated at : /..../procon_solve/test/results/solved-sample.html
 #P"/..../programs/procon_solve/test/results/solved-sample.html"
 
 

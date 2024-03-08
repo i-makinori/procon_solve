@@ -97,7 +97,7 @@
 (defun rank-of-vector-list-by-upper-triangular-vector-list (upper-triangular-vector-list)
   (let* ((tv-list upper-triangular-vector-list)
          (zero-vec-nd (make-array (array-dimension (car tv-list) 0) :initial-element 0)))
-    (length (remove-if #'(lambda (v) 
+    (length (remove-if #'(lambda (v)
                            ;; todo: which is better, = or ser= ?
                            (vector= v zero-vec-nd :test #'ser=))
                        tv-list))))
@@ -160,7 +160,7 @@
                     (if (> (+ 3x (* 3y (/ C1 C0)))
                            (- (/ C2 C0)))
                         +1 -1))
-                   (t 
+                   (t
                     (warn "zero direction at the line.")
                     0))))
     ;; todo: make-array may be farster.
@@ -168,7 +168,7 @@
 |#
 
 #|
-(defun coordinate-points-into-simultaneous-domain (coord-points contains-infinity-point-p)  
+(defun coordinate-points-into-simultaneous-domain (coord-points contains-infinity-point-p)
   ;;
   (cond ((< (length coord-points) 3)
          '())
@@ -176,7 +176,7 @@
          (mapcar #'(lambda (cp123) ;; coord poinint 1 2 3
                      (domain-of-line-p1p2-contains-p3 (car cp123) (cadr cp123) (cddr cp123)))
                  (make-3tuple-list coord-points)))))
-  
+
 |#
 
 

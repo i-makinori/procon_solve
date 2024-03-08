@@ -13,7 +13,7 @@
          (not (vec3-ser= point point2)) ;; not on point2
          (vec3-ser= (identity (vec3-normalize-xy v1)) ;; point are inner range of edge P1--P2.
                     (vec3-inverse-xy (vec3-normalize-xy v2))))))
-    
+
 
 
 ;;; collision detection for boundary lines
@@ -88,7 +88,7 @@
         (y-to   (+ (domain-rect-y-max domain-rect) (/ approx-length 2)))
         (x-from (- (domain-rect-x-min domain-rect) (/ approx-length 2)))
         (x-to   (+ (domain-rect-x-max domain-rect) (/ approx-length 2))))
-    (flatten 
+    (flatten
      (loop for y from y-from to y-to by approx-length
            collect (loop for x from x-from to x-to by approx-length
                          collect (vec3 x y 1))))))
@@ -100,7 +100,7 @@
           (if (< 0 (vec3-cross-xy (vec3-sub-xy p_p p_c) (vec3-sub-xy p_n p_c))) 1 -1)))
     (vec3-add-xy
      p_c
-     (vec3-factor-xy (* 1/2 rot-direction-sign sign_pcn *default-approx-length* 1000/1001) 
+     (vec3-factor-xy (* 1/2 rot-direction-sign sign_pcn *default-approx-length* 1000/1001)
                      (vec3-add-xy (vec3-normalize-xy (vec3-sub-xy p_p p_c))
                                   (vec3-normalize-xy (vec3-sub-xy p_n p_c)))))))
 
@@ -109,14 +109,14 @@
          nil)
         (t
          (let* ((rot-direction ;; detect clock wise or counter clock wise.
-                  (if (point-inner-domain-p 
+                  (if (point-inner-domain-p
                        (inner-model-point (nth 0 shape) (nth 1 shape) (nth 2 shape) 1) shape)
                       1 -1)))
            (mapcar #'(lambda (p_pcn) ;; point previous, current next
                        (let ((p_p (car  p_pcn)) (p_c (cadr p_pcn)) (p_n (cddr p_pcn)))
                          (inner-model-point p_p p_c p_n rot-direction)))
                    (make-3tuple-list shape))))))
-             
+
 
 #|
 ;; old implement
@@ -137,12 +137,12 @@
   (let* ((cfl-const (* 1/2 *default-approx-length*)) ;; 1/root(2) may be metter
          (l-line (vec3-length-xy (vec3-sub-xy p2 p1))) ;; length of line
          (n-points (ceiling (/ l-line cfl-const))) ;; n points to fill inner of line domain enoughly.
-         ;; 
+         ;;
          (delta-vector
            (vec3-factor-xy (/ l-line (+ n-points 1)) ;; length of delta
                            (vec3-normalize-xy (vec3-sub-xy p2 p1))))) ;; direction
     (loop for i from 1 to n-points
-          collect (vec3-add-xy p1 
+          collect (vec3-add-xy p1
                                (vec3-factor-xy i delta-vector)))))
 
 (defun fill-shape-boundary-by-applox-loading-points (coords)

@@ -44,7 +44,7 @@
 
 (defun fs-decrease-d/dt-evaluation-by-retake (fs)
   "retake its state, gradient (d/dt) of evaluation value is decreased"
-  ;; todo: convergence sequence 
+  ;; todo: convergence sequence
   ;; lim (n->infinity) => (f(n)->C) , C such as +2
   (setf (fs-d/dt-evaluation-value fs)
         ((lambda (v)
@@ -142,16 +142,16 @@
             (mapcar #'(lambda (s) (format nil "~,4f " (fs-d/dt-evaluation-value s)))
                     (first-n 20 next-gradient-stack)))))
 
-(defun write-piece-list-as-html-from-fs-stacks-for-grad-beam 
+(defun write-piece-list-as-html-from-fs-stacks-for-grad-beam
     (next-stack-of-this-step gradient-stack)
-  (write-piece-list-as-html 
+  (write-piece-list-as-html
    (mapcar #'(lambda (state) (fs-frame-piece state)) next-stack-of-this-step)
    :file-name "piece-list.html")
-  (write-piece-list-as-html 
+  (write-piece-list-as-html
    (mapcar #'(lambda (state) (fs-frame-piece state)) gradient-stack)
    :file-name "gradient-list.html"))
 
-  
+
 
 ;;; Gradient stacked Beam Search
 
@@ -194,7 +194,7 @@
          (cond
            ((null next-stack-of-this-step) ;; no methods in this beam's stack
             (format t "=== the Beam_n is Cut By Dead Twig ===~%")
-            (search-solution-aux-grad-beam 
+            (search-solution-aux-grad-beam
              rest-queue
              primary-piece-list next-gradient-stack))
            ((state-is-solution-p (car next-stack-of-this-step))
@@ -231,7 +231,7 @@
               ;; t0
               (stack_t0 (list (make-fs-from-piece frame-piece none-frame-pieces)))
               ;; t1
-              (stack_t1 (next-state-stack 
+              (stack_t1 (next-state-stack
                          (states-of-next-step-from-1-state (car stack_t0) none-frame-pieces)
                          '()))
               (beam-queue_t1
@@ -241,6 +241,6 @@
               ;; search solution in tree by beam with gradient-stack
               (solution-and-paths (search-solution-aux-grad-beam
                                    beam-queue_t1 none-frame-pieces gradient-stack_t0)))
-         
+
          (mapcar #'(lambda (s) (fs-frame-piece s)) solution-and-paths)
          )))))

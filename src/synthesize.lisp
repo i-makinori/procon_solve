@@ -8,11 +8,11 @@
 (defstruct sy-select
   ;; selection for synthesize
   ;; x of {:px piece, :nx nth_point, :pmx plus-minus} ++ y of it
-  (:p1 nil) (:n1 nil) (:pm1 nil) 
-  (:p2 nil) (:n2 nil) (:pm2 nil) 
+  (:p1 nil) (:n1 nil) (:pm1 nil)
+  (:p2 nil) (:n2 nil) (:pm2 nil)
   )
 
-(defun whole-set-of-point-and-edge-selections-piece-piece 
+(defun whole-set-of-point-and-edge-selections-piece-piece
     (piece1 piece2 &key (piece1-by-nth_point-only nil))
   (let ((combinations
           ;; (or {A[n]} (A_l)) X (B_l) X {A+, A-} X {B+, B-}
@@ -76,7 +76,7 @@
                         :piece piece1
                         :transformation-matrix matrix)))
     ;;(format t "make-transform: (id, point, direction):~%~A, ~A, ~A, ~%~A, ~A, ~A~%"
-    ;;  (piece-id piece1) point-from1 direction1 
+    ;;  (piece-id piece1) point-from1 direction1
     ;;  (piece-id piece2) point-from2 direction2)
     (if (null transformp)
         (list (gen-transform *identity-matrix-3x3*))
@@ -121,7 +121,7 @@
        (transform-approx-points #'(lambda (f-transform approx-ps) (mapcar f-transform approx-ps))))
   (labels ((transform (v)
              (matrix3x3-vector3-product transformation-matrix v)))
-    (shape 
+    (shape
      :pm-sign (shape-pm-sign shape)
      :coord-points  (funcall transform-coord-points  #'transform (shape-coord-points shape))
      :approx-points (funcall transform-approx-points #'transform (shape-approx-points shape)))))
@@ -195,7 +195,7 @@
          (tms (make-transforms-by-point-and-edge-selection-piece-and-piece sel))
          (tmas (mapcar #'transform-transformation-matrix tms))
          ;; ShapeS before transform
-         (ss (mapcar #'piece-shape 
+         (ss (mapcar #'piece-shape
                      (cons (sy-select-p1 sel) (list (sy-select-p2 sel) (sy-select-p2 sel)))))
          ;; Spape'(Dush) eS. shapes after transforms.
          (sds (mapcar #'(lambda (shape transform)
@@ -240,7 +240,7 @@
            (if arc-dirp (not pm-sign) (identity pm-sign))))
     (cond ((eq t pm-direction)
            (cons (car rot-list) (identity (cdr rot-list))))
-          (t 
+          (t
            (cons (car rot-list) (reverse (cdr rot-list)))))))
 
 (defun synthesize-syntheable-piece-and-piece (new-shape1 transform1 new-shape2 transform2)
@@ -267,7 +267,7 @@
            ;; A-B (Set theory Subset) may be faster than 1ce below line
            (fill-shape-domain-by-approx-loading-points synthed-coord-points))
          ;; pm-sign
-         (pm-sign 
+         (pm-sign
            ((lambda (pm_1 pm_2)
               (cond ((and (shape-plus-p  pm_1) (shape-plus-p  pm_2)) *+shape*) ;; "piece to piece"
                     ((and (shape-minus-p pm_1) (shape-plus-p  pm_2)) *-shape*) ;; "piece in hole"

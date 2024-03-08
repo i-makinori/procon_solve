@@ -53,7 +53,7 @@
 
   ;; for 'leaf piece
   (id nil) ;; nil => synthed, numbered => leaf
-  
+
   ;; for 'synthed piece
   (function-sign nil) ;; nil => not synthed, '+ => synthe piece, '- => negative synth piece.
   (transform1 nil)
@@ -70,10 +70,10 @@
   (piece-coord-points piece))
 
 (defun piece-approx-points (piece)
-  (shape-approx-points (piece-shape piece)))  
+  (shape-approx-points (piece-shape piece)))
 
 
-;; zero element 
+;; zero element
 
 (defun zero-shape-p (shape)
   ;; synthesized zero shape is one of the solution

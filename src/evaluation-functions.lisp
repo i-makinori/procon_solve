@@ -38,7 +38,7 @@
           (if (or (null (piece-coord-points piece_t1))
                   (null (piece-coord-points piece_t2)))
               0
-              (+ 
+              (+
                ;; body term
                (+ (length (piece-coord-points piece_t1)))
                (+ (length (piece-coord-points piece_t1)))

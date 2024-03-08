@@ -7,17 +7,17 @@
    `(progn
      ;; call profiler
      (sb-sprof:start-profiling)
-     
+
      ;; actual calculation
-     
+
      ;;(write-piece-list-as-html (remove-congruent-from-synthesized-piece-list search1))
      ,@forms
-     
+
      ;; stop and report
      (sb-sprof:stop-profiling)
      (sb-sprof:report ,@report-format)
      ;;
-     )) ;; and report at last  
+     )) ;; and report at last
   )
 
 
@@ -52,7 +52,7 @@
   (sb-profile:profile "PUZZLE-1617")
   ;; run program
   (time
-   (progn 
+   (progn
      (search-solution-grad-beam (nth problem-number *problem-list*))
      nil))
   ;; report

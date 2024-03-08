@@ -20,7 +20,7 @@
 
 
 (defun save-profile-into-flamegraph ()
-  (flamegraph:save-flame-graph 
+  (flamegraph:save-flame-graph
       (*flame-file*)
     ;;(profile-easy-problem)
     #|

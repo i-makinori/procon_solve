@@ -54,7 +54,7 @@
   (and (ser= (vec3-x V1) (vec3-x V2))
        (ser= (vec3-y V1) (vec3-y V2))
        (ser= (vec3-j V1) (vec3-j V2))))
-         
+
 
 (defun vec3-multiply (V1 V2)
   (let ((V3 (vec3)))
@@ -77,7 +77,7 @@
   (vec3 (* scalar (vec3-x Vn))
         (* scalar (vec3-y Vn))
         1))
-  
+
 
 (defparameter *vec3-zero-xy* #(0 0 1))
 
@@ -153,7 +153,7 @@
   (matrix3x3 1 0 transform-x
              0 1 transform-y
              0 0 1))
-|# 
+|#
 
 (defun transform-parallel-move (vec-moves)
   (matrix3x3 1 0 (vec3-x vec-moves)
@@ -180,8 +180,8 @@
   (let* ((length^2 (vec3-length-xy^2 axis-vec))
          (length^2 (if (zerop length^2) ;; 0-direction. avoid (x/0).
                        (progn (warn (format nil "direction of ~A is not decidable~%" axis-vec))
-                              1) 
-                       length^2)) 
+                              1)
+                       length^2))
          (ax (vec3-x axis-vec))
          (ay (vec3-y axis-vec)))
     (labels ((Rij (kro-delta Ai Aj)
@@ -191,4 +191,4 @@
                  0             0             1))))
 
 
-                 
+

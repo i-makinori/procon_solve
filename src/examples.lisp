@@ -20,8 +20,8 @@
 
 ;;;; problem list
 
-(defparameter *file-names-of-problems* 
-  '("puzzle_4.txt" "puzzle_5.txt" "puzzle_6.txt" "puzzle_7.txt" 
+(defparameter *file-names-of-problems*
+  '("puzzle_4.txt" "puzzle_5.txt" "puzzle_6.txt" "puzzle_7.txt"
     "puzzle_8.txt" "puzzle_9.txt" "puzzle_10.txt"))
 
 (defparameter *problem-list*
@@ -29,7 +29,7 @@
           *file-names-of-problems*))
 
 
-;;;; 
+;;;;
 
 #|
 (defparameter *piece-hole1*

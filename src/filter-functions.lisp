@@ -16,7 +16,7 @@
                      ((every test rot1_da rot-list2) t)
                      (t                              (aux (cdr rot1_ab) rot1_da))))))
     (cond ((not (= (length rot-list1) (length rot-list2))) nil)
-          (also-reverse 
+          (also-reverse
            (or (aux rot-list1 rot-list1)
                (aux (reverse rot-list1) (reverse rot-list1))))
           (t
@@ -35,7 +35,7 @@
                       (make-3tuple-list ((lambda (l) (append (cdr l) (list (car l))))
                                          (shape-coord-points shape))))))
         (if (ser= (* (- n-points 2) *pi*) ;; sum of interior angle = (N-2) * 180°
-                  (reduce #'+ angle-list)) 
+                  (reduce #'+ angle-list))
             (identity angle-list)
             (mapcar #'(lambda (angle) (- *pi*2* angle)) angle-list)))))
 
@@ -44,7 +44,7 @@
     (cond ((shape-minus-p shape)
            (mapcar #'(lambda (a) (- *pi*2* a))
                    angle-list1))
-          (t 
+          (t
            (identity angle-list1)))))
 
 (defun shape-line-segments-length-xy^2-list (shape)
@@ -87,7 +87,7 @@
     (or (car detect_1_2) (cadr detect_1_2))))
 
 (defun detect-piece-exist-congruent-transform (piece1 piece2)
-  ;; if piece1 and piece2 is congruent, 
+  ;; if piece1 and piece2 is congruent,
   ;; it exist congruent transform, all coordinates of corresponding
   ;; points at piece1 and piece2 are equal in its specific transform.
   ;;
@@ -107,7 +107,7 @@
    (eq (piece-pm-sign piece1)
        (piece-pm-sign piece2))
    ;; == num edge points
-   (= (length (piece-coord-points piece1)) 
+   (= (length (piece-coord-points piece1))
       (length (piece-coord-points piece2)))
    ;; == primary piecese which composes its piece.
    (set-equal (mapcar #'piece-id (list-of-primary-piece-list-of-synthesized-piece piece1))
@@ -249,7 +249,7 @@
           (t (cons (car lis)
                    (remove-congruent-from-state-list
                     (remove-if #'(lambda (s)
-                                   (detect-piece-congruent (fs-frame-piece (car lis)) 
+                                   (detect-piece-congruent (fs-frame-piece (car lis))
                                                            (fs-frame-piece s)))
                                (cdr lis))))))))
 
@@ -265,7 +265,7 @@
 
 (defun remove-plus-piece-overs-frame-from-state-list (state-list frame-state) ;; (state-list)
   (remove-if #'(lambda (piece-state)
-                 (detect-domain-of-plus-piece-overs-frame 
+                 (detect-domain-of-plus-piece-overs-frame
                   (fs-frame-piece piece-state) ;; todo: [±]piece is not only frame-piece
                   (fs-frame-piece frame-state)))
              state-list))
@@ -280,9 +280,9 @@
         (< n-d/dt-value 2)
         nil)))
 
-(defun remove-by-evaluation-value 
+(defun remove-by-evaluation-value
   (fs-list ;; (state-list)
-   &optional (cut-function 
+   &optional (cut-function
               #'cut-function-for-evaluation-value-by-delta-points_sum))
   (remove-if cut-function
              fs-list))

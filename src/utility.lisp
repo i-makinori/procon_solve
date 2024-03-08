@@ -9,7 +9,7 @@
   (subseq lst 0 (min (length lst) n)))
 
 (defun insert (thing into &key (older-function #'<))
-  "insert thing into list. 
+  "insert thing into list.
  if you use insert for the as sort, into need to be sorted"
   (labels ((aux (rest memo)
              (cond  ((or (null rest)
@@ -20,13 +20,13 @@
 
 ;; assoc
 (defun assocdr (item alist)
-  (cdr (assoc item alist))) 
+  (cdr (assoc item alist)))
 
 
 ;; mod-nth
 (defun modnth (n list)
   (nth (mod n (length list)) list))
-               
+
 
 ;; constant
 (defparameter *standard-error* 0.0001)
@@ -100,7 +100,7 @@
 
 (defun make-tuple-list-aux (cycle-series cycle-car)
   (cond ((null cycle-series) nil)
-        ((null (cdr cycle-series)) 
+        ((null (cdr cycle-series))
          (list (cons (car cycle-series) cycle-car)))
         (t
          (cons (cons (car cycle-series) (cadr cycle-series))
@@ -131,7 +131,7 @@
                (make-3tuple-list-aux (cdr cycle-series) fst snd)))))
 
 (defun make-3tuple-list (cycle-series)
-  (make-3tuple-list-aux cycle-series 
+  (make-3tuple-list-aux cycle-series
                         (car cycle-series)
                         (if (null (cadr cycle-series))
                             (car cycle-series)

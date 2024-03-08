@@ -25,7 +25,7 @@
 (defun approx-coords-into-svg-dots (approx-coords-list &key (frame-piece-p nil))
   (let* ((template
            (if frame-piece-p
-               "<circle r='2' cx='~A' cy='~A' fill='aliceblue' />" ;; frame 
+               "<circle r='2' cx='~A' cy='~A' fill='aliceblue' />" ;; frame
                "<circle r='1' cx='~A' cy='~A' fill='green'     />" ;; piece (none framed)
                ))
          (text (apply #'concatenate 'string
@@ -44,7 +44,7 @@
                                piece-points-list))
          (polygon-list-text
            (apply #'concatenate 'string polygon-list)))
-    
+
     (format nil "<svg id='~A' width='600' height='600'>~%~A~%</svg>~%"
             id-string polygon-list-text)))
 
@@ -67,7 +67,7 @@
 
 (defun shape-svg-element-text (shape &key (frame-piece-p nil))
   (format nil
-          ;;"~A~%" 
+          ;;"~A~%"
           "~A~A~%"
           (point-list-into-svg-polygon (shape-coord-points shape))
           (approx-coords-into-svg-dots (shape-approx-points shape)
@@ -207,14 +207,14 @@
 
 (defparameter *html-template-text*
   (uiop:read-file-string *html-template-file*))
-  
+
 ;; render to html
 
 
 (defun write-piece-list-as-html (piece-list &key (file-name "piece-list.html"))
   "for piece-list"
   (let*
-      ((pathname (merge-pathnames (format nil "test/results/~A" file-name) 
+      ((pathname (merge-pathnames (format nil "test/results/~A" file-name)
                                   *pathname-puzzle-1617-root*))
     ;;   (html-text (html-of-piece-list-overlap piece-list)))
        (html-text (html-of-piece-list piece-list)))
@@ -249,7 +249,7 @@
 (defun write-solven-puzzle-as-html (file-name puzzle)
   "for solven puzzle"
   (let*
-      ((pathname (merge-pathnames (format nil "test/results/~A" file-name) 
+      ((pathname (merge-pathnames (format nil "test/results/~A" file-name)
                                   *pathname-puzzle-1617-root*))
        (html-text (template-text-of-solven-puzzle-html puzzle)))
     (handler-case
