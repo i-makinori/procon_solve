@@ -1,21 +1,39 @@
 
 (in-package :puzzle-1617)
 
-;; liner algebra
+;;;; liner algebra
+
+
+;;; types and optimizations
+
+;;(deftype vec3 () '(vector float 3))
+(deftype vec3 () '(vector number 3))
+
+;; (typep '#(1.0 2.1 3.4) 'vec3) ;; test
+
+;;  (declare (optimize (speed 3) (debug 0) (safety 0)))
+;;  (declare (type (simple-array single-float (* *)) ma mb))
+
+
+;;; defines
 
 (defun vec3 (&optional (v0 0) (v1 0) (v2 1))
+  (declare (ftype (function (number number number) vec3) vec3-x))
   (make-array 3 :initial-contents `(,v0 ,v1 ,v2)))
 
 (defun point (x y)
   (vec3 x y 1))
 
 (defun vec3-x (vec3)
+  (declare (ftype (function (vec3) float) vec3-x))
   (aref vec3 0))
 
 (defun vec3-y (vec3)
+  (declare (ftype (function (vec3) float) vec3-y))
   (aref vec3 1))
 
 (defun vec3-j (vec3)
+  (declare (ftype (function (vec3) float) vec3-j))
   ;; we use j. not z because z meanse height dimention.
   (aref vec3 2))
 
@@ -78,20 +96,25 @@
         (vec3 (/ (vec3-x Vn) length) (/ (Vec3-y Vn) length) 1))))
 
 (defun vec3-dot-xy (V1 V2)
+  ;;(declare (optimize (speed 2) (debug 0) (safety 0)))
+  (declare (ftype (function (vec3 vec3) float) vec3-dot-xy))
   (+ (* (vec3-x V1) (vec3-x V2))
      (* (vec3-y V1) (vec3-y V2))))
 
 (defun vec3-dot (V1 V2)
   ;; (reduce #'+ (vec3-multiply V1 V2)) ;; <- slower implement
+  (declare (ftype (function (vec3 vec3) float) vec3-dot))
   (+ (* (vec3-x V1) (vec3-x V2))
      (* (vec3-y V1) (vec3-y V2))
      (* (vec3-j V1) (vec3-j V2))))
 
 (defun vec3-cross-xy (V1 V2)
+  (declare (ftype (function (vec3 vec3) float) vec3-cross-xy))
   (- (* (vec3-x V1) (vec3-y V2))
      (* (vec3-y V1) (vec3-x V2))))
 
 (defun vec3-cross (V1 V2)
+  (declare (ftype (function (vec3 vec3) vec3) vec3-cross))
   (vec3 (- (* (vec3-y V1) (vec3-j V2)) (* (vec3-j V1) (vec3-y V2)))
         (- (* (vec3-j V1) (vec3-x V2)) (* (vec3-x V1) (vec3-j V2)))
         (- (* (vec3-x V1) (vec3-y V2)) (* (vec3-y V1) (vec3-x V2)))))
