@@ -29,7 +29,10 @@
   (coord-points nil)
   ;; memo for detection
   (approx-points nil)        ;; piece's shape filling approx-points.
-  ;; (domain poly-inequality nil)   ;; domain poly-inequality, which determines piece shape truly.  
+  ;; (domain poly-inequality nil)   ;; domain poly-inequality, which determines piece shape truly.
+  ;;
+  ;;(point-angles nil)
+  ;;(segment-length^2s nil)
   )
 
 (defstruct (transform (:conc-name transform-) (:constructor transform))

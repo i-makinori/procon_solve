@@ -150,6 +150,7 @@
          (frame-pieces   (remove-if-not #'(lambda (p) (shape-minus-p (piece-pm-sign p)))
                                         primary-pieces)))
     (setf *n-search-iter* 0)
+    (setf *n-search-iter-max* 3000)
     (cond
       ((not (= 1 (length frame-pieces)))
        (warn (format nil "whole-piece-list has multiple frames. IDs: ~A~%"
