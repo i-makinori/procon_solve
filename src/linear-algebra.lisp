@@ -7,7 +7,7 @@
 ;;; types and optimizations
 
 ;;(deftype vec3 () '(vector float 3))
-(deftype vec3 () '(vector number 3))
+(deftype vec3 () '(vector float 3))
 
 ;; (typep '#(1.0 2.1 3.4) 'vec3) ;; test
 
@@ -18,7 +18,8 @@
 ;;; defines
 
 (defun vec3 (&optional (v0 0) (v1 0) (v2 1))
-  (declare (ftype (function (number number number) vec3) vec3-x))
+  ;;(declare (ftype (function (number number number) vec3) vec3-x))
+  (declare (ftype (function (float float float) vec3) vec3-x))
   (make-array 3 :initial-contents `(,v0 ,v1 ,v2)))
 
 (defun point (x y)
