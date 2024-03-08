@@ -112,7 +112,7 @@
 
 (defparameter *infinity-point* (vec3 100003 (exp 1) 1)) ;; (infinity, e, 1)
 
-#|
+
 (defun domain-of-line-p1p2-dirs-p3 (coord-p1 coord-p2 coord-p3)
   ;; domain by line is shown us,
   ;; (C0 * x + C1 * y + C2 * 1 (<||>) 0
@@ -128,8 +128,17 @@
               (vec3-cross-xy v dir))))
     `#(,C0 ,C1 ,C2 ,C3) ;;(domain (make-array 4 :initial-contents #(C0 C1 C2 <+1||-1> 0)))
     ))
-|#
 
+(defun coordinate-dirs-into-simultaneous-domain (coord-points)
+  ;;
+  (cond ((< (length coord-points) 3)
+         '())
+        (t
+         (mapcar #'(lambda (cp123) ;; coord poinint 1 2 3
+                     (domain-of-line-p1p2-dirs-p3 (car cp123) (cadr cp123) (cddr cp123)))
+                 (make-3tuple-list coord-points)))))
+
+#|
 
 (defun domain-of-line-p1p2-contains-p3 (coord-p1 coord-p2 coord-p3)
   ;; domain by line is shown us,
@@ -156,11 +165,10 @@
                     0))))
     ;; todo: make-array may be farster.
     `#(,C0 ,C1 ,C2 ,C3)))
-
+|#
 
 #|
-(defun coordinate-points-into-simultaneous-domain (coord-points contains-infinity-point-p)
-  
+(defun coordinate-points-into-simultaneous-domain (coord-points contains-infinity-point-p)  
   ;;
   (cond ((< (length coord-points) 3)
          '())

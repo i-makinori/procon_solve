@@ -93,6 +93,45 @@
            collect (loop for x from x-from to x-to by approx-length
                          collect (vec3 x y 1))))))
 
+(defun inner-model-point (p_p p_c p_n rot-direction-sign)
+  ;; Coord = Pc + {1/2 * rot_direction * sign_pcn * CFL * 1/(1+ε) } * {(Pp - Pc) + (Pn - Pc)}
+  ;; rot-direction-sign means clock wise or counter clockwise.
+  (let ((sign_pcn ;; detect angle of pc is interior or exterior
+          (if (< 0 (vec3-cross-xy (vec3-sub-xy p_p p_c) (vec3-sub-xy p_n p_c))) 1 -1)))
+    (vec3-add-xy
+     p_c
+     (vec3-factor-xy (* 1/2 rot-direction-sign sign_pcn *default-approx-length* 1000/1001) 
+                     (vec3-add-xy (vec3-normalize-xy (vec3-sub-xy p_p p_c))
+                                  (vec3-normalize-xy (vec3-sub-xy p_n p_c)))))))
+
+(defun fill-shape-domain-by-approx-loading-points (shape)
+  (cond ((> 3 (length shape))
+         nil)
+        (t
+         (let* ((rot-direction ;; detect clock wise or counter clock wise.
+                  (if (point-inner-domain-p 
+                       (inner-model-point (nth 0 shape) (nth 1 shape) (nth 2 shape) 1) shape)
+                      1 -1)))
+           (mapcar #'(lambda (p_pcn) ;; point previous, current next
+                       (let ((p_p (car  p_pcn)) (p_c (cadr p_pcn)) (p_n (cddr p_pcn)))
+                         (inner-model-point p_p p_c p_n rot-direction)))
+                   (make-3tuple-list shape))))))
+             
+
+#|
+;; old implement
+(defun fill-shape-domain-by-approx-loading-points (shape)
+  (cond ((null shape) ;; 0 shape, zero-shape, it is zero element.
+         nil)
+        (t ;; otherwise, there is actual (physical) volume at the plane.
+         (remove-if
+          ;;#'(lambda (point) point nil ) ;;(not (point-inner-domnain-p point shape)))
+          #'(lambda (point) (not (point-inner-domain-p point shape)))
+          (approx-points-list (shape-domain-rect shape))
+          ))))
+|#
+
+#|
 (defun fill-inner-line-by-points (p1 p2)
   "opened interval"
   (let* ((cfl-const (* 1/2 *default-approx-length*)) ;; 1/root(2) may be metter
@@ -111,21 +150,11 @@
          '())
         (t ;; otherwise, there is actual (physical) boundary planes at the plane.
          (flatten (map-tuple #'fill-inner-line-by-points coords)))))
-         
-#|
+
 (defun fill-shape-domain-by-approx-loading-points (coords)
   (fill-shape-boundary-by-applox-loading-points coords))
 |#
 
-(defun fill-shape-domain-by-approx-loading-points (shape)
-  (cond ((null shape) ;; 0 shape, zero-shape, it is zero element.
-         nil)
-        (t ;; otherwise, there is actual (physical) volume at the plane.
-         (remove-if
-          ;;#'(lambda (point) point nil ) ;;(not (point-inner-domnain-p point shape)))
-          #'(lambda (point) (not (point-inner-domain-p point shape)))
-          (approx-points-list (shape-domain-rect shape))
-          ))))
 
 
 ;;; piece piece collision detection
