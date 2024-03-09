@@ -35,16 +35,8 @@
 (defun line-string-into-piece (id pm-sign line-text)
   ;;todo
   (let* ((coords (line-text-into-vector-list line-text))
-         (approx-points (funcall
-                         ;;#'(lambda (c) c nil)
-                         #'fill-shape-domain-by-approx-loading-points
-                         ;;#'(lambda (c) (approx-points-list (shape-domain-rect c)))
-                         coords))
-         (shape (shape :pm-sign pm-sign
-                       :coord-points coords
-                       :approx-points approx-points)))
+         (shape (shape pm-sign coords)))
     (piece :leaf-or-synthed 'leaf :id id :shape shape)))
-
 
 (defun load-problem-file-into-puzzle (file-name)
   (let* ((file-path (problem-file-path file-name)))

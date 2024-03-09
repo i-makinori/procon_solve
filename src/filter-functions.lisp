@@ -22,43 +22,13 @@
           (t
            (aux rot-list1 rot-list1)))))
 
-(defun shape-angle-list (shape)
-  (if (zero-shape-p shape)
-      nil
-      (let ((n-points (length (shape-coord-points shape)))
-            (angle-list
-              (mapcar #'(lambda (c_pcn) ;; Coordinate_Previous, Current, Next
-                          (;; positive angle. (avoid negative range). from -pi to pi into 0 to 2 pi .
-                           (lambda (a) (mod a *pi*2*))
-                           (angle (cadr c_pcn) (car c_pcn) (cddr c_pcn))))
-                      ;; 3tuple-list, rot-right 1 .
-                      (make-3tuple-list ((lambda (l) (append (cdr l) (list (car l))))
-                                         (shape-coord-points shape))))))
-        (if (ser= (* (- n-points 2) *pi*) ;; sum of interior angle = (N-2) * 180°
-                  (reduce #'+ angle-list))
-            (identity angle-list)
-            (mapcar #'(lambda (angle) (- *pi*2* angle)) angle-list)))))
-
-(defun shape-angle-list-reverse-when-hole (shape)
-  (let ((angle-list1 (shape-angle-list shape)))
-    (cond ((shape-minus-p shape)
-           (mapcar #'(lambda (a) (- *pi*2* a))
-                   angle-list1))
-          (t
-           (identity angle-list1)))))
-
-(defun shape-line-segments-length-xy^2-list (shape)
-  (mapcar #'(lambda (c_cn) ;; Coordinate_Current, Next
-              (vec3-length-xy^2 (vec3-sub-xy (cdr c_cn) (car c_cn))))
-          (make-tuple-list (shape-coord-points shape))))
-
 (defun detect-piece-exist-congruent-corresponding-index (piece1 piece2)
   ;;
   (let ((shape1 (piece-shape piece1))
         (shape2 (piece-shape piece2)))
     (and (detect-rot-list-exists-all-equal-index
-          (shape-line-segments-length-xy^2-list shape1)
-          (shape-line-segments-length-xy^2-list shape2)
+          (shape-segment-length^2-list shape1)
+          (shape-segment-length^2-list shape2)
           :test #'ser= :also-reverse t)
          (detect-rot-list-exists-all-equal-index
           (shape-angle-list shape1)
@@ -140,7 +110,7 @@
              (afcl #'min *num-divergent*
                    (flatten
                     (mapcar #'(lambda (p)
-                                (shape-angle-list-reverse-when-hole (piece-shape p)))
+                                (shape-angle-list (piece-shape p)))
                             primary-piece-list))))
            (objective-length^2
              (cond (;; if subjective is hole[-], minimal line-length of piece[+] is objective
@@ -149,7 +119,7 @@
                     (afcl #'min *num-divergent*
                           (flatten
                            (mapcar #'(lambda (p)
-                                       (shape-line-segments-length-xy^2-list (piece-shape p)))
+                                       (shape-segment-length^2-list (piece-shape p)))
                                    (remove-if-not #'(lambda (p) (shape-plus-p (piece-shape p)))
                                                   primary-piece-list)))))
                    (;; if subjective is piece[+], maximum line-length of hole[-] is objective
@@ -157,7 +127,7 @@
                     (afcl #'max *num-zero*
                           (flatten
                            (mapcar #'(lambda (p)
-                                       (shape-line-segments-length-xy^2-list (piece-shape p)))
+                                       (shape-segment-length^2-list (piece-shape p)))
                                    (remove-if-not #'(lambda (p) (shape-minus-p (piece-shape p)))
                                                   primary-piece-list)))))
                    (;; something none Real
@@ -185,8 +155,8 @@
   (let ((minimal-angle  (assocdr :minimal-angle   primary-params))
         (objective-length^2 (assocdr :objective-length^2 primary-params))
         ;;
-        (angle-list (shape-angle-list-reverse-when-hole shape))
-        (length^2-list (shape-line-segments-length-xy^2-list shape)))
+        (angle-list (shape-angle-list shape))
+        (length^2-list (shape-segment-length^2-list shape)))
     (or
      ;; angle
      (no-future-angles-p angle-list minimal-angle)

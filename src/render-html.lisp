@@ -5,7 +5,7 @@
 ;;; HTML, SVG
 
 ;; "A (no B) no iro" means "color of (B of) A.".
-;; it is the reading of Japanese written in Alphabet.
+;; it is the Alphabet written of the Japanese reading.
 ;; 
 
 (defparameter *display-scale-multiply* 14)
@@ -29,9 +29,7 @@
          (fill-color (cond ;; suna no iro, hinoki no iro, sora no tairakeki iro,
                        ((eq pm *+shape*) "#feecd6")
                        ((eq pm *-shape*) "#eadec9")
-                       (t                "#fcf5e3")
-
-))
+                       (t                "#fcf5e3")))
          ;; nil no annkoku no iro
          (style (format nil "style='fill:~A;stroke:#16160e;stroke-width:0.7071067'" fill-color)))
     (format nil "<polygon points='~A' ~A />~%"

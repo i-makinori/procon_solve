@@ -122,9 +122,9 @@
   (labels ((transform (v)
              (matrix3x3-vector3-product transformation-matrix v)))
     (shape
-     :pm-sign (shape-pm-sign shape)
-     :coord-points  (funcall transform-coord-points  #'transform (shape-coord-points shape))
-     :approx-points (funcall transform-approx-points #'transform (shape-approx-points shape)))))
+     (shape-pm-sign shape)
+     (funcall transform-coord-points  #'transform (shape-coord-points shape))
+     (funcall transform-approx-points #'transform (shape-approx-points shape)))))
 
 
 (defun transform-shape-by-transformation-matrix-however-nil-approxs (shape transformation-matrix)
@@ -262,10 +262,6 @@
          ;; next coordintae-points is ommited append two IRCs.
          (synthed-coord-points
            (ommit-edge-points (append irc1 irc2)))
-         ;; approxs points
-         (approx-points
-           ;; A-B (Set theory Subset) may be faster than 1ce below line
-           (fill-shape-domain-by-approx-loading-points synthed-coord-points))
          ;; pm-sign
          (pm-sign
            ((lambda (pm_1 pm_2)
@@ -278,9 +274,7 @@
             (shape-pm-sign new-shape2)))
          ;; shape
          (synthed-new-shape
-           (shape :pm-sign pm-sign
-                  :coord-points synthed-coord-points
-                  :approx-points approx-points)))
+           (shape pm-sign synthed-coord-points)))
     ;;
     (incf-id-counter!)
     ;;(format t "~A, ~A, (~A: ~A)~%"
