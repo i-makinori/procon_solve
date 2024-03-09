@@ -2,31 +2,47 @@
 (in-package :puzzle-1617)
 
 ;;;; render results to HTML
-;; HTML, SVG
+;;; HTML, SVG
+
+;; "A (no B) no iro" means "color of (B of) A.".
+;; it is the reading of Japanese written in Alphabet.
+;; 
 
 (defparameter *display-scale-multiply* 14)
 
-;; SVG parts
+;;; SVG parts
+
+(defun tml-coord (number)
+  (* number *display-scale-multiply*))
 
 (defun tml-coord-text (number)
-  (round (* number *display-scale-multiply*)))
+  ;;(round (* number *display-scale-multiply*)))
+  (format nil "~,4f" (tml-coord number)))
 
-(defun point-list-into-svg-polygon (point-list)
+(defun point-list-into-svg-polygon (point-list pm)
   (let* ((points-text
            (apply #'concatenate 'string
                   (mapcar #'(lambda (p) (format nil "~A,~A "
                                                 (tml-coord-text (vec3-x p))
                                                 (tml-coord-text (vec3-y p))))
                           point-list)))
-         (style "style='fill:none;stroke:#555555;stroke-width:1'"))
+         (fill-color (cond ;; suna no iro, hinoki no iro, sora no tairakeki iro,
+                       ((eq pm *+shape*) "#feecd6")
+                       ((eq pm *-shape*) "#eadec9")
+                       (t                "#fcf5e3")
+
+))
+         ;; nil no annkoku no iro
+         (style (format nil "style='fill:~A;stroke:#16160e;stroke-width:0.7071067'" fill-color)))
     (format nil "<polygon points='~A' ~A />~%"
             points-text style)))
 
 (defun approx-coords-into-svg-dots (approx-coords-list &key (frame-piece-p nil))
   (let* ((template
            (if frame-piece-p
-               "<circle r='2' cx='~A' cy='~A' fill='aliceblue' />" ;; frame
-               "<circle r='1' cx='~A' cy='~A' fill='green'     />" ;; piece (none framed)
+               ;; yuki no iro, hinoki no ha no iro, 
+               "<circle r='2' cx='~A' cy='~A' fill='#eaeff3' />" ;; waku qi, frame
+               "<circle r='1' cx='~A' cy='~A' fill='#648131' />" ;; hozo qi, piece (none framed)
                ))
          (text (apply #'concatenate 'string
                       (mapcar #'(lambda (p) (format nil template
@@ -35,41 +51,13 @@
                               approx-coords-list))))
     text))
 
-;; overlap version HTML
-
-(defun point-list-list-into-svg (piece-points-list &key (id-string "shape_whole"))
-  "piece vector list(piece) list into svg text"
-  (let* ((polygon-list (mapcar #'(lambda (piece-points)
-                                   (point-list-into-svg-polygon piece-points))
-                               piece-points-list))
-         (polygon-list-text
-           (apply #'concatenate 'string polygon-list)))
-
-    (format nil "<svg id='~A' width='600' height='600'>~%~A~%</svg>~%"
-            id-string polygon-list-text)))
-
-(defun html-of-piece-list-overlap (piece-list)
-  "for solven puzzle"
-  (let* ((list-of-piece-points
-           (mapcar #'(lambda (piece) (piece-coord-points piece))
-                   piece-list))
-         (id1 "overlapped_pieces")
-         (overlap-alist
-           `(,(cons :id id1)
-             ,(cons :svg-text
-                    (point-list-list-into-svg list-of-piece-points
-                                              :id-string id1))))
-         (svg-alists (list overlap-alist)))
-    (funcall (cl-template:compile-template *html-template-text*)
-             (list :svgs svg-alists))))
-
-;; piece list version HTML
+;;; piece list version HTML
 
 (defun shape-svg-element-text (shape &key (frame-piece-p nil))
   (format nil
           ;;"~A~%"
           "~A~A~%"
-          (point-list-into-svg-polygon (shape-coord-points shape))
+          (point-list-into-svg-polygon (shape-coord-points shape) (shape-pm-sign shape))
           (approx-coords-into-svg-dots (shape-approx-points shape)
                                        :frame-piece-p frame-piece-p)))
 
@@ -141,7 +129,7 @@
          (domain-rect ((lambda (cs) (if (null cs) '(0 0 0 0) (shape-domain-rect cs)))
                        (piece-coord-points max-piece)))
          (pd ;; Piece_Domain
-           (mapcar #'tml-coord-text domain-rect))
+           (mapcar #'tml-coord domain-rect))
          (pad *display-scale-multiply*) ;; padding
          ;; viw box ranges
          (x_min (- (min 0 (domain-rect-x-min pd)) (* pad 1)))
@@ -158,7 +146,8 @@
          (template "<svg id='~A' ~A width='600' height='600'>~%~A~%~A~%</svg>~%")
          (viewbox (piece-svg-viewbox-string piece))
          (id-text (piece-id-tml-string-svg piece))
-         (elm-memo "<circle r='5' cx='0' cy='0' fill='red' />~%") ;; origin point
+         ;; ume no hana moe qithesu iro.
+         (elm-memo "<circle r='5' cx='0' cy='0' fill='#f3a7a5' />~%") ;; genten, origin point
          ;; elements
          ;;(elm-shape (shape-svg-element-text (piece-shape piece)))
          (tree-elements
@@ -200,6 +189,8 @@
              (list :svgs svg-alists
                    :len-limitage-text len-limitage-text))))
 
+;;; I/O read write
+
 ;; template
 
 (defparameter *html-template-file* (merge-pathnames "src/viewer/htmlpage_template.html.clt"
@@ -223,39 +214,4 @@
                (format t "HTML file updated at : ~A ~%" pathname)
                pathname)
       (error (e) (print e) nil))))
-
-
-;;;; old implement memo writtings
-
-#|
-
-(defun template-text-of-solven-puzzle-html (puzzle &key (template-file-path *html-template-file*))
-  "for solven puzzle"
-  (with-open-file (template-file template-file-path)
-    (let*
-        ((template (make-string (file-length template-file)))
-         (svg-alist (mapcar
-                     #'(lambda (puzzle id)
-                         `((:id . ,id)
-                           (:svg-text .
-                           ,(vec3-list-list-into-svg (identity puzzle) :id-string id))))
-                     ;; (list puzzle puzzle puzzle) (list "piyo" "fuga" "hoge") ;; listing example
-                     (list puzzle) (list "puzzle_solution")
-                     )))
-      (read-sequence template template-file)
-      (funcall (cl-template:compile-template template)
-               (list :svgs svg-alist)))))
-
-(defun write-solven-puzzle-as-html (file-name puzzle)
-  "for solven puzzle"
-  (let*
-      ((pathname (merge-pathnames (format nil "test/results/~A" file-name)
-                                  *pathname-puzzle-1617-root*))
-       (html-text (template-text-of-solven-puzzle-html puzzle)))
-    (handler-case
-        (progn (write-string-to-file pathname html-text)
-               (format t "HTML file updated at : ~A ~%" pathname)
-               pathname)
-      (error (e) (print e) nil))))
-|#
 
