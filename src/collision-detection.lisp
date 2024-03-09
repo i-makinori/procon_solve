@@ -93,16 +93,22 @@
            collect (loop for x from x-from to x-to by approx-length
                          collect (vec3 x y 1))))))
 
+
+;;; approx (loading) points
+
 (defun inner-model-point (p_p p_c p_n rot-direction-sign)
-  ;; Coord = Pc + {1/2 * rot_direction * sign_pcn * CFL * 1/(1+ε) } * {(Pp - Pc) + (Pn - Pc)}
+  ;; Coord = Pc + (* (1/2 * CFL * 1/(1+ε)})
+  ;;                 normalize({rot_direction * sign_pcn} * {dirVec(Pp - Pc) + dirVec(Pn - Pc)})
   ;; rot-direction-sign means clock wise or counter clockwise.
   (let ((sign_pcn ;; detect angle of pc is interior or exterior
           (if (< 0 (vec3-cross-xy (vec3-sub-xy p_p p_c) (vec3-sub-xy p_n p_c))) 1 -1)))
     (vec3-add-xy
      p_c
-     (vec3-factor-xy (* 1/2 rot-direction-sign sign_pcn *default-approx-length* 1000/1001)
-                     (vec3-add-xy (vec3-normalize-xy (vec3-sub-xy p_p p_c))
-                                  (vec3-normalize-xy (vec3-sub-xy p_n p_c)))))))
+     (vec3-factor-xy (*  1/2  *default-approx-length* 1000/1001)
+                     (vec3-normalize-xy
+                      (vec3-factor-xy (* rot-direction-sign sign_pcn)
+                                      (vec3-add-xy (vec3-normalize-xy (vec3-sub-xy p_p p_c))
+                                                   (vec3-normalize-xy (vec3-sub-xy p_n p_c)))))))))
 
 (defun fill-shape-domain-by-approx-loading-points (shape)
   (cond ((> 3 (length shape))
@@ -132,6 +138,7 @@
 |#
 
 #|
+;; unused implement
 (defun fill-inner-line-by-points (p1 p2)
   "opened interval"
   (let* ((cfl-const (* 1/2 *default-approx-length*)) ;; 1/root(2) may be metter
