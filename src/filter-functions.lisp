@@ -15,7 +15,8 @@
                (cond ((null (car rot1_ab))           nil)
                      ((every test rot1_da rot-list2) t)
                      (t                              (aux (cdr rot1_ab) rot1_da))))))
-    (cond ((not (= (length rot-list1) (length rot-list2))) nil)
+    (cond ((and (null rot-list1) (null rot-list2) t))
+          ((not (= (length rot-list1) (length rot-list2))) nil)
           (also-reverse
            (or (aux rot-list1 rot-list1)
                (aux (reverse rot-list1) (reverse rot-list1))))
