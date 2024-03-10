@@ -91,14 +91,14 @@
                         (transform-piece (piece-transform2 piece)))))))))
 |#
 
-(defun piece-into-svg-element-aux1 (piece transformation-matrixes)
+(defun piece-into-svg-element-aux1 (piece transformation-matrixes-reversed)
   (cond ((null piece) "")
         ((primary-piece-p piece)
          (let ((transfomed-shape
                  ;; transform-shape-by-transformation-matrix (shape transformation-matrix)
                  (transform-shape-by-transformation-matrix
                   (piece-shape piece)
-                  (reduce #'matrix3x3-product transformation-matrixes)))
+                  (reduce #'matrix3x3-product (reverse transformation-matrixes-reversed))))
                (frame?
                  (if (shape-minus-p (piece-pm-sign piece)) t nil)))
            (shape-svg-element-text transfomed-shape :frame-piece-p frame?)))
@@ -109,10 +109,13 @@
                    ""
                    (piece-into-svg-element-aux1
                     (transform-piece trans1)
-                    (cons (transform-transformation-matrix trans1) transformation-matrixes))
+                    (cons (transform-transformation-matrix trans1)
+                          transformation-matrixes-reversed))
                    (piece-into-svg-element-aux1
                     (transform-piece trans2)
-                    (cons (transform-transformation-matrix trans2) transformation-matrixes)))))))
+                    (cons (transform-transformation-matrix trans2)
+                          transformation-matrixes-reversed))
+                   )))))
 
 (defun piece-svg-viewbox-string (piece)
   ;; viewBox="X_min Y_min X_length Y_length" (without dimentions).
