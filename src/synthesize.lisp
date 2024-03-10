@@ -124,7 +124,8 @@
     (shape
      (shape-pm-sign shape)
      (funcall transform-coord-points  #'transform (shape-coord-points shape))
-     (funcall transform-approx-points #'transform (shape-approx-points shape)))))
+     (funcall transform-approx-points #'transform (shape-approx-points shape))
+     nil)))
 
 
 (defun transform-shape-by-transformation-matrix-however-nil-approxs (shape transformation-matrix)

@@ -117,14 +117,23 @@
                   (vec3-length-xy^2 (vec3-sub-xy (cdr c_cn) (car c_cn))))
               (make-tuple-list coords))))
 
-(defun shape (pm-sign coord-points &optional (approx-points 'by-renew))
-  (let ((approx-points (if (eq approx-points 'by-renew)
-                           (fill-shape-domain-by-approx-loading-points coord-points)
-                           approx-points)))
+(defun shape (pm-sign coord-points &optional (approx-points 'by-renew) (need-memo-list 't))
+  (let ((approx-points
+          (if (eq approx-points 'by-renew)
+              (fill-shape-domain-by-approx-loading-points coord-points)
+              approx-points))
+        (segment-length^2-list 
+          (if need-memo-list
+              (coords-segment-length-xy^2-list coord-points)
+              nil))
+        (angle-list
+          (if need-memo-list
+              (coords-angle-list-yin-and-yang pm-sign coord-points)
+              nil)))
     (make-piece-shape :pm-sign pm-sign
                       :coord-points coord-points
                       :approx-points approx-points
                       ;;
-                      :segment-length^2-list (coords-segment-length-xy^2-list coord-points)
-                      :angle-list (coords-angle-list-yin-and-yang pm-sign coord-points))))
+                      :segment-length^2-list segment-length^2-list
+                      :angle-list angle-list)))
   
