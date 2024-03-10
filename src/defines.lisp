@@ -95,8 +95,7 @@
                            (lambda (a) (mod a *pi*2*))
                            (angle (cadr c_pcn) (car c_pcn) (cddr c_pcn))))
                       ;; 3tuple-list, rot-right 1 .
-                      (make-3tuple-list ((lambda (l) (append (cdr l) (list (car l))))
-                                         coords)))))
+                      (make-3tuple-list (rot-right 1 coords)))))
         (if (ser= (* (- n-points 2) *pi*) ;; sum of interior angle = (N-2) * 180°
                   (reduce #'+ angle-list))
             (identity angle-list)
