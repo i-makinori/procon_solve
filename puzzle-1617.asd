@@ -31,6 +31,8 @@
              (:file "linear-problem")
              (:file "collision-detection")
              (:file "synthesize")
+             ;; partial-problem
+             (:file "partial-problem")
              ;; solver-functions
              (:file "solver-functions")
              (:file "evaluation-functions")
