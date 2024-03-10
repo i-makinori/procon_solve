@@ -214,7 +214,7 @@
     (setf *beam-current-index* 0)
     ;; parameters
     (setf *beam-width* 6)
-    (setf *n-search-iter-max* 10) ;; n:: depth
+    (setf *n-search-iter-max* 25) ;; n:: depth
 
     ;; handle problem forms
     (cond

@@ -12,21 +12,28 @@
 ;;; example problem
 
 (defparameter *example-problem-9*
-  (load-problem-file-into-puzzle "puzzle_9.txt"))
+  (load-problem-file-into-puzzle "unofficial_type/puzzle_9.txt"))
 
 (defparameter *example-problem-10*
-  (load-problem-file-into-puzzle "puzzle_10.txt"))
+  (load-problem-file-into-puzzle "unofficial_type/puzzle_10.txt"))
 
 
 ;;;; problem list
 
-(defparameter *file-names-of-problems*
-  '("puzzle_4.txt" "puzzle_5.txt" "puzzle_6.txt" "puzzle_7.txt"
-    "puzzle_8.txt" "puzzle_9.txt" "puzzle_10.txt"))
+(defparameter *file-names-of-problems-unofficial-type*
+  (directory (problem-file-path "./unofficial_type/*.txt")))
 
 (defparameter *problem-list*
   (mapcar #'load-problem-file-into-puzzle
-          *file-names-of-problems*))
+          *file-names-of-problems-unofficial-type*))
+
+(defparameter *file-names-of-problems-official-type*
+  (directory (problem-file-path "./official_type/*.txt")))
+
+(defparameter *problem-list-official*
+  (mapcar #'load-problem-file-into-puzzle
+          *file-names-of-problems-official-type*))
+
 
 
 ;;;;

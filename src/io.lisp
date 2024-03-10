@@ -17,9 +17,10 @@
   (asdf:system-relative-pathname :puzzle-1617 nil))
 
 (defun problem-file-path (file-name)
-  (merge-pathnames ;; shapes (f P_from_child P_from_root)
-   (pathname (format nil "test/problems/~A" file-name))
-   *pathname-puzzle-1617-root*))
+  (let ((own-root-pathname (merge-pathnames
+                            (pathname (format nil "test/problems/~A" file-name))
+                            *pathname-puzzle-1617-root*)))
+    own-root-pathname))
 
 (defun line-text-into-vector-list (line-text-string)
   (labels ((2takes-list (list current)
@@ -39,7 +40,13 @@
     (piece :leaf-or-synthed 'leaf :id id :shape shape)))
 
 (defun load-problem-file-into-puzzle (file-name)
-  (let* ((file-path (problem-file-path file-name)))
+  (let* ((file-path (cond ((probe-file file-name)
+                           file-name)
+                          ((probe-file (problem-file-path file-name))
+                           (problem-file-path file-name))
+                          (t
+                           (warn (format nil "finle-name not found ~A~%" file-name))
+                           ""))))
     (handler-case
         (let* (;; read file
                (line-texts
