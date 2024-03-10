@@ -141,6 +141,18 @@
          (y_len (- y_max y_min)))
     (format nil "viewbox='~A ~A ~A ~A'" x_min y_min x_len y_len)))
 
+(defun piece-shape-coords-numbering-svg-element (piece)
+  (let ((coords (piece-coord-points piece)))
+    (reduce 
+     #'(lambda (s1 s2) (concatenate 'string s1 s2))
+     (mapcar
+      #'(lambda (n)
+          (format nil "<text x='~A' y='~A' font-size='6'>~A</text>~%"
+                  (tml-coord (vec3-x (nth n coords)))
+                  (tml-coord (vec3-y (nth n coords)))
+                  n))
+      (from-m-to-n-list 0 (1- (length coords))))
+     :initial-value "")))
 
 (defun piece-into-svg-element (piece)
   (let* (;; meta
@@ -148,7 +160,9 @@
          (viewbox (piece-svg-viewbox-string piece))
          (id-text (piece-id-tml-string-svg piece))
          ;; ume no hana moe qithesu iro.
-         (elm-memo "<circle r='5' cx='0' cy='0' fill='#f3a7a5' />~%") ;; genten, origin point
+         (origin-point-element "<circle r='5' cx='0' cy='0' fill='#f3a7a5' />~%") ;; genten
+         (coord-numbers (piece-shape-coords-numbering-svg-element piece))
+         (elm-memo (concatenate 'string coord-numbers origin-point-element))
          ;; elements
          ;;(elm-shape (shape-svg-element-text (piece-shape piece)))
          (tree-elements
@@ -159,12 +173,20 @@
             tree-elements elm-memo)))
 
 (defun piece-into-html-describe (piece)
-  (let* ((coords (piece-coord-points piece))
-         (id (piece-id piece)))
-    (format nil
-            "<pre id='~A'>~%Length: ~A [n edge points],~%id: ~A,~%shapee: ~A</pre>"
-            (piece-id-tml-string-describe piece)
-            (length coords) id coords)))
+  (let* ((idid_string (piece-id-tml-string-describe piece))
+         (piece-text
+           (format nil "piece-meta...~%id: ~A,~%(composes)[len]: ~A[~A],~%len_coord-points: ~A~%"
+                   (piece-id piece)
+                   (mapcar #'piece-id (list-of-primary-piece-list-of-synthesized-piece piece))
+                   (length (list-of-primary-piece-list-of-synthesized-piece piece))
+                   (length (piece-coord-points piece))))
+         (shape-text
+           (format nil "shape-info...~%shape:~A~%" (piece-shape piece))))
+  (format nil
+          "<pre id='~A'>~A~A</pre>"
+          idid_string
+          piece-text
+          shape-text)))
 
 (defun html-of-piece-list (piece-list)
   (let* (;; limitage
@@ -189,6 +211,12 @@
     (funcall (cl-template:compile-template *html-template-text*)
              (list :svgs svg-alists
                    :len-limitage-text len-limitage-text))))
+
+;;; state list version HTML
+
+
+nil ;;
+
 
 ;;; I/O read write
 
