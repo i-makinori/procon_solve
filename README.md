@@ -1,10 +1,34 @@
 
+<center>
+
+![木組主之示申(ki kumu nushi no kami, or, ki kumun shi no kami)](./0kikunumushinokami.svg)
+
+Afraid to say, He is the 木組主之示申(ki kumu nushi no kami, or, ki kumun shi no kami),  
+is sitting downs to synthesized stones, is thinkingh how to solve puzzle into zero point.
+
+<!--
+```lisp
+> ;; at the commit of 2fbb752, and spent the times day and night.
+> (write-piece-list-as-html
+              (list (nth 42
+                         (all-synthesizeable-patterns-of-piece-to-piece
+                          (nth 2
+                               (all-synthesizeable-patterns-of-piece-to-piece
+                                (nth 5 *example-problem-9*)
+                                (nth 3 *example-problem-9*)))
+                          (nth 49
+                               (all-synthesizeable-patterns-of-piece-to-piece
+                                (nth 1 *example-problem-10*)
+                                (nth 1 (all-synthesizeable-patterns-of-piece-to-piece (nth 9 *example-problem-10*) (nth 8 *example-problem-10*)))))))))
+```
+-->
+
+</center>
+
 # solver of shape filling puzzle.
 
 
 shape filling puzzle.
-
-
 
 
 # example usage
