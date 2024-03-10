@@ -3,6 +3,7 @@
   <head>
     <title>:puzzle-1617 | solver viewer. </title>
     <script src="../htmlpage-assets/svg-pan-zoom.js"></script>
+    <link rel="stylesheet" href="../htmlpage-assets/style.css"></link>
   </head>
 
   <body>
@@ -38,9 +39,13 @@
 
       function gen_tab_html_text (id_name) {
           let panzoom_script_path =  dir + "/../htmlpage-assets/svg-pan-zoom.js"
+          let style_css_path = dir + "/../htmlpage-assets/style.css"
           let svg_panzoom_script = gen_svg_panzoom_script_text(id_name);
           
-          let describe_tml = document.getElementById("tml_"+id_name).innerHTML;
+          let piece_tml = document.getElementById("tml_"+id_name);
+          
+          var describe_tml  = piece_tml.getElementsByClassName("describe_tml")[0].innerHTML;
+          var piece_svg_tml = piece_tml.getElementsByClassName("piece_svg_tml")[0].innerHTML;
 
           let tab_html = 
               '<!DOCTYPE html>\n' +
@@ -49,11 +54,13 @@
               '  <head>\n' +
               '    <title>:Puzzle1617 | '+id_name+' Specific Synthesized Piece Viewer.</title>\n' +
               '    <script src=\"'+panzoom_script_path+'\"><\/script>\n' +
+              '    <link rel="stylesheet" href="'+style_css_path+'"></link>\n' +
               '  </head>\n' +
               '  <body>\n' +
               '    <h1>Specific Piece Window</h1>' +
               '    <h2>' + id_name + '</h2> \n' +
               '    ' + describe_tml + ' \n' +
+              '    ' + piece_svg_tml + ' \n' +
               '    ' + svg_panzoom_script + ' \n' +
               '  </body>\n' +
               '</html>\n';
@@ -71,20 +78,35 @@
       </script>
 
 
+
     <h1>solution</h1>
 
-    <% loop for svg in (@ svgs) do %>
-      <div id='tml_<%= (cdr (assoc :id svg)) %>'>
-        <%= (cdr (assoc :id svg)) %>
-        <%= (cdr (assoc :describe-text svg)) %>
-        <%= (cdr (assoc :svg-text svg)) %>
-      </div>
-      <div id='button_<%= (cdr (assoc :id svg)) %>'>
-        <button onclick="open_SVG_in_new_tab('<%= (cdr (assoc :id svg)) %>')">
-          open in new Tab
-        </button>
-      </div>
-    <% end %>
+    <table>
+      <tbody>
+        <tr>
+          <td>Piece Descriptions</td>
+          <td>Piece SVGs</td>
+        </tr>
+        <% loop for svg in (@ svgs) do %>
+        <tr id='tml_<%= (cdr (assoc :id svg)) %>'>
+          <td class='describe_tml'>
+            <%= (cdr (assoc :id svg)) %>
+            <%= (cdr (assoc :describe-text svg)) %>
+          </td>
+          <td>
+            <div class='piece_svg_tml'>
+              <%= (cdr (assoc :svg-text svg)) %>
+            </div>
+            <div id='button_<%= (cdr (assoc :id svg)) %>'>
+              <button onclick="open_SVG_in_new_tab('<%= (cdr (assoc :id svg)) %>')">
+                open in new Tab
+              </button>
+            </div>
+          </td>
+        </tr>
+        <% end %>
+      </tbody>
+    </table>
 
     <hr />
     <%= (@ len-limitage-text) %>
