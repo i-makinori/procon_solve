@@ -58,11 +58,18 @@
   primary-piece-list
   (delta_points-of-synthesize_delta (fs-frame-piece state)))
 
-(defun evaluation-value-by-div1-nomials (state primary-piece-list)
+(defun evaluation-value-by-remain-edges (state primary-piece-list)
   ;;primaries
-  primary-piece-list
-  state
-  0)
+  (let* ((frame-piece (fs-frame-piece state))
+         (frame-edges (length (piece-coord-points frame-piece)))
+         (remain-pieces (list-of-unused-primary-piece-list-of-synthesized-piece
+                         frame-piece primary-piece-list))
+         (remain-primes-edges (apply #'+ (mapcar #'(lambda (p) (length (piece-coord-points p)))
+                                          remain-pieces)))
+         (remain-edges (+ frame-edges remain-primes-edges)))
+    (- (* 50 50) remain-edges)))
+
+;;; sort
 
 (defun sorted-states-by-evaluation-function (state-list-new state-list-resting)
   ;; todo: merge sort. because states rest are sorted and values stored in logically.

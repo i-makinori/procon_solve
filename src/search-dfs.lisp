@@ -26,7 +26,8 @@
   )
 
 (defparameter *evaluation-function*
-  #'evaluation-value-by-delta-points_sum
+  ;;#'evaluation-value-by-delta-points_sum
+  #'evaluation-value-by-remain-edges
   ;;#'evaluation-value-by-delta-points_delta
   "evaluation funciton of step (node or edge is not determined)"
   )
