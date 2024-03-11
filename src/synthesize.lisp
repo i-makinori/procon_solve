@@ -12,6 +12,32 @@
   (:p2 nil) (:n2 nil) (:pm2 nil)
   )
 
+(defun whole-set-of-point-and-edge-selections-piece
+    (piece &key (piece-by-nth_point-only nil))
+  (let ((combinations
+          (cartesian
+           ;; (or {A[n]} (A_l)) X (B_l) X {A+, A-} X {B+, B-}
+           ;; where (A_l), (B_l) types of {0,1, ... , (n_points-1)}.
+           (if piece-by-nth_point-only
+               (list (mod piece-by-nth_point-only (length (piece-points piece))))  ;; {A[n]}
+               (from-m-to-n-list 0 (1-            (length (piece-points piece))))) ;; (A_l)
+           (list '+1 '-1))))
+    combinations))
+
+(defun whole-set-of-point-and-edge-selections-piece-piece
+    (piece1 piece2 &key (piece1-by-nth_point-only nil))
+  (mapcar
+   #'(lambda (syd1.syd2.nil) ;; sy-param-dush_1 . sy-param-dush_2, [[cp1, pm1], [cp2, pm2]]
+       (let ((syd1 (nth 0 syd1.syd2.nil)) (syd2 (nth 1 syd1.syd2.nil)))
+         (make-sy-select :p1 piece1 :n1 (car syd1) :pm1 (cadr syd1)
+                         :p2 piece2 :n2 (car syd2) :pm2 (cadr syd2))))
+   (cartesian
+    (mapcar #'list (whole-set-of-point-and-edge-selections-piece 
+                    piece1 :piece-by-nth_point-only piece1-by-nth_point-only))
+    (identity      (whole-set-of-point-and-edge-selections-piece
+                    piece2 :piece-by-nth_point-only nil)))))
+
+#|
 (defun whole-set-of-point-and-edge-selections-piece-piece
     (piece1 piece2 &key (piece1-by-nth_point-only nil))
   (let ((combinations
@@ -30,7 +56,7 @@
        (make-sy-select :p1  piece1 :n1 (nth 0 cp12_pm12) :pm1 (nth 2 cp12_pm12)
                        :p2  piece2 :n2 (nth 1 cp12_pm12) :pm2 (nth 3 cp12_pm12)))
    combinations)))
-
+|#
 
 ;;; note: test
 #|
