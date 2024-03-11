@@ -36,6 +36,7 @@
           (shape-angle-list shape2)
           :test #'ser= :also-reverse t))))
 
+
 ;;; detect congruent of piece and piece
 ;; old implement. slow
 
@@ -301,7 +302,7 @@
   ;; todo: rewrite stack filter for gradient_stack by this function
   ;; call filter functions
   (first-n
-   *beam-stack-width-const*
+   *fs-stackwidth-const*
    (remove-plus-piece-overs-frame-from-state-list
     (remove-no-future-state-from-state-list
      (remove-by-evaluation-value

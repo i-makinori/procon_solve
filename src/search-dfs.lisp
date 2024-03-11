@@ -14,8 +14,8 @@
 (defparameter *n-search-iter* 0) ;; variable
 (defparameter *n-search-iter-max* 30) ;; parameter
 
-(defparameter *beam-stack-width-const* 1000 "max stack width for search of its beam") ;; parameter
-
+(defparameter *beam-stack-width-const* 200 "max stack width for search of its beam") ;; parameter
+(defparameter *fs-stackwidth-const* 100)
 
 ;;; function configs
 
