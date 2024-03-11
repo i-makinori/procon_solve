@@ -72,6 +72,12 @@
 (defun piece-approx-points (piece)
   (shape-approx-points (piece-shape piece)))
 
+(defun piece-angle-list (piece)
+  (shape-angle-list (piece-shape piece)))
+
+(defun piece-segment-length^2-list (piece)
+  (shape-segment-length^2-list (piece-shape piece)))
+
 
 ;; zero element
 

@@ -54,6 +54,89 @@
 
 ;;;
 
+#|
+(defun solve-partial-problem-aux (objective-value choice-value-list
+                                  this-depth-queue next-depth-queue solutions current-depth)
+  (cond ((>= current-depth *depth-const-of-partial-problem*)
+         solutions)
+        ((null this-depth-queue)
+         (solve-partial-problem-aux objective-value choice-value-list
+                                    next-depth-queue '() solutions (+ 1 current-depth)))
+        (t
+         (let* ((step-vs (car this-depth-queue))
+                (step-next-depth-queue-combination
+                  (mapcar #'(lambda (v) (cons v step-vs)) ;; it is unneeded to remove equally set
+                          choice-value-list))
+                (step-next-depth-queue
+                  (remove-if-not #'(lambda (vs) (ser<= (reduce #'+ vs :initial-value 0)
+                                                       objective-value))
+                                 step-next-depth-queue-combination))
+                (step-solutions
+                  (remove-if-not #'(lambda (vs) (ser= (reduce #'+ vs :initial-value 0)
+                                                      objective-value))
+                                 step-next-depth-queue-combination)))
+           #|
+           (format t "depth ~A. ~A = Sum ,~A~%"
+                   current-depth
+                   (reduce #'+ step-vs :initial-value 0)
+                   step-vs)
+           |#        
+           (solve-partial-problem-aux
+            objective-value choice-value-list
+            (cdr this-depth-queue)
+            (append next-depth-queue step-next-depth-queue)
+            (append solutions step-solutions)
+            current-depth)
+           ))))
+|#
+
+(defun solve-partial-problem-aux (objective-value choice-value-list
+                                  this-depth-queue next-depth-queue solutions current-depth)
+  (cond ((> current-depth *depth-const-of-partial-problem*)
+         solutions)
+        ((null this-depth-queue)
+         (solve-partial-problem-aux objective-value choice-value-list
+                                    next-depth-queue '() solutions (+ 1 current-depth)))
+        (t
+         (let* ((step-vs (car this-depth-queue))
+                (step-value (apply #'+ step-vs)))
+           (cond 
+             ((ser= step-value objective-value)
+              (solve-partial-problem-aux 
+               objective-value choice-value-list
+               (cdr this-depth-queue) next-depth-queue
+               (cons (car this-depth-queue) solutions) current-depth))
+             ((ser> step-value objective-value)
+              (solve-partial-problem-aux
+               objective-value choice-value-list
+               (cdr this-depth-queue) next-depth-queue
+               solutions current-depth))
+             (t
+              (solve-partial-problem-aux
+               objective-value choice-value-list
+               (cdr this-depth-queue)
+               (append  next-depth-queue
+                        (mapcar #'(lambda (v) (cons v step-vs)) choice-value-list))
+               solutions current-depth)))))))
+
+                                    
+(defun solve-partial-problem (objective-value choice-value-list)
+  (remove-equally-set-from-set-list
+   (solve-partial-problem-aux objective-value choice-value-list
+                              (mapcar #'list choice-value-list)
+                              '() '() -1)))
+
+
+(defun solve-partial-angle (vvsy available-piece-list)
+  (solve-partial-problem (- *pi*2* (vvsy-angle vvsy))
+                         (flatten (mapcar #'piece-angle-list available-piece-list)))
+  ;;flatten (mapcar #'piece-angle-list available-piece-list))
+  )
+
+
+;;;
+
+#|
 (defun solve-partial-angle-aux (vvsy-list queue-current queue-next
                                 memo-structure current-depth)
   ;;(format t "~A~%" (car queue-current))
@@ -100,6 +183,7 @@
                                          memo-structure
                                          current-depth)))             
              )))))
+|#
 #|
 (defun solve-partial-angle-aux (vvsy-list queue-current queue-next
                                 memo-structure current-depth)
@@ -143,6 +227,7 @@
      )))
 |#
 
+#|
 (defun solve-partial-angle (frame-piece primary-piece-list)
   (let* ((remain-pieces (list-of-unused-primary-piece-list-of-synthesized-piece
                          frame-piece primary-piece-list)))
@@ -154,27 +239,4 @@
      '()
      '()
      0)))
-
-#|
-(defun solve-partial-problem-aux (objective-value vvsy-list queue-current queue-next
-                                  memo-structure current-depth)
-  (cond ((> current-depth *depth-const-of-partial-problem*)
-         nil)
-        ((null queue-current)
-         (solve-partial-problem-aux objective-value vvsy-list (car queue-next) (cdr queue-next)
-                                    memo-structure (1+ current-depth)))
-        (t ...)
-  ))
 |#
-
-
-;;;
-
-
-;;(defun solve-partial-problem-aux (
-
-
-(defun solve-partial-problem-aux (objective-value choice-value-list
-                                  this-depth-queue next-depth-queue current-depth)
-  )
-
