@@ -21,7 +21,8 @@
   nil)
 
 (defparameter *partial-width-limit*
-  (expt (* 49 7) 2))
+  ;;(expt (* 49 7) 2))
+  (expt (* 49 7 1/2) 2))
 
 ;;; defines and initialize
 
@@ -91,7 +92,8 @@
 
 (defun solve-partial-problem (objective-value choice-value-list)
   (let* ((t0_combination
-           (mapcar #'list choice-value-list))
+           (mapcar #'list
+                   (remove-duplicates choice-value-list :test #'ser=))) ;; todo. sort version(?)
          (t1_queue
            (remove-if-not #'(lambda (vs) (ser<= (nth 0 vs) objective-value)) t0_combination))
          (t1_solutions
