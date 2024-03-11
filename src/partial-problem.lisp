@@ -52,17 +52,14 @@
 
 ;;;
 
-;;;
-
-#|
 (defun solve-partial-problem-aux (objective-value choice-value-list
                                   this-depth-queue next-depth-queue solutions current-depth)
-  (cond ((>= current-depth *depth-const-of-partial-problem*)
+  (cond ((>= current-depth *depth-const-of-partial-problem*) ;; end
          solutions)
-        ((null this-depth-queue)
+        ((null this-depth-queue) ;; next depth
          (solve-partial-problem-aux objective-value choice-value-list
                                     next-depth-queue '() solutions (+ 1 current-depth)))
-        (t
+        (t ;; forward and next queue at this depth.
          (let* ((step-vs (car this-depth-queue))
                 (step-next-depth-queue-combination
                   (mapcar #'(lambda (v) (cons v step-vs)) ;; it is unneeded to remove equally set
@@ -80,163 +77,33 @@
                    current-depth
                    (reduce #'+ step-vs :initial-value 0)
                    step-vs)
-           |#        
+           |#
            (solve-partial-problem-aux
             objective-value choice-value-list
             (cdr this-depth-queue)
             (append next-depth-queue step-next-depth-queue)
             (append solutions step-solutions)
-            current-depth)
-           ))))
-|#
+            current-depth)))))
 
-(defun solve-partial-problem-aux (objective-value choice-value-list
-                                  this-depth-queue next-depth-queue solutions current-depth)
-  (cond ((> current-depth *depth-const-of-partial-problem*)
-         solutions)
-        ((null this-depth-queue)
-         (solve-partial-problem-aux objective-value choice-value-list
-                                    next-depth-queue '() solutions (+ 1 current-depth)))
-        (t
-         (let* ((step-vs (car this-depth-queue))
-                (step-value (apply #'+ step-vs)))
-           (cond 
-             ((ser= step-value objective-value)
-              (solve-partial-problem-aux 
-               objective-value choice-value-list
-               (cdr this-depth-queue) next-depth-queue
-               (cons (car this-depth-queue) solutions) current-depth))
-             ((ser> step-value objective-value)
-              (solve-partial-problem-aux
-               objective-value choice-value-list
-               (cdr this-depth-queue) next-depth-queue
-               solutions current-depth))
-             (t
-              (solve-partial-problem-aux
-               objective-value choice-value-list
-               (cdr this-depth-queue)
-               (append  next-depth-queue
-                        (mapcar #'(lambda (v) (cons v step-vs)) choice-value-list))
-               solutions current-depth)))))))
 
                                     
 (defun solve-partial-problem (objective-value choice-value-list)
-  (remove-equally-set-from-set-list
-   (solve-partial-problem-aux objective-value choice-value-list
-                              (mapcar #'list choice-value-list)
-                              '() '() -1)))
-
+  (let* ((t0_combination
+          (mapcar #'list choice-value-list))
+         (t1_queue
+           (remove-if-not #'(lambda (vs) (ser<= (nth 0 vs) objective-value)) t0_combination))
+         (t1_solutions
+           (remove-if-not #'(lambda (vs) (ser=  (nth 0 vs) objective-value)) t0_combination)))
+    (remove-equally-set-from-set-list
+     (solve-partial-problem-aux objective-value choice-value-list
+                                t1_queue '()
+                                t1_solutions 1) ;; current_depth(t1) = 1
+     :test #'ser=)))
 
 (defun solve-partial-angle (vvsy available-piece-list)
-  (solve-partial-problem (- *pi*2* (vvsy-angle vvsy))
-                         (flatten (mapcar #'piece-angle-list available-piece-list)))
-  ;;flatten (mapcar #'piece-angle-list available-piece-list))
-  )
+  (solve-partial-problem
+   (- *pi*2* (vvsy-angle vvsy))
+   (flatten (mapcar #'piece-angle-list available-piece-list))))
 
 
 ;;;
-
-#|
-(defun solve-partial-angle-aux (vvsy-list queue-current queue-next
-                                memo-structure current-depth)
-  ;;(format t "~A~%" (car queue-current))
-  (cond 
-    ((>= current-depth *depth-const-of-partial-problem*)
-     memo-structure)
-    ((null queue-current)
-     (format t "next-len: ~A~%" (length queue-next))
-     (solve-partial-angle-aux vvsy-list
-                              (identity queue-next ) ;; todo unique set
-                              '()
-                              memo-structure (1+ current-depth)))
-    (t
-     (let* ((step-vvsy-s (car queue-current))
-            (step-angle (reduce #'(lambda (val vvsy) (+ val (vvsy-angle vvsy)))
-                                step-vvsy-s :initial-value 0)))
-       ;;
-       #|
-       (format t "~A, ~6,f, " (length step-vvsy-s) step-angle)
-       (format t "~A~%"
-               (mapcar #'(lambda (v)
-                           ;;(format nil "[~A,~A,~A] " (vvsy-id v) (vvsy-nc v) (vvsy-pm v)))
-                           (format nil "~A " (vvsy-id v)))
-                           step-vvsy-s))
-       |#
-       ;;
-       (cond ((ser= step-angle *pi*2*)
-              (solve-partial-angle-aux vvsy-list (cdr queue-current) queue-next
-                                       (cons step-vvsy-s memo-structure) current-depth))
-             ((ser> step-angle *pi*2*)
-              (solve-partial-angle-aux vvsy-list (cdr queue-current) queue-next
-                                       memo-structure current-depth))
-             (t
-              (let ((nexts-which-uses-this-step
-                      (mapcar
-                       #'(lambda (vvsy) (cons vvsy step-vvsy-s))
-                       (remove-if 
-                        #'(lambda (vvsy)
-                            (find-if #'(lambda (s_n) (equal (vvsy-id s_n) (vvsy-id vvsy)))
-                                     step-vvsy-s))
-                        vvsy-list))))
-                (solve-partial-angle-aux vvsy-list (cdr queue-current)
-                                         (append queue-next nexts-which-uses-this-step)
-                                         memo-structure
-                                         current-depth)))             
-             )))))
-|#
-#|
-(defun solve-partial-angle-aux (vvsy-list queue-current queue-next
-                                memo-structure current-depth)
-  ;;(format t "~A~%" (car queue-current))
-  (cond 
-    ((>= current-depth *depth-const-of-partial-problem*)
-     memo-structure)
-    ((null queue-current)
-     (format t "next-len: ~A~%" (length queue-next))
-     (solve-partial-angle-aux vvsy-list
-                              (identity queue-next ) ;; todo unique set
-                              '()
-                              memo-structure (1+ current-depth)))
-    (t
-     (let* ((step-vvsy-s (car queue-current))
-            (step-angle (reduce #'(lambda (val vvsy) (+ val (vvsy-angle vvsy)))
-                                step-vvsy-s :initial-value 0)))
-       #|
-       (cond ((ser= step-angle *pi*2*)
-              (solve-partial-angle-aux vvsy-list (cdr queue-current) queue-next
-                                       (cons step-vvsy-s memo-structure) current-depth))
-             ((ser> step-angle *pi*2*)
-              (solve-partial-angle-aux vvsy-list (cdr queue-current) queue-next
-                                       memo-structure current-depth))
-
-             (t
-|#
-       (let ((nexts-which-uses-this-step
-               (mapcar
-                #'(lambda (vvsy) (cons vvsy step-vvsy-s))
-                (remove-if 
-                 #'(lambda (vvsy)
-                     (find-if #'(lambda (s_n) (equal (vvsy-id s_n) (vvsy-id vvsy)))
-                              step-vvsy-s))
-                 vvsy-list))))
-         (solve-partial-angle-aux vvsy-list (cdr queue-current)
-                                  (append queue-next nexts-which-uses-this-step)
-                                  memo-structure
-                                  current-depth)))
-     
-     )))
-|#
-
-#|
-(defun solve-partial-angle (frame-piece primary-piece-list)
-  (let* ((remain-pieces (list-of-unused-primary-piece-list-of-synthesized-piece
-                         frame-piece primary-piece-list)))
-    (solve-partial-angle-aux 
-     ;;(sy-select-parameters-from-piece-list 
-     ;;(append (list frame-piece) remain-pieces)) ;; todo
-     (sy-select-parameters-from-piece-list remain-pieces)
-     (mapcar #'list (sy-select-parameters-from-piece-list (list frame-piece)))
-     '()
-     '()
-     0)))
-|#

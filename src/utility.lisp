@@ -157,9 +157,10 @@
        (subsetp set-list2 set-list1 :test test)))
 
 
-(defun remove-equally-set-from-set-list (set-list)
+(defun remove-equally-set-from-set-list (set-list &key (test #'eql))
   (labels ((aux (lis memo)
              (cond ((null lis) memo)
-                   (t (aux (remove-if #'(lambda (scdn) (set-equal (car lis) scdn)) (cdr lis))
+                   (t (aux (remove-if #'(lambda (scdn) (set-equal (car lis) scdn :test test))
+                                      (cdr lis))
                            (cons (car lis) memo))))))
     (reverse (aux set-list '()))))
