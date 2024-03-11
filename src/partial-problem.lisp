@@ -25,8 +25,8 @@
 (defparameter *memo-of-partial-problem*
   nil)
 
-(defparameter *depth-const-of-partial-problem*
-  3)
+(defparameter *partial-width-limit*
+  (expt (* 50 10) 2))
 
 (defstruct (value-and-sy-param (:constructor make-vvsy) (:conc-name vvsy-))
   (:angle 1000000) (:length^2 1000000) ;; value value
@@ -45,7 +45,7 @@
                                   (shape-segment-length^2-list (piece-shape piece)))))
            (make-vvsy :angle angle :length^2 length^2 :id id :nc nc :pm pm)))
      sy-param-list)))
-  
+
 (defun sy-select-parameters-from-piece-list (piece-list)
   (flatten (mapcar #'partial-value-sy-param-list piece-list)))
 
@@ -53,12 +53,15 @@
 ;;;
 
 (defun solve-partial-problem-aux (objective-value choice-value-list
-                                  this-depth-queue next-depth-queue solutions current-depth)
-  (cond ((>= current-depth *depth-const-of-partial-problem*) ;; end
-         solutions)
-        ((null this-depth-queue) ;; next depth
+                                  this-depth-queue next-depth-queue solutions
+                                  current-iter)
+  (cond ((and (null this-depth-queue) (null next-depth-queue)) ;; end with all pattern completed
+         (values solutions 't))
+        ((and (null this-depth-queue) t) ;; next depth
          (solve-partial-problem-aux objective-value choice-value-list
-                                    next-depth-queue '() solutions (+ 1 current-depth)))
+                                    next-depth-queue '() solutions (+ 1 current-iter)))
+        ((> (length next-depth-queue) *partial-width-limit*) ;; end with length divergence
+         (values solutions 'divergence))
         (t ;; forward and next queue at this depth.
          (let* ((step-vs (car this-depth-queue))
                 (step-next-depth-queue-combination
@@ -74,36 +77,42 @@
                                  step-next-depth-queue-combination)))
            #|
            (format t "depth ~A. ~A = Sum ,~A~%"
-                   current-depth
-                   (reduce #'+ step-vs :initial-value 0)
-                   step-vs)
+           current-depth
+           (reduce #'+ step-vs :initial-value 0)
+           step-vs)
            |#
            (solve-partial-problem-aux
             objective-value choice-value-list
             (cdr this-depth-queue)
             (append next-depth-queue step-next-depth-queue)
             (append solutions step-solutions)
-            current-depth)))))
+            (+ 1 current-iter))))))
 
 
-                                    
+
 (defun solve-partial-problem (objective-value choice-value-list)
   (let* ((t0_combination
-          (mapcar #'list choice-value-list))
+           (mapcar #'list choice-value-list))
          (t1_queue
            (remove-if-not #'(lambda (vs) (ser<= (nth 0 vs) objective-value)) t0_combination))
          (t1_solutions
            (remove-if-not #'(lambda (vs) (ser=  (nth 0 vs) objective-value)) t0_combination)))
-    (remove-equally-set-from-set-list
-     (solve-partial-problem-aux objective-value choice-value-list
-                                t1_queue '()
-                                t1_solutions 1) ;; current_depth(t1) = 1
-     :test #'ser=)))
+    (multiple-value-bind (partials end-state)
+        (solve-partial-problem-aux objective-value choice-value-list
+                                   t1_queue '()
+                                   t1_solutions 1) ;; current_depth(t1) = 1
+      (values
+       (remove-equally-set-from-set-list partials :test #'ser=)
+       end-state))))
+
 
 (defun solve-partial-angle (vvsy available-piece-list)
-  (solve-partial-problem
-   (- *pi*2* (vvsy-angle vvsy))
-   (flatten (mapcar #'piece-angle-list available-piece-list))))
+  (multiple-value-bind
+        (patterns end-state)
+      (solve-partial-problem
+       (- *pi*2* (vvsy-angle vvsy))
+       (flatten (mapcar #'piece-angle-list available-piece-list)))
+    (values patterns end-state)))
 
 
 ;;;
