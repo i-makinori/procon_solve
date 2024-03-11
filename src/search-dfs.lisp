@@ -98,6 +98,10 @@
   (setf *evaluation-function*
         ;;#'evaluation-value-by-delta-points_sum
         #'evaluation-value-by-remain-edges)
+
+  ;;; dictionaries
+  (setf *partial-angle-dictionary* (make-dictionary))
+  (setf *partial-length^2-dictionary* (make-dictionary))
   )
 
 (defun format-search-status-before (state-of-this-step primary-piece-list)

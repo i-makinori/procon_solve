@@ -173,7 +173,6 @@
                (vector value)
                (subseq vector n)))
 
-
 (defun append-key-value-into-dictionary (key value dictionary)
   (multiple-value-bind (dict-nth already-exist-p)
       (nth-of-dictionary key dictionary)
@@ -186,6 +185,13 @@
                  (insert-to-vector-at-n (+ dict-nth 1)
                                         value
                                         (dictionary-item-storage dictionary)))))))
+
+(defun dictionary-key-sets (key dictionary)
+  (multiple-value-bind (dict-nth exist-p)
+      (nth-of-dictionary key dictionary)
+    (cond ((null exist-p) nil)
+          (t
+           (aref (dictionary-item-storage dictionary) dict-nth)))))
 
 
 ;;; solve with memorize dictionary
