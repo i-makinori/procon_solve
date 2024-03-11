@@ -146,11 +146,16 @@ PUZZLE-1617> (length (flatten (map 'list #'dict-item-partials (dictionary-item-s
            (let* ((syntheables-from-this-angle-dict-item
                     (dictionary-key-sets (- *pi*2* (vvsy-angle p1-vvsy)) *partial-angle-dictionary*))
                   (synthable-angles
-                    (flatten (dict-item-partials syntheables-from-this-angle-dict-item)))
+                    (if (null syntheables-from-this-angle-dict-item)
+                        '()
+                        (flatten (dict-item-partials syntheables-from-this-angle-dict-item))))
+
                   (syntheables-from-this-length^2-dict-item
                     (dictionary-key-sets (vvsy-length^2 p1-vvsy) *partial-length^2-dictionary*))
                   (synthable-length^2s
-                    (flatten (dict-item-partials syntheables-from-this-length^2-dict-item))))
+                    (if (null syntheables-from-this-length^2-dict-item)
+                        '()
+                        (flatten (dict-item-partials syntheables-from-this-length^2-dict-item)))))
              ;;(format t "Ax: ~%~A~%~A~%" syntheables-from-this-angle syntheables-from-this-length^2)
              (flatten
               (remove
