@@ -209,11 +209,15 @@
   (let* ((primary-pieces (remove-if-not #'primary-piece-p whole-primary-piece-list))
          (frame-pieces   (remove-if-not #'(lambda (p) (shape-minus-p (piece-pm-sign p)))
                                         primary-pieces)))
+    (init-meta-params :iter-max (ceiling (* (length whole-primary-piece-list) 3/2))
+                      :stack-width-const-1 (ceiling (* (length whole-primary-piece-list) 3/2))
+                      :beam-width 6)
+
     ;; variables
     (setf *n-search-iter* 0)
-    (setf *beam-current-index* 0)
+
     ;; parameters
-    (setf *beam-width* 6)
+
     (setf *n-search-iter-max* 25) ;; n:: depth
 
     ;; handle problem forms

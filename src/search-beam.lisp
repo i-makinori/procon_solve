@@ -110,11 +110,10 @@
   (let* ((primary-pieces (remove-if-not #'primary-piece-p whole-primary-piece-list))
          (frame-pieces   (remove-if-not #'(lambda (p) (shape-minus-p (piece-pm-sign p)))
                                         primary-pieces)))
-    (setf *n-search-iter* 0)
-    ;; (setf *n-search-iter-max* 4)
-    (setf *beam-current-index* 0)
-    ;;    (setf *beam-width* 6)
-
+    ;;
+    (init-meta-params :iter-max 100
+                      :stack-width-const-1 100
+                      :beam-width 6)
     ;;
     (cond
       ((not (= 1 (length frame-pieces)))

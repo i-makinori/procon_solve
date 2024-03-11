@@ -21,7 +21,8 @@
 
 (defparameter *step-function*
   ;;#'all-synthesizeable-patterns-of-pieces-to-frame
-  #'all-synthesizeables-of-pieces-to-piece_del-if-e-jam-edge
+  ;;#'all-synthesizeables-of-pieces-to-piece_del-if-e-jam-edge
+  #'rare-synthesizeables-of-pieces-to-piece
   "step function to get next pieces"
   )
 
@@ -75,6 +76,30 @@
 
 ;;; functions for DFS Greede.
 
+(defun init-meta-params (&key (iter-max 3000) (stack-width-const-1 200) (beam-width 6))
+  ;;; parameters
+  ;; 
+  (setf *n-search-iter* 0) ;; variable
+  (setf *n-search-iter-max* iter-max) ;; parameter
+  ;; stack size
+  (setf *beam-stack-width-const* 200) ;; todo "max stack width for search of its beam"
+  (setf *fs-stackwidth-const* stack-width-const-1) ;; todo "max stack width for common storage"
+  ;; beam param
+  (setf *beam-current-index* 0)
+  (setf *beam-width* beam-width)
+
+  ;;; functions
+  (setf *step-function*
+        ;;#'all-synthesizeable-patterns-of-pieces-to-frame
+        ;;#'all-synthesizeables-of-pieces-to-piece_del-if-e-jam-edge
+        #'rare-synthesizeables-of-pieces-to-piece
+        )   ;;"step function to get next pieces"
+
+  (setf *evaluation-function*
+        ;;#'evaluation-value-by-delta-points_sum
+        #'evaluation-value-by-remain-edges)
+  )
+
 (defun format-search-status-before (state-of-this-step primary-piece-list)
   primary-piece-list
   (format t "~%============~%")
@@ -89,7 +114,8 @@
          (spl-all-combinations
            (funcall *step-function*
                     (fs-frame-piece state-this-step)
-                    (fs-primary-rest state-this-step)))
+                    (fs-primary-rest state-this-step)
+                    primary-piece-list))
          (fs-all-combinations
            (mapcar #'(lambda (next-piece)
                        (make-fs-from-piece next-piece primary-piece-list state-this-step))
@@ -150,14 +176,16 @@
   (let* ((primary-pieces (remove-if-not #'primary-piece-p whole-primary-piece-list))
          (frame-pieces   (remove-if-not #'(lambda (p) (shape-minus-p (piece-pm-sign p)))
                                         primary-pieces)))
-    (setf *n-search-iter* 0)
-    (setf *n-search-iter-max* 3000)
     (cond
+      ;; handle error
       ((not (= 1 (length frame-pieces)))
        (warn (format nil "whole-piece-list has multiple frames. IDs: ~A~%"
                      (mapcar #'piece-id frame-pieces)))
        nil)
       (t
+       ;; init
+       (init-meta-params :iter-max 4000 )
+       ;; call-search
        (let* ((frame-piece    (car frame-pieces))
               ;;
               (none-frame-pieces (remove frame-piece primary-pieces :test #'equalp))

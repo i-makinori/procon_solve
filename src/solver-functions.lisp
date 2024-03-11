@@ -35,7 +35,8 @@
    (mapcar #'(lambda (p) (whole-set-of-point-and-edge-selections-piece-piece frame-piece p))
            piece-list)))
 
-(defun all-synthesizeable-patterns-of-pieces-to-frame (frame piece-list)
+(defun all-synthesizeable-patterns-of-pieces-to-frame (frame piece-list _primes)
+  _primes
   (flatten
    (remove nil
            (mapcar #'synthesize-piece-and-piece-by-selection-piece-or-fail
@@ -56,9 +57,10 @@
                                                  :piece1-by-nth_point-only piece1-nth_point-n))
                              piece-list))))))
 
-(defun all-synthesizeables-of-pieces-to-piece_del-if-e-jam-edge (piece1 piece-list)
+(defun all-synthesizeables-of-pieces-to-piece_del-if-e-jam-edge (piece1 piece-list _primes)
   "all-synthesizeable-patterns-of-pieces-to-piece_delete-if-exists-jammed-edge"
   ;; piece-list need to be unused primary pieces
+  _primes
   (let ((synths-of-each-edges
            (mapcar #'(lambda (nth_point-n) (all-synthesizeable-patterns-of-pieces-to-piece-point
                                             nth_point-n piece1 piece-list))
@@ -70,6 +72,17 @@
           (t
            ;;(format t "Deepin~%")
            (flatten synths-of-each-edges)))))
+
+
+;;; synthesizeable patterns filtered by partial problem
+
+(defparameter *partial-angle-dictionary* (make-dictionary))
+(defparameter *partial-length^2-dictionary* (make-dictionary))
+
+(defun rare-synthesizeables-of-pieces-to-piece (piece piece-list primary-pieces)
+  ;;(all-synthesizeable-patterns-of-piece-to-piece
+  (all-synthesizeables-of-pieces-to-piece_del-if-e-jam-edge piece piece-list primary-pieces)
+  )
 
 
 ;;;

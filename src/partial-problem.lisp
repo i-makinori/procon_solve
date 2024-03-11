@@ -21,7 +21,7 @@
   nil)
 
 (defparameter *partial-width-limit*
-  (expt (* 50 10) 2))
+  (expt (* 49 7) 2))
 
 ;;; defines and initialize
 
@@ -103,6 +103,7 @@
       (values
        (remove-equally-set-from-set-list partials :test #'ser=)
        end-state))))
+
 
 ;;; solve partial problem
 
@@ -186,9 +187,10 @@
                                         value
                                         (dictionary-item-storage dictionary)))))))
 
+
 ;;; solve with memorize dictionary
 
-(defparameter *partial-angle-dictionary* (make-dictionary))
+;; (defparameter *partial-angle-dictionary* (make-dictionary))
 
 (defun solve-partial-angle-with-memo (vvsy available-piece-list dictionary)
   (let* ((objective-value (- *pi*2* (vvsy-angle vvsy)))
@@ -209,7 +211,7 @@
                (values partials end-state)))))))
 
 
-(defparameter *partial-length^2-dictionary* (make-dictionary))
+;; (defparameter *partial-length^2-dictionary* (make-dictionary))
 
 (defun solve-partial-length^2-with-memo (vvsy available-piece-list dictionary)
   (let* ((objective-value (vvsy-length^2 vvsy))
@@ -231,8 +233,37 @@
 
 
 #|
+
+;;;; applied usage
+
+;;; angle all
+PUZZLE-1617> (mapcar
+              #'(lambda (vvsy)
+                  (solve-partial-angle-with-memo
+                   vvsy
+                   (cdr (nth 4 *problem-list-official*)) ;; primary
+                   *partial-angle-dictionary*))
+              (partial-value-sy-param-list (nth 0 (nth 4 *problem-list-official*))))
+PUZZLE-1617> (length (flatten (map 'list #'dict-item-partials (dictionary-item-storage *partial-angle-dictionary*))))
+
+
+;;; length^2 all
+PUZZLE-1617> (mapcar
+              #'(lambda (vvsy)
+                  (solve-partial-length^2-with-memo
+                   vvsy
+                   (cdr (nth 4 *problem-list-official*)) ;; primary
+                   *partial-length^2-dictionary*))
+              (partial-value-sy-param-list (nth 0 (nth 4 *problem-list-official*))))
+
+PUZZLE-1617> (length (flatten (map 'list #'dict-item-partials (dictionary-item-storage *partial-length^2-dictionary*))))
+
+
 ;;;; example usage
-PUZZLE-1617> (solve-partial-length
+
+;;; partial-length^2, partial-angle
+
+PUZZLE-1617> (solve-partial-length^2
               (nth 5 (partial-value-sy-param-list (nth 0 (nth 4 *problem-list-official*))))
               (cdr (nth 4 *problem-list-official*)))
 ((14.56022) (7.28011 7.28011))
@@ -245,7 +276,7 @@ PUZZLE-1617> (solve-partial-angle
 DIVERGENCE
 
 
-;;;; memo versios
+;;; memo versios
 
 PUZZLE-1617> (solve-partial-length^2-with-memo
               (nth 21 (partial-value-sy-param-list (nth 0 (nth 4 *problem-list-official*))))
