@@ -17,12 +17,15 @@
 
 ;;; parameters
 
-(defparameter *memo-of-partial-problem*
-  nil)
-
 (defparameter *partial-width-limit*
-  ;;(expt (* 49 7) 2))
-  (expt (* 49 7 1/2) 2))
+  ;;(expt (* 49 7 1/2) 2)
+  nil
+)
+
+(defparameter *partial-iter-limit*
+  ;;(expt (* 49 7 1/2) 2)
+  nil
+  )
 
 ;;; defines and initialize
 
@@ -53,9 +56,13 @@
 
 ;;; linear combination problem until limited iter
 
+
+;; functional pattern
+#|
 (defun solve-partial-problem-aux (objective-value choice-value-list
                                   this-depth-queue next-depth-queue solutions
                                   current-iter)
+  ;;(declare (inline solve-partial-problem-aux))
   (cond ((and (null this-depth-queue) (null next-depth-queue)) ;; end with all pattern completed
          (values solutions 'all-paterns))
         ((and (null this-depth-queue) t) ;; next depth
@@ -63,33 +70,69 @@
                                     next-depth-queue '() solutions (+ 1 current-iter)))
         ((> (length next-depth-queue) *partial-width-limit*) ;; end with length divergence
          (values solutions 'divergence))
+        ((> current-iter *partial-iter-limit*) ;; end with iter divergence
+         (values solutions 'divergence))
         (t ;; forward and next queue at this depth.
          (let* ((step-vs (car this-depth-queue))
                 (step-next-depth-queue-combination
                   (mapcar #'(lambda (v) (cons v step-vs)) ;; it is unneeded to remove equally set
                           choice-value-list))
                 (step-next-depth-queue
-                  (remove-if-not #'(lambda (vs) (ser<= (reduce #'+ vs :initial-value 0)
+                  (remove-if-not #'(lambda (vs) (ser<= (apply #'+ vs)
                                                        objective-value))
                                  step-next-depth-queue-combination))
                 (step-solutions
-                  (remove-if-not #'(lambda (vs) (ser= (reduce #'+ vs :initial-value 0)
+                  (remove-if-not #'(lambda (vs) (ser= (apply #'+ vs)
                                                       objective-value))
                                  step-next-depth-queue-combination)))
-           #|
-           (format t "depth ~A. ~A = Sum ,~A~%"
-           current-depth
-           (reduce #'+ step-vs :initial-value 0)
-           step-vs)
-           |#
            (solve-partial-problem-aux
             objective-value choice-value-list
             (cdr this-depth-queue)
             (append next-depth-queue step-next-depth-queue)
             (append solutions step-solutions)
             (+ 1 current-iter))))))
+|#
+
+;; loop version
 
 
+(defun solve-partial-problem-aux (objective-value choice-value-list
+                                  first-queue _bottom1_ first-solution _bottom3)
+  _bottom1_ _bottom3
+  (let* ((end-state nil)
+         (solutions (copy-seq first-solution))
+         (queue first-queue))
+    (loop named depth-loop for i from 0 ;; below (1- *partial-width-limit*
+          if (or (> i *partial-width-limit*)
+                 (> (length queue) *partial-iter-limit*))
+            do (setf end-state 'divergence)
+               (return-from depth-loop)
+          if (null queue)
+            do (setf end-state 'all-paterns)
+               (return-from depth-loop)
+          do (let* ((step-vs (car queue))
+                         (step-next-depth-queue-combination
+                           (mapcar #'(lambda (v) (cons v step-vs))
+                                   choice-value-list))
+                         (step-next-depth-queue
+                           (remove-if-not #'(lambda (vs) (ser<=
+                                                          ;;(reduce #'+ vs :initial-value 0)
+                                                          (apply #'+ vs)
+                                                          objective-value))
+                                          step-next-depth-queue-combination))
+                         (step-solutions
+                           (remove-if-not #'(lambda (vs) (ser= 
+                                                          ;;(reduce #'+ vs :initial-value 0)
+                                                          (apply #'+ vs)
+                                                          objective-value))
+                                          step-next-depth-queue-combination)))
+                    ;;(format t "~A: ~A~%" i step-vs)
+                    (incf i)
+                    (setf queue (append (cdr queue) step-next-depth-queue))
+               (setf solutions (append solutions step-solutions))
+               ;;step-solutions
+                    ))
+    (values solutions end-state)))
 
 (defun solve-partial-problem (objective-value choice-value-list)
   (let* ((t0_combination
@@ -106,6 +149,9 @@
       (values
        (remove-equally-set-from-set-list partials :test #'ser=)
        end-state))))
+
+
+
 
 
 ;;; solve partial problem
