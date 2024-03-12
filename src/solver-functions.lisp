@@ -94,7 +94,6 @@
       (mapcar
        #'(lambda (vvsy)
            (format t "*")
-           ;;(solve-partial-angle-with-memo vvsy primary-pieces *partial-angle-dictionary*))
            (solve-partial-angle-with-memo vvsy primary-pieces angle-dictionary))
        piece-vvsy-s)
       ;; partial Length^2 problem
@@ -102,7 +101,6 @@
       (mapcar
        #'(lambda (vvsy)
            (format t "*")
-           ;;(solve-partial-length^2-with-memo vvsy primary-pieces *partial-length^2-dictionary*))
            (solve-partial-length^2-with-memo vvsy primary-pieces length^2-dictionary))
        piece-vvsy-s)
       ;;
@@ -123,6 +121,21 @@
    (make-sy-select :p1 p1-piece :n1 (vvsy-nc p1-vvsy) :pm1 (vvsy-pm p1-vvsy)
                    :p2 p2-piece :n2 (vvsy-nc p2-vvsy) :pm2 (vvsy-pm p2-vvsy))))
 
+(defun synthesize-piece-if-synthesizeable-pattern-vvsy-and-partial-solutions-match
+    (p1-piece p1-vvsy primary-pieces p2-vvsy
+     synthable-angles angle-end-state synthable-length^2s length^2-end-state)
+  ;;
+  angle-end-state length^2-end-state
+  ;;
+  (let ((p2-id-piece (find-if #'(lambda (p) (= (vvsy-id p2-vvsy) (piece-id p))) primary-pieces))
+        (synthable-pattern-vvsy-p
+          (and (find (vvsy-angle p2-vvsy)    synthable-angles    :test #'ser=)
+               (find (vvsy-length^2 p2-vvsy) synthable-length^2s :test #'ser=))))
+    (if (and synthable-pattern-vvsy-p t)
+        (synthesize-piece-and-piece-by-vvsy-vvsy-piece-or-fail
+         p1-piece p1-vvsy p2-id-piece p2-vvsy)
+        nil)))
+
 (defun synthesizeable-patterns-of-specific-frame-vvsy (frame-piece frame-vvsy
                                                        primary-pieces primary-vvsy-s
                                                        angle-dictionary length^2-dictionary)
@@ -140,16 +153,10 @@
        ((and t t) ;; todo case by :end-state
         (mapcar
          #'(lambda (p2-vvsy)
-             (let ((p2-id-piece (find-if #'(lambda (p) (= (vvsy-id p2-vvsy) (piece-id p))) primary-pieces))
-                   (synthable-pattern-vvys-p
-                     (and (find (vvsy-angle p2-vvsy)    synthable-angles    :test #'ser=)
-                          (find (vvsy-length^2 p2-vvsy) synthable-length^2s :test #'ser=))))
-               (if synthable-pattern-vvys-p
-                   (synthesize-piece-and-piece-by-vvsy-vvsy-piece-or-fail
-                    frame-piece frame-vvsy p2-id-piece p2-vvsy)
-                   nil)))
+             (synthesize-piece-if-synthesizeable-pattern-vvsy-and-partial-solutions-match
+              frame-piece frame-vvsy primary-pieces p2-vvsy
+              synthable-angles nil synthable-length^2s nil))
          primary-vvsy-s))))))
-
 
 
 (defun rare-synthesizeables-of-pieces-to-piece (frame-piece piece-list primary-pieces)
@@ -172,6 +179,9 @@
 
 
 ;;(defun rare-synthesizeables-of-pieces-to-piece-_del-if-e-jam-edge 
+
+
+
 
 ;;;
 ;;; set theoretical manipulations
