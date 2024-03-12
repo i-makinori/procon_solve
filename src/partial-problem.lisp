@@ -32,10 +32,11 @@
   (:angle 1000000) (:length^2 1000000) ;; value value
   (:id -1) (:nc 0) (:pm 0)) ;; sy-select parameter
 
-(defun partial-value-sy-param-list (piece)
+(defun partial-value-sy-param-list (piece &key (piece-by-nth_point-only nil))
   (let ((id (piece-id piece))
         (sy-param-list
-          (whole-set-of-point-and-edge-selections-piece piece)))
+          (whole-set-of-point-and-edge-selections-piece
+           piece  :piece-by-nth_point-only piece-by-nth_point-only)))
     (mapcar
      #'(lambda (sy-param) ;; [nth_point, pm_sign]
          (let* ((nc (nth 0 sy-param)) (pm (nth 1 sy-param))

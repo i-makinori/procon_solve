@@ -19,10 +19,12 @@
 
 ;;; function configs
 
+#|
 (defparameter *step-function*
   ;;#'all-synthesizeable-patterns-of-pieces-to-frame
   ;;#'all-synthesizeables-of-pieces-to-piece_del-if-e-jam-edge
-  #'rare-synthesizeables-of-pieces-to-piece
+  ;;#'rare-synthesizeables-of-pieces-to-piece
+  #'rare-synthesizeables-of-pieces-to-piece-_del-if-e-jam-edge
   "step function to get next pieces"
   )
 
@@ -32,7 +34,11 @@
   ;;#'evaluation-value-by-delta-points_delta
   "evaluation funciton of step (node or edge is not determined)"
   )
+|#
 
+(defparameter *step-function* #'identity)
+
+(defparameter *evaluation-function* #'identity)
 
 ;;; structure
 
@@ -92,7 +98,8 @@
   (setf *step-function*
         ;;#'all-synthesizeable-patterns-of-pieces-to-frame
         ;;#'all-synthesizeables-of-pieces-to-piece_del-if-e-jam-edge
-        #'rare-synthesizeables-of-pieces-to-piece
+        ;;#'rare-synthesizeables-of-pieces-to-piece
+        #'rare-synthesizeables-of-pieces-to-piece-_del-if-e-jam-edge
         )   ;;"step function to get next pieces"
 
   (setf *evaluation-function*

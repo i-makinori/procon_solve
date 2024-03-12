@@ -139,30 +139,24 @@
 (defun synthesizeable-patterns-of-specific-frame-vvsy (frame-piece frame-vvsy
                                                        primary-pieces primary-vvsy-s
                                                        angle-dictionary length^2-dictionary)
-  (let* (;; angle    partials and (todo: state)
+  (let* (;; angle    partials
          (synthable-angles-dict
            (avaiable-choices-from-dictionary (- *pi*2* (vvsy-angle frame-vvsy)) angle-dictionary))
          (synthable-angles (assocdr :partials synthable-angles-dict))
-         ;; length^2 partials and (todo: state)
+         ;; length^2 partials
          (synthable-length^2s-dict
            (avaiable-choices-from-dictionary (vvsy-length^2 frame-vvsy) length^2-dictionary))
          (synthable-length^2s (assocdr :partials synthable-length^2s-dict)))
     ;;(format t "Ax: ~%~A~%~A~%" syntheables-from-this-angle syntheables-from-this-length^2)
     (flatten ;; flatten removes nil also
-     (cond
-       ((and t t) ;; todo case by :end-state
-        (mapcar
-         #'(lambda (p2-vvsy)
-             (synthesize-piece-if-synthesizeable-pattern-vvsy-and-partial-solutions-match
-              frame-piece frame-vvsy primary-pieces p2-vvsy
-              synthable-angles nil synthable-length^2s nil))
-         primary-vvsy-s))))))
-
+     (mapcar
+      #'(lambda (p2-vvsy)
+          (synthesize-piece-if-synthesizeable-pattern-vvsy-and-partial-solutions-match
+           frame-piece frame-vvsy primary-pieces p2-vvsy
+           synthable-angles nil synthable-length^2s nil))
+      primary-vvsy-s))))
 
 (defun rare-synthesizeables-of-pieces-to-piece (frame-piece piece-list primary-pieces)
-  ;; todo. implement
-  ;;(all-synthesizeables-of-pieces-to-piece_del-if-e-jam-edge piece piece-list primary-pieces)
-  ;;
   ;; solve partial problem
   (update-dictionary-by-new-piece! frame-piece primary-pieces
                                    *partial-angle-dictionary* *partial-length^2-dictionary*)
@@ -178,9 +172,127 @@
       frame-vvsy-s))))
 
 
-;;(defun rare-synthesizeables-of-pieces-to-piece-_del-if-e-jam-edge 
+;;; del if exists jam edge
+
+(defun synthesizeable-patterns-of-specific-frame-vvsy-stores-end-state
+    (frame-piece frame-vvsy
+     primary-pieces primary-vvsy-s
+     angle-dictionary length^2-dictionary)
+  (let* (;; angle    partials and (todo: state)
+         (synthable-angles-dict
+           (avaiable-choices-from-dictionary (- *pi*2* (vvsy-angle frame-vvsy)) angle-dictionary))
+         (synthable-angles (assocdr :partials synthable-angles-dict))
+         (dict-angle-state (assocdr :end-state synthable-angles-dict))
+         ;; length^2 partials and (todo: state)
+         (synthable-length^2s-dict
+           (avaiable-choices-from-dictionary (vvsy-length^2 frame-vvsy) length^2-dictionary))
+         (synthable-length^2s (assocdr :partials synthable-length^2s-dict))
+         (dict-length^2-state (assocdr :end-state synthable-length^2s-dict))
+         ;; all synthesize patterns
+         (all-synthesize-patterns
+           (flatten ;; flatten removes nil also
+            (mapcar
+             #'(lambda (p2-vvsy)
+                 (synthesize-piece-if-synthesizeable-pattern-vvsy-and-partial-solutions-match
+                  frame-piece frame-vvsy primary-pieces p2-vvsy
+                  synthable-angles nil synthable-length^2s nil))
+             primary-vvsy-s))))
+    ;;(format t "Ax: ~%~A~%~A~%" syntheables-from-this-angle syntheables-from-this-length^2)
+
+    ;;(format t "state: ~A, ~A~%" dict-angle-state dict-length^2-state)
+    ;;
+
+    ;; todo case by :end-state
+    (cond
+      ((or     (eq dict-angle-state 'all-paterns)  (eq dict-length^2-state 'all-paterns))
+       `((:synthesizes . ,all-synthesize-patterns) (:state . 'sy-vvsy-conver)))
+      #|
+      ((or     (eq dict-angle-state 'sy-vvsy-ocilla) (eq dict-length^2-state 'sy-vvsy-ocilla))
+       `((:synthesizes . ,all-synthesize-patterns) (:state . 'sy-vvsy-ocilla)))
+      |#
+      ((and    (eq dict-angle-state 'divergence)   (eq dict-length^2-state 'divergence))
+       `((:synthesizes . ,all-synthesize-patterns) (:state . 'sy-vvsy-diverg)))
+      (t
+       (warn "warning something wrong. storeed end-state")
+       `((:synthesizes . nil) (:state . 'sy-vvsy-conver)) ;; 'failure
+       ))))
+
+(defun synthesizeable-patterns-of-specific-frame-nth-with-vvsy-remove-if-jam
+    (frame-piece nth_point-n
+     primary-pieces primary-vvsy-s
+     angle-dictionary length^2-dictionary)
+  ;;#'(lambda (nth_point-n)
+  (let* ((synths-and-state-list ;; where length = 2
+           (mapcar 
+            #'(lambda (frame-vvsy_n_pmx)
+                (synthesizeable-patterns-of-specific-frame-vvsy-stores-end-state
+                 frame-piece frame-vvsy_n_pmx primary-pieces primary-vvsy-s
+                 angle-dictionary length^2-dictionary))
+            (partial-value-sy-param-list frame-piece ;; frame-nth-vvsys
+                                         :piece-by-nth_point-only nth_point-n)))
+         ;;
+
+         ;;
+         (synths_a (assocdr :synthesizes (nth 0 synths-and-state-list)))
+         (synths_b (assocdr :synthesizes (nth 1 synths-and-state-list)))
+         (state_a  (assocdr :state       (nth 0 synths-and-state-list)))
+         (state_b  (assocdr :state       (nth 1 synths-and-state-list)))
+         ;;
+         (state-returns
+           (cond ((member 'sy-vvsy-conver (list state_a state_b)) 'sy-vvsy-conver)
+                 ;;((member 'sy-vvsy-ocilla (list state_a state_b)) 'sy-vvsy-ocilla)
+                 ((member 'sy-vvsy-diverg (list state_a state_b)) 'sy-vvsy-diverg)
+                 (t 'sy-vvsy-conver))))
+    ;;(format t "~A, ~A~%" "fuga")
+    (cond (;; filter by jummed edge
+           (or (and (eq state_a 'sy-vvsy-conver) (null synths_a))
+               (and (eq state_b 'sy-vvsy-conver) (null synths_b)))
+           `((:synthesizes . nil)
+             (:state       . 'sy-vvsy-conver)))
+          (;; not filtered
+           t
+           `((:synthesizes . ,(append synths_a synths_b))
+             (:state       . ,state-returns))))))
 
 
+(defun rare-synthesizeables-of-pieces-to-piece-_del-if-e-jam-edge 
+    (frame-piece piece-list primary-pieces)
+  ;; todo. implement
+  ;;(all-synthesizeables-of-pieces-to-piece_del-if-e-jam-edge piece piece-list primary-pieces)
+  ;;
+
+  ;;
+  ;; solve partial problem
+  (update-dictionary-by-new-piece! frame-piece primary-pieces
+                                   *partial-angle-dictionary* *partial-length^2-dictionary*)
+
+  ;;
+  ;; synthesize which uses solution of partial problem, filters jam edge synth
+  (let* ((avaiable-vvsy-s (sy-select-parameters-from-piece-list piece-list))
+         ;;
+         (synthes-and-state-list-of-each-edges
+           (mapcar
+            #'(lambda (nth)
+                (synthesizeable-patterns-of-specific-frame-nth-with-vvsy-remove-if-jam
+                 frame-piece nth primary-pieces avaiable-vvsy-s
+                 *partial-angle-dictionary* *partial-length^2-dictionary*))
+            (from-m-to-n-list 0 (1- (length (piece-points frame-piece)))))))
+    ;;(print synthes-and-state-list-of-each-edges)
+    (cond (;;(member nil synths-of-each-edges)
+           (find-if #'(lambda (l_n)
+                        ;;(format t "~A, ~A~%"
+                        ;;(assocdr :state l_n)
+                        ;;(length (assocdr :synthesizes l_n)))
+                        (and (eq   (assocdr :state l_n) 'sy-vvsy-conver)
+                             (null (assocdr :synthesizes l_n)))
+                        ;;nil ; for test of cut
+                        )
+                    synthes-and-state-list-of-each-edges)
+           nil)
+          (t
+           (flatten (mapcar #'(lambda (l_n)
+                                (assocdr :synthesizes l_n))
+                            synthes-and-state-list-of-each-edges))))))
 
 
 ;;;
