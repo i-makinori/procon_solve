@@ -19,23 +19,6 @@
 
 ;;; function configs
 
-#|
-(defparameter *step-function*
-  ;;#'all-synthesizeable-patterns-of-pieces-to-frame
-  ;;#'all-synthesizeables-of-pieces-to-piece_del-if-e-jam-edge
-  ;;#'rare-synthesizeables-of-pieces-to-piece
-  #'rare-synthesizeables-of-pieces-to-piece-_del-if-e-jam-edge
-  "step function to get next pieces"
-  )
-
-(defparameter *evaluation-function*
-  ;;#'evaluation-value-by-delta-points_sum
-  #'evaluation-value-by-remain-edges
-  ;;#'evaluation-value-by-delta-points_delta
-  "evaluation funciton of step (node or edge is not determined)"
-  )
-|#
-
 (defparameter *step-function* #'identity)
 
 (defparameter *evaluation-function* #'identity)
@@ -82,7 +65,8 @@
 
 ;;; functions for DFS Greede.
 
-(defun init-meta-params (&key (iter-max 3000) (stack-width-const-1 200) (beam-width 6))
+(defun init-meta-params (primary-piece-list
+                         &key (iter-max 3000) (stack-width-const-1 200) (beam-width 6))
   ;;; parameters
   ;; 
   (setf *n-search-iter* 0) ;; variable
@@ -106,6 +90,15 @@
         ;;#'evaluation-value-by-delta-points_sum
         #'evaluation-value-by-remain-edges)
 
+
+  ;; partial problem parameters
+  (setf *partial-width-limit*
+        ;;(expt (* 49 7 1/2) 2)
+        ;; pattern^2 + C1
+        (+ (expt (length (sy-select-parameters-from-piece-list primary-piece-list)) 2)
+           10))
+  (setf *partial-iter-limit* ;; todo: are there some better iter limit?
+        (ceiling (/ *partial-width-limit* 2))) 
   ;;; dictionaries
   (setf *partial-angle-dictionary* (make-dictionary))
   (setf *partial-length^2-dictionary* (make-dictionary))
@@ -195,7 +188,8 @@
        nil)
       (t
        ;; init
-       (init-meta-params :iter-max 4000 )
+       (init-meta-params primary-pieces
+                         :iter-max 4000)
        ;; call-search
        (let* ((frame-piece    (car frame-pieces))
               ;;

@@ -209,7 +209,8 @@
   (let* ((primary-pieces (remove-if-not #'primary-piece-p whole-primary-piece-list))
          (frame-pieces   (remove-if-not #'(lambda (p) (shape-minus-p (piece-pm-sign p)))
                                         primary-pieces)))
-    (init-meta-params :iter-max (ceiling (* (length whole-primary-piece-list) 3/2))
+    (init-meta-params primary-pieces
+                      :iter-max (ceiling (* (length whole-primary-piece-list) 3/2))
                       :stack-width-const-1 (ceiling (* (length whole-primary-piece-list) 3/2))
                       :beam-width 6)
 

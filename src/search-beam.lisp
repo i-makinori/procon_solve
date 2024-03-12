@@ -111,7 +111,8 @@
          (frame-pieces   (remove-if-not #'(lambda (p) (shape-minus-p (piece-pm-sign p)))
                                         primary-pieces)))
     ;;
-    (init-meta-params :iter-max 100
+    (init-meta-params primary-pieces
+                      :iter-max 100
                       :stack-width-const-1 100
                       :beam-width 6)
     ;;
