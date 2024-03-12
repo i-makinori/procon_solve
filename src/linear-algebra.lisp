@@ -17,13 +17,12 @@
 
 ;;; defines
 
-(defun vec3 (&optional (v0 0) (v1 0) (v2 1))
-  ;;(declare (ftype (function (number number number) vec3) vec3-x))
-  (declare (ftype (function (float float float) vec3) vec3-x))
-  (make-array 3 :initial-contents `(,v0 ,v1 ,v2)))
+(defun vec3 (&optional (v0 0.00) (v1 0.00) (v2 1.00))
+  (declare (ftype (function (float float float) vec3) vec3))
+  (make-array 3 :initial-contents `(,(float v0) ,(float v1) ,(float v2))))
 
 (defun point (x y)
-  (vec3 x y 1))
+  (vec3 x y 1.0))
 
 (defun vec3-x (vec3)
   (declare (ftype (function (vec3) float) vec3-x))
@@ -79,7 +78,7 @@
         1))
 
 
-(defparameter *vec3-zero-xy* #(0 0 1))
+(defparameter *vec3-zero-xy* #(0.0 0.0 1.0))
 
 (defun vec3-inverse-xy (Vn)
   (vec3 (- (vec3-x Vn)) (- (vec3-y Vn)) 1))

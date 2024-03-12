@@ -27,14 +27,13 @@
              (cond ((or (null list) (null (cdr list))) (reverse current))
                    (t (2takes-list (cddr list) (cons (point (car list) (cadr list)) current))))))
     (let* ((int-list
-             (mapcar #'parse-integer
+             (mapcar #'(lambda (s) (float (parse-integer s)))
                      (split-string line-text-string
                                    #'(lambda (c) (char= c #\Space))))))
       (2takes-list int-list nil)
       )))
 
 (defun line-string-into-piece (id pm-sign line-text)
-  ;;todo
   (let* ((coords (line-text-into-vector-list line-text))
          (shape (shape pm-sign coords)))
     (piece :leaf-or-synthed 'leaf :id id :shape shape)))

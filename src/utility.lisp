@@ -70,31 +70,27 @@
 
 
 ;; standard error
+(declaim (ftype (function (float float &optional float) boolean) ser= ser> ser< ser>= ser<=))
+
 (defun ser= (val1 val2 &optional (standard-error *standard-error*))
   "standard error rounded equal (=)"
   (< (abs (- val2 val1)) standard-error))
 
 (defun ser> (val1 val2 &optional (standard-error *standard-error*))
   "standard error rounded greater-than (>)"
-  (and (> val1 val2)
-       (not (ser= val1 val2 standard-error))))
+  (> (- val1 standard-error) val2))
 
 (defun ser< (val1 val2 &optional (standard-error *standard-error*))
   "standard error rounded less-than (<)"
-  (and (< val1 val2)
-       (not (ser= val1 val2 standard-error))))
-
+  (< val1 (- val2 standard-error)))
 
 (defun ser>= (val1 val2 &optional (standard-error *standard-error*))
   "standard error rounded greater-or-equal-than (>=)"
-  (or  (>= val1 val2)
-       (ser= val1 val2 standard-error)))
+  (>= (+ val1 standard-error) val2))
 
 (defun ser<= (val1 val2 &optional (standard-error *standard-error*))
   "standard error rounded less-or-equal-than (=<)"
-  (or  (<= val1 val2)
-       (ser= val1 val2 standard-error)))
-
+  (<= val1 (+ val2 standard-error)))
 
 ;; cycled list into tuple list
 
