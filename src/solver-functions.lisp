@@ -86,32 +86,7 @@
 (defparameter *partial-length^2-dictionary* (make-dictionary))
 
 
-
-#|
-;;; angle all
-PUZZLE-1617> (mapcar
-#'(lambda (vvsy)
-(solve-partial-angle-with-memo
-vvsy
-(cdr (nth 4 *problem-list-official*)) ;; primary
-*partial-angle-dictionary*))
-(partial-value-sy-param-list (nth 0 (nth 4 *problem-list-official*))))
-PUZZLE-1617> (length (flatten (map 'list #'dict-item-partials (dictionary-item-storage *partial-angle-dictionary*))))
-
-
-;;; length^2 all
-PUZZLE-1617> (mapcar
-#'(lambda (vvsy)
-(solve-partial-length^2-with-memo
-vvsy
-(cdr (nth 4 *problem-list-official*)) ;; primary
-*partial-length^2-dictionary*))
-(partial-value-sy-param-list (nth 0 (nth 4 *problem-list-official*))))
-
-PUZZLE-1617> (length (flatten (map 'list #'dict-item-partials (dictionary-item-storage *partial-length^2-dictionary*))))
-|#
-
-(defun update-dictionary-by-new-piece! (piece primary-pieces)
+(defun update-dictionary-by-new-piece! (piece primary-pieces angle-dictionary length^2-dictionary)
   (let ((piece-vvsy-s (partial-value-sy-param-list piece)))
     (progn
       ;; partial Angle problem
@@ -119,65 +94,84 @@ PUZZLE-1617> (length (flatten (map 'list #'dict-item-partials (dictionary-item-s
       (mapcar
        #'(lambda (vvsy)
            (format t "*")
-           (solve-partial-angle-with-memo vvsy primary-pieces *partial-angle-dictionary*))
+           ;;(solve-partial-angle-with-memo vvsy primary-pieces *partial-angle-dictionary*))
+           (solve-partial-angle-with-memo vvsy primary-pieces angle-dictionary))
        piece-vvsy-s)
       ;; partial Length^2 problem
       (format t "~%Partial Length^2 :- ")
       (mapcar
        #'(lambda (vvsy)
            (format t "*")
-           (solve-partial-length^2-with-memo vvsy primary-pieces *partial-length^2-dictionary*))
+           ;;(solve-partial-length^2-with-memo vvsy primary-pieces *partial-length^2-dictionary*))
+           (solve-partial-length^2-with-memo vvsy primary-pieces length^2-dictionary))
        piece-vvsy-s)
       ;;
       (format t "~%"))))
 
+;;
+
+(defun avaiable-choices-from-dictionary (key dictionary)
+  (let* ((dict-item (dictionary-key-sets key dictionary)))
+    (if (null dict-item)
+        `((:partials  . nil)
+          (:end-state . nil))
+        `((:partials  . ,(flatten (dict-item-partials dict-item)))
+          (:end-state . ,(dict-item-end-state dict-item))))))
+
+(defun synthesize-piece-and-piece-by-vvsy-vvsy-piece-or-fail (p1-piece p1-vvsy p2-piece p2-vvsy)
+  (synthesize-piece-and-piece-by-selection-piece-or-fail
+   (make-sy-select :p1 p1-piece :n1 (vvsy-nc p1-vvsy) :pm1 (vvsy-pm p1-vvsy)
+                   :p2 p2-piece :n2 (vvsy-nc p2-vvsy) :pm2 (vvsy-pm p2-vvsy))))
+
+(defun synthesizeable-patterns-of-specific-frame-vvsy (frame-piece frame-vvsy
+                                                       primary-pieces primary-vvsy-s
+                                                       angle-dictionary length^2-dictionary)
+  (let* (;; angle    partials and (todo: state)
+         (synthable-angles-dict
+           (avaiable-choices-from-dictionary (- *pi*2* (vvsy-angle frame-vvsy)) angle-dictionary))
+         (synthable-angles (assocdr :partials synthable-angles-dict))
+         ;; length^2 partials and (todo: state)
+         (synthable-length^2s-dict
+           (avaiable-choices-from-dictionary (vvsy-length^2 frame-vvsy) length^2-dictionary))
+         (synthable-length^2s (assocdr :partials synthable-length^2s-dict)))
+    ;;(format t "Ax: ~%~A~%~A~%" syntheables-from-this-angle syntheables-from-this-length^2)
+    (flatten ;; flatten removes nil also
+     (cond
+       ((and t t) ;; todo case by :end-state
+        (mapcar
+         #'(lambda (p2-vvsy)
+             (let ((p2-id-piece (find-if #'(lambda (p) (= (vvsy-id p2-vvsy) (piece-id p))) primary-pieces))
+                   (synthable-pattern-vvys-p
+                     (and (find (vvsy-angle p2-vvsy)    synthable-angles    :test #'ser=)
+                          (find (vvsy-length^2 p2-vvsy) synthable-length^2s :test #'ser=))))
+               (if synthable-pattern-vvys-p
+                   (synthesize-piece-and-piece-by-vvsy-vvsy-piece-or-fail
+                    frame-piece frame-vvsy p2-id-piece p2-vvsy)
+                   nil)))
+         primary-vvsy-s))))))
+
+
+
 (defun rare-synthesizeables-of-pieces-to-piece (frame-piece piece-list primary-pieces)
   ;; todo. implement
   ;;(all-synthesizeables-of-pieces-to-piece_del-if-e-jam-edge piece piece-list primary-pieces)
-  (update-dictionary-by-new-piece! frame-piece primary-pieces)
   ;;
+  ;; solve partial problem
+  (update-dictionary-by-new-piece! frame-piece primary-pieces
+                                   *partial-angle-dictionary* *partial-length^2-dictionary*)
+  ;;
+  ;; synthesize which uses solution of partial problem
   (let ((frame-vvsy-s (partial-value-sy-param-list frame-piece))
         (avaiable-vvys-s (sy-select-parameters-from-piece-list piece-list)))
-    (flatten
-     (remove
-      nil
-      (mapcar
-       #'(lambda (p1-vvsy)
-           (let* ((syntheables-from-this-angle-dict-item
-                    (dictionary-key-sets (- *pi*2* (vvsy-angle p1-vvsy)) *partial-angle-dictionary*))
-                  (synthable-angles
-                    (if (null syntheables-from-this-angle-dict-item)
-                        '()
-                        (flatten (dict-item-partials syntheables-from-this-angle-dict-item))))
-
-                  (syntheables-from-this-length^2-dict-item
-                    (dictionary-key-sets (vvsy-length^2 p1-vvsy) *partial-length^2-dictionary*))
-                  (synthable-length^2s
-                    (if (null syntheables-from-this-length^2-dict-item)
-                        '()
-                        (flatten (dict-item-partials syntheables-from-this-length^2-dict-item)))))
-             ;;(format t "Ax: ~%~A~%~A~%" syntheables-from-this-angle syntheables-from-this-length^2)
-             (flatten
-              (remove
-               nil
-               (cond
-                 ((and t t) ;; todo case by :end-state
-                  (mapcar
-                   #'(lambda (p2-vvsy)
-                       (let ((p2-id-piece (find-if #'(lambda (p) (= (vvsy-id p2-vvsy) (piece-id p))) primary-pieces))
-                             (synthable-pattern-vvys-p
-                               (and (find (vvsy-angle p2-vvsy)    synthable-angles    :test #'ser=)
-                                    (find (vvsy-length^2 p2-vvsy) synthable-length^2s :test #'ser=))))
-                         (if synthable-pattern-vvys-p
-                             (synthesize-piece-and-piece-by-selection-piece-or-fail
-                              (make-sy-select :p1 frame-piece :n1 (vvsy-nc p1-vvsy) :pm1 (vvsy-pm p1-vvsy)
-                                              :p2 p2-id-piece :n2 (vvsy-nc p2-vvsy) :pm2 (vvsy-pm p2-vvsy)))
-                             nil)))
-                   avaiable-vvys-s)))))))
-       frame-vvsy-s)))))
+    (flatten ;; flatten removes nil also
+     (mapcar #'(lambda (frame-vvsy_n)
+                 (synthesizeable-patterns-of-specific-frame-vvsy
+                  frame-piece frame-vvsy_n primary-pieces avaiable-vvys-s
+                  *partial-angle-dictionary* *partial-length^2-dictionary*))
+      frame-vvsy-s))))
 
 
-
+;;(defun rare-synthesizeables-of-pieces-to-piece-_del-if-e-jam-edge 
 
 ;;;
 ;;; set theoretical manipulations
