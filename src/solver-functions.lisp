@@ -76,9 +76,6 @@
 
 
 
-
-
-
 ;;; synthesizeable patterns filtered by partial problem
 
 
@@ -172,7 +169,8 @@
       frame-vvsy-s))))
 
 
-;;; del if exists jam edge
+;;; delete if exists jamed edge version of
+;;; synthesizeable patterns filtered by partial problem
 
 (defun synthesizeable-patterns-of-specific-frame-vvsy-stores-end-state
     (frame-piece frame-vvsy
@@ -197,19 +195,9 @@
                   frame-piece frame-vvsy primary-pieces p2-vvsy
                   synthable-angles nil synthable-length^2s nil))
              primary-vvsy-s))))
-    ;;(format t "Ax: ~%~A~%~A~%" syntheables-from-this-angle syntheables-from-this-length^2)
-
-    ;;(format t "state: ~A, ~A~%" dict-angle-state dict-length^2-state)
-    ;;
-
-    ;; todo case by :end-state
     (cond
       ((or     (eq dict-angle-state 'all-paterns)  (eq dict-length^2-state 'all-paterns))
        `((:synthesizes . ,all-synthesize-patterns) (:state . 'sy-vvsy-conver)))
-      #|
-      ((or     (eq dict-angle-state 'sy-vvsy-ocilla) (eq dict-length^2-state 'sy-vvsy-ocilla))
-       `((:synthesizes . ,all-synthesize-patterns) (:state . 'sy-vvsy-ocilla)))
-      |#
       ((and    (eq dict-angle-state 'divergence)   (eq dict-length^2-state 'divergence))
        `((:synthesizes . ,all-synthesize-patterns) (:state . 'sy-vvsy-diverg)))
       (t
@@ -221,7 +209,6 @@
     (frame-piece nth_point-n
      primary-pieces primary-vvsy-s
      angle-dictionary length^2-dictionary)
-  ;;#'(lambda (nth_point-n)
   (let* ((synths-and-state-list ;; where length = 2
            (mapcar 
             #'(lambda (frame-vvsy_n_pmx)
@@ -231,8 +218,6 @@
             (partial-value-sy-param-list frame-piece ;; frame-nth-vvsys
                                          :piece-by-nth_point-only nth_point-n)))
          ;;
-
-         ;;
          (synths_a (assocdr :synthesizes (nth 0 synths-and-state-list)))
          (synths_b (assocdr :synthesizes (nth 1 synths-and-state-list)))
          (state_a  (assocdr :state       (nth 0 synths-and-state-list)))
@@ -240,7 +225,6 @@
          ;;
          (state-returns
            (cond ((member 'sy-vvsy-conver (list state_a state_b)) 'sy-vvsy-conver)
-                 ;;((member 'sy-vvsy-ocilla (list state_a state_b)) 'sy-vvsy-ocilla)
                  ((member 'sy-vvsy-diverg (list state_a state_b)) 'sy-vvsy-diverg)
                  (t 'sy-vvsy-conver))))
     ;;(format t "~A, ~A~%" "fuga")
@@ -257,10 +241,6 @@
 
 (defun rare-synthesizeables-of-pieces-to-piece-_del-if-e-jam-edge 
     (frame-piece piece-list primary-pieces)
-  ;; todo. implement
-  ;;(all-synthesizeables-of-pieces-to-piece_del-if-e-jam-edge piece piece-list primary-pieces)
-  ;;
-
   ;;
   ;; solve partial problem
   (update-dictionary-by-new-piece! frame-piece primary-pieces
@@ -277,15 +257,13 @@
                  frame-piece nth primary-pieces avaiable-vvsy-s
                  *partial-angle-dictionary* *partial-length^2-dictionary*))
             (from-m-to-n-list 0 (1- (length (piece-points frame-piece)))))))
-    ;;(print synthes-and-state-list-of-each-edges)
-    (cond (;;(member nil synths-of-each-edges)
-           (find-if #'(lambda (l_n)
-                        ;;(format t "~A, ~A~%"
-                        ;;(assocdr :state l_n)
-                        ;;(length (assocdr :synthesizes l_n)))
+    (cond ((find-if #'(lambda (l_n)
+                        #|(format t "~A, ~A~%" (assocdr :state l_n)
+                        (length (assocdr :synthesizes l_n)))|# ; for test
                         (and (eq   (assocdr :state l_n) 'sy-vvsy-conver)
                              (null (assocdr :synthesizes l_n)))
-                        ;;nil ; for test of cut
+                        #|(null (assocdr :synthesizes l_n))|# ;for test
+                        #|nil|# ; for test of cut
                         )
                     synthes-and-state-list-of-each-edges)
            nil)
@@ -321,7 +299,6 @@
   (labels ((aux (p_n)
              (cond ((null p_n) nil)
                    (t (append
-                       ;;(list (piece-id p_n))
                        (list p_n)
                        (if (piece-transform1 p_n)
                            (aux (transform-piece (piece-transform1 p_n)))
