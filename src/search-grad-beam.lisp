@@ -43,25 +43,54 @@
 ;; evaluation value updator for fs
 
 (defun fs-decrease-d/dt-evaluation-by-retake (fs)
+  ;; greedic version
+  "retake its state, gradient (d/dt) of evaluation value is decreased"
+  ;; todo: convergence sequence
+  ;; lim (n->infinity) => (f(n)->C) , C such as +2
+  (setf (fs-evaluation-value fs)
+        ((lambda (v)
+           (* v (/ 1 (+ 1 0.10))))
+         (fs-evaluation-value fs)))
+  fs)
+
+#|
+(defun fs-decrease-d/dt-evaluation-by-retake (fs)
+;; d/dt version
   "retake its state, gradient (d/dt) of evaluation value is decreased"
   ;; todo: convergence sequence
   ;; lim (n->infinity) => (f(n)->C) , C such as +2
   (setf (fs-d/dt-evaluation-value fs)
         ((lambda (v)
            (* v (/ 1 (+ 1 0.05)))) ;; V_next = V_now * 1 / (1+ε)
-         (fs-d/dt-evaluation-value fs)))
-  fs)
+  (fs-d/dt-evaluation-value fs)))
 
+  fs)
+|#
 
 ;; insert to stack
 
 (defun insert-state-into-stack-by-grad (fs stack-by-grad) ;; (state)
+  ;; greedic version
+  (cond ((composition-of-filters fs stack-by-grad)
+         (insert fs stack-by-grad
+                 :older-function #'(lambda (fs stack_n)
+                                     #|(> (fs-d/dt-evaluation-value fs)
+                                     (fs-d/dt-evaluation-value stack_n)))))
+                                      |#
+                                     (> (fs-evaluation-value fs)
+                                        (fs-evaluation-value stack_n)))))
+        (t stack-by-grad)))
+
+#|
+(defun insert-state-into-stack-by-grad (fs stack-by-grad) ;; (state)
+  ;; d/dt version
   (cond ((composition-of-filters fs stack-by-grad)
          (insert fs stack-by-grad
                  :older-function #'(lambda (fs stack_n)
                                      (> (fs-d/dt-evaluation-value fs)
-                                        (fs-d/dt-evaluation-value stack_n)))))
+                                     (fs-d/dt-evaluation-value stack_n)))))
         (t stack-by-grad)))
+|#
 
 (defun insert-state-list-into-stack-by-grad (fs-list stack-by-grad)
   (reduce #'(lambda (fs stack-by-grad)
@@ -94,12 +123,17 @@
   (let* ((states-of-next-step_fat
            (states-of-next-step-from-1-state state-this-step primary-piece-list))
          (states-of-next-step
+           states-of-next-step_fat))
+           #|
+         ;; congruent filter, its beam and past gradient-stack
+         (states-of-next-step
            (remove-if #'(lambda (state-this-step_i)
                           (some #'(lambda (filter-state_j)
                                     (detect-piece-congruent (fs-frame-piece state-this-step_i)
                                                             (fs-frame-piece filter-state_j)))
                                 additional-filter))
                       states-of-next-step_fat)))
+|#
     states-of-next-step))
 
 (defun next-gradient-stack (next-stack-of-this-step previous-gradient-stack)
