@@ -142,15 +142,27 @@
             (mapcar #'(lambda (s) (format nil "~,4f " (fs-d/dt-evaluation-value s)))
                     (first-n 20 next-gradient-stack)))))
 
+
+(defparameter *timestamp-next-html-write-after* (local-time:now))
+
 (defun write-piece-list-as-html-from-fs-stacks-for-grad-beam
-    (next-stack-of-this-step gradient-stack)
-  (write-piece-list-as-html
-   (mapcar #'(lambda (state) (fs-frame-piece state)) next-stack-of-this-step)
-   :file-name "piece-list.html")
-  (write-piece-list-as-html
-   (mapcar #'(lambda (state) (fs-frame-piece state)) gradient-stack)
-   :file-name "gradient-list.html")
-)
+    (next-stack-of-this-step gradient-stack &optional (by-delta-time-p-millisec nil))
+
+  (when (or (not (numberp by-delta-time-p-millisec))
+            (local-time:timestamp>= (local-time:now)
+                                    *timestamp-next-html-write-after*))
+    (write-piece-list-as-html
+     (mapcar #'(lambda (state) (fs-frame-piece state)) next-stack-of-this-step)
+     :file-name "piece-list.html")
+    (write-piece-list-as-html
+     (mapcar #'(lambda (state) (fs-frame-piece state)) gradient-stack)
+     :file-name "gradient-list.html")
+    
+    (when (numberp by-delta-time-p-millisec)
+      (setf *timestamp-next-html-write-after*
+            (local-time:timestamp+ (local-time:now)
+                                   (* by-delta-time-p-millisec (expt 1000 2))
+                                   :nsec)))))
 
 
 
@@ -188,9 +200,10 @@
                                                          primary-piece-list gradient-stack)
          ;;              ;; format after once list
          (format-search-status-after-for-grad-beam next-beam-of-this-step next-gradient-stack)
-         ;;              ;; HTML
-         (write-piece-list-as-html-from-fs-stacks-for-grad-beam next-stack-of-this-step
-                                                                next-gradient-stack)
+         ;;              ;; HTML by 10000[ms]
+         (write-piece-list-as-html-from-fs-stacks-for-grad-beam
+          next-stack-of-this-step next-gradient-stack
+          10000)
          ;; Call nexts or gool
          (cond
            ((null next-stack-of-this-step) ;; no methods in this beam's stack
@@ -240,7 +253,9 @@
                 (insert-state-list-into-stack-by-grad stack_t1 '()))
               ;; search solution in tree by beam with gradient-stack
               (solution-and-paths (search-solution-aux-grad-beam
-                                   beam-queue_t1 none-frame-pieces gradient-stack_t0)))
-
-         (mapcar #'(lambda (s) (fs-frame-piece s)) solution-and-paths)
+                                   beam-queue_t1 none-frame-pieces gradient-stack_t0))
+              ;; solution piece list
+              (solution-piece-list (mapcar #'(lambda (s) (fs-frame-piece s)) solution-and-paths)))
+         (write-piece-list-as-html-from-fs-stacks-for-grad-beam solution-and-paths '())
+         solution-piece-list
          )))))
