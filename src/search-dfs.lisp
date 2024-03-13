@@ -94,14 +94,24 @@
   ;; partial problem parameters
   (setf *partial-width-limit*
         ;;(expt (* 49 7 1/2) 2)
+        #|
         ;; pattern^2 + C1
         ;;(+ (expt (length (sy-select-parameters-from-piece-list primary-piece-list)) 2)
         ;;10))
-        ;; num-combination-sequence(2-1, pattern) + C1
-        (+ (num-combination-sequence
-            (- 2 1)
-            (length (sy-select-parameters-from-piece-list primary-piece-list)))
-           10))
+        |#
+        #|
+        ;; C1 * num_combination(2-1, pattern) + C2
+        (+ (* 1/3
+              (num-combination-sequence
+               (- 2 1)
+               (length (sy-select-parameters-from-piece-list primary-piece-list))))
+           10)
+         |#
+        ;; num_combination(0, pattern) * C1 
+        (* 0.8 ;; depth ~= (1 + 1) + 0.x 
+           (num-combination-sequence
+            1
+            (length (sy-select-parameters-from-piece-list primary-piece-list)))))
         
   (setf *partial-iter-limit* ;; todo: are there some better iter limit?
         ;;(ceiling (/ *partial-width-limit* 2))) 

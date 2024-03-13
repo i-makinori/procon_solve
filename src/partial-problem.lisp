@@ -57,6 +57,10 @@
   50000 ;; tmporaly
   )
 
+;;
+
+(defun compare-sigma (tester value-list objective-value)
+  (funcall tester (apply #'+ value-list) objective-value))
 
 
 #|
@@ -94,15 +98,12 @@
             (append next-depth-queue step-next-depth-queue)
             (append solutions step-solutions)
             (+ 1 current-iter))))))
+
+
 |#
-
-
 ;; loop version
 
-(defun compare-sigma (tester value-list objective-value)
-  (funcall tester (apply #'+ value-list) objective-value))
-
-
+#|
 (defun solve-partial-problem-aux (objective-value choice-value-list
                                   first-queue _bottom1_ first-solution _bottom3)
   _bottom1_ _bottom3
@@ -135,9 +136,10 @@
                ;;step-solutions
                ))
     (values solutions end-state)))
+|#
 
 
-
+;; loop wave version
 (defun solve-partial-problem-aux (objective-value choice-value-list
                                   first-queue _bottom1_ first-solution _bottom3)
   _bottom1_ _bottom3
@@ -145,27 +147,28 @@
          (solutions (copy-seq first-solution))
          ;;(queue_t+1 (mapcar #'list first-queue))
          (queue_t+1 first-queue)
-         (queue_t+0 nil)
-         )
+         (queue_t+0 nil))
 
-    (loop ;; whole depth
-      named depth-loop for iter from 0
+    (loop
+      named depth-loop for iter from 0 ;; whole depth
       if (null queue_t+1)
         do (setf end-state 'all-paterns)
            (return-from depth-loop)
       do ;; todo. remove-duplicates is slow.
-         ;; (reverse
-         ;;(format t "Q: ~A~%" queue_t+1)
-         ;;(setf queue_t+1 (remove-duplicates (flatten queue_t+1) :test #'set-equal))
-         (setf queue_t+1 (remove-duplicates queue_t+1 :test #'set-equal))
+         ;;(format t "Q1: ~A~%" queue_t+1)
+         ;;(setf queue_t+1 (remove-duplicates (apply #'append queue_t+1) :test #'set-equal))
          ;;
          (setf queue_t+0 queue_t+1)
          (setf queue_t+1 '())
-         ;;(format t "Q: ~A~%" queue_t+0)
-         (loop ;; whole its depth
-           for step-vs in queue_t+0
-           if (or (> iter *partial-width-limit*)
-                  ;;(> (length queue_t+1) *partial-iter-limit*))
+         ;;(format t "Q0: ~A~%" queue_t+0)
+      if (< 6 (length (nth 0 queue_t+0))) ;; limit by depth, now it is 5
+        do (setf end-state 'divergence)
+           ;;(format t "cut~%")
+           (return-from depth-loop)
+      do (loop
+           for step-vs in queue_t+0 ;; whole its depth
+           if (or (> iter *partial-iter-limit*)
+                  ;;(> (length queue_t+1) *partial-width-limit*))
                   )
              do (setf end-state 'divergence)
                 (return-from depth-loop)
@@ -178,13 +181,10 @@
                      (step-solutions
                        (remove-if-not #'(lambda (vs) (compare-sigma #'ser= vs objective-value))
                                       step-next-depth-queue-combination)))
-                ;;(format t "~A: ~A: ~A~%" iter step-vs "");;step-next-depth-queue)
-                ;;(format t "  ,~A~%" (nth 0 step-next-depth-queue))
                 (incf iter)
+                ;;(format t "~A: ~A: ~A~%" iter step-vs "");;step-next-depth-queue)
                 (setf queue_t+1 (append step-next-depth-queue queue_t+1))
-                ;;(setf queue_t+1 (cons step-next-depth-queue queue_t+1))
-                (setf solutions (append solutions step-solutions)))
-               ))
+                (setf solutions (append solutions step-solutions)))))
     (values solutions end-state)))
 
 
@@ -197,8 +197,6 @@
         (t
          (apply #'+ (mapcar #'(lambda (i) (num-combination-sequence (- m 1) (- n i)))
                             (from-m-to-n-list 0 (- n 1)))))))
-            
-                  
 
 
 (defun profile-solve-partial-problem (n &optional (profile-p t))
