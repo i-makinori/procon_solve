@@ -95,10 +95,17 @@
   (setf *partial-width-limit*
         ;;(expt (* 49 7 1/2) 2)
         ;; pattern^2 + C1
-        (+ (expt (length (sy-select-parameters-from-piece-list primary-piece-list)) 2)
+        ;;(+ (expt (length (sy-select-parameters-from-piece-list primary-piece-list)) 2)
+        ;;10))
+        ;; num-combination-sequence(2-1, pattern) + C1
+        (+ (num-combination-sequence
+            (- 2 1)
+            (length (sy-select-parameters-from-piece-list primary-piece-list)))
            10))
+        
   (setf *partial-iter-limit* ;; todo: are there some better iter limit?
-        (ceiling (/ *partial-width-limit* 2))) 
+        ;;(ceiling (/ *partial-width-limit* 2))) 
+        (* 1 *partial-width-limit*))
   ;;; dictionaries
   (setf *partial-angle-dictionary* (make-dictionary))
   (setf *partial-length^2-dictionary* (make-dictionary))

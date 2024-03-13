@@ -113,11 +113,9 @@
           if (or (> i *partial-width-limit*)
                  (> (length queue) *partial-iter-limit*))
             do (setf end-state 'divergence)
-               ;;(format t "dive: ~A~%" i)
                (return-from depth-loop)
           if (null queue)
             do (setf end-state 'all-paterns)
-               ;;(format t "allp: ~A~%" i)
                (return-from depth-loop)
           do (let* ((step-vs (car queue))
                     (step-next-depth-queue-combination
@@ -129,8 +127,9 @@
                     (step-solutions
                       (remove-if-not #'(lambda (vs) (compare-sigma #'ser= vs objective-value))
                                      step-next-depth-queue-combination)))
-               (format t "~A: ~A: ~A~%" i step-vs "");;step-next-depth-queue)
+               ;;(format t "~A: ~A: ~A~%" i step-vs "");;step-next-depth-queue)
                (incf i)
+               ;;(setf queue (append (cdr queue) step-next-depth-queue))
                (setf queue (append (cdr queue) step-next-depth-queue))
                (setf solutions (append solutions step-solutions))
                ;;step-solutions
@@ -139,102 +138,54 @@
 
 
 
-
 (defun solve-partial-problem-aux (objective-value choice-value-list
                                   first-queue _bottom1_ first-solution _bottom3)
   _bottom1_ _bottom3
   (let* ((end-state nil)
          (solutions (copy-seq first-solution))
-         (queue_t+1 (mapcar #'list first-queue))
-         (queue_t+0 nil))
-    (loop named depth-loop for i from 0 ;; below (1- *partial-width-limit*
-          if (every #'null queue_t+1)
-            do (setf end-state 'all-paterns)
-               (return-from depth-loop)
-          do (setf queue_t+0 queue_t+1)
-             (setf queue_t+1 '())
-             (format t "Q: ~A~%" queue_t+0)
-             (setf
-              queue_t+1
-              (loop for i_symbol
-                    from 0 to (1- (length queue_t+0))  ;; (1- (length choice-value-list)) 
-                    if (or (> i *partial-width-limit*)
-                           (> (length queue_t+1) *partial-iter-limit*))
-                      do (setf end-state 'divergence)
-                         (return-from depth-loop)
-                    collect
-                    ;;(flatten
-                    (flatten
-                     (loop for step-vs in (nth i_symbol queue_t+0)
-                           collect
-                           (let* ((step-next-combination
-                                    (mapcar #'(lambda (v) (cons v step-vs))
-                                            (subseq choice-value-list i_symbol)))
-                                  (step-next-depth-queue
-                                    (remove-if-not #'(lambda (vs) (compare-sigma #'ser< vs objective-value))
-                                                   step-next-combination))
-                                  (step-solutions
-                                    (remove-if-not #'(lambda (vs) (compare-sigma #'ser= vs objective-value))
-                                                   step-next-combination)))
-                             (format t "~A, ~A: ~A: ~A~%" i i_symbol step-vs "");;step-next-depth-queue)
-                             (incf i)
-                             (setf solutions (append solutions step-solutions))
-                             step-next-depth-queue
-                             )
-                           )
-                     ))))
-    (values solutions end-state)))
-
-(defun solve-partial-problem-aux (objective-value choice-value-list
-                                  first-queue _bottom1_ first-solution _bottom3)
-  _bottom1_ _bottom3
-  (let* ((end-state nil)
-         (solutions (copy-seq first-solution))
-         (queue_t+1 (mapcar #'list first-queue))
+         ;;(queue_t+1 (mapcar #'list first-queue))
+         (queue_t+1 first-queue)
          (queue_t+0 nil)
-         (patrolled-index -1))
-    (loop named depth-loop for i from 0 ;; below (1- *partial-width-limit*
-          if (every #'null queue_t+1)
-            do (setf end-state 'all-paterns)
-               (return-from depth-loop)
-          do (setf queue_t+0 queue_t+1)
-             (setf queue_t+1 '())
-             (setf patrolled-index 0)
-             ;;(format t "Q: ~A~%" queue_t+0)
-             (setf
-              queue_t+1
-              (loop for i_symbol
-                    from 0 to (1- (length queue_t+0))  ;; (1- (length choice-value-list)) 
-                    if (not (null (nth i_symbol queue_t+0)))
-                      do (incf patrolled-index)
-                    if (or (> i *partial-width-limit*)
-                           (> (length queue_t+1) *partial-iter-limit*))
-                      do (setf end-state 'divergence)
-                         (return-from depth-loop)
-                    collect
-                    ;;(flatten
-                    (flatten
-                     (loop for step-vs in (nth i_symbol queue_t+0)
-                           collect
-                           (let* ((step-next-combination
-                                    (mapcar #'(lambda (v) (cons v step-vs))
-                                            ;;(subseq choice-value-list i_symbol)))
-                                            (subseq choice-value-list patrolled-index)))
-                                  (step-next-depth-queue
-                                    (remove-if-not #'(lambda (vs) (compare-sigma #'ser< vs objective-value))
-                                                   step-next-combination))
-                                  (step-solutions
-                                    (remove-if-not #'(lambda (vs) (compare-sigma #'ser= vs objective-value))
-                                                   step-next-combination)))
-                             ;;(format t "~A, ~A: ~A: ~A~%" i i_symbol step-vs "");;step-next-depth-queue)
-                             (incf i)
-                             (setf solutions (append solutions step-solutions))
-                             step-next-depth-queue
-                             )
-                           )
-                     ))))
-    (values solutions end-state)))
+         )
 
+    (loop ;; whole depth
+      named depth-loop for iter from 0
+      if (null queue_t+1)
+        do (setf end-state 'all-paterns)
+           (return-from depth-loop)
+      do ;; todo. remove-duplicates is slow.
+         ;; (reverse
+         ;;(format t "Q: ~A~%" queue_t+1)
+         ;;(setf queue_t+1 (remove-duplicates (flatten queue_t+1) :test #'set-equal))
+         (setf queue_t+1 (remove-duplicates queue_t+1 :test #'set-equal))
+         ;;
+         (setf queue_t+0 queue_t+1)
+         (setf queue_t+1 '())
+         ;;(format t "Q: ~A~%" queue_t+0)
+         (loop ;; whole its depth
+           for step-vs in queue_t+0
+           if (or (> iter *partial-width-limit*)
+                  ;;(> (length queue_t+1) *partial-iter-limit*))
+                  )
+             do (setf end-state 'divergence)
+                (return-from depth-loop)
+           do (let* ((step-next-depth-queue-combination
+                       (mapcar #'(lambda (v) (cons v step-vs)) 
+                               choice-value-list))
+                     (step-next-depth-queue
+                       (remove-if-not #'(lambda (vs) (compare-sigma #'ser< vs objective-value))
+                                      step-next-depth-queue-combination))
+                     (step-solutions
+                       (remove-if-not #'(lambda (vs) (compare-sigma #'ser= vs objective-value))
+                                      step-next-depth-queue-combination)))
+                ;;(format t "~A: ~A: ~A~%" iter step-vs "");;step-next-depth-queue)
+                ;;(format t "  ,~A~%" (nth 0 step-next-depth-queue))
+                (incf iter)
+                (setf queue_t+1 (append step-next-depth-queue queue_t+1))
+                ;;(setf queue_t+1 (cons step-next-depth-queue queue_t+1))
+                (setf solutions (append solutions step-solutions)))
+               ))
+    (values solutions end-state)))
 
 
 (defun num-combination-sequence (m n)
@@ -251,6 +202,7 @@
 
 
 (defun profile-solve-partial-problem (n &optional (profile-p t))
+  n
   (sb-profile:unprofile )
   ;; register package
   (when profile-p
