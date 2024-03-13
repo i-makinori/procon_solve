@@ -17,6 +17,8 @@
 
 ;;; defines
 
+(declaim (inline vec3 point vec3-x vec3-y vec3-j))
+
 (defun vec3 (&optional (v0 0.00) (v1 0.00) (v2 1.00))
   (declare (ftype (function (float float float) vec3) vec3))
   (make-array 3 :initial-contents `(,(float v0) ,(float v1) ,(float v2))))
@@ -37,6 +39,10 @@
   ;; we use j. not z because z meanse height dimention.
   (aref vec3 2))
 
+(defparameter *vec3-zero-xy* #(0.0 0.0 1.0))
+
+;;
+
 (defun matrix3x3
     (&optional (a00 0) (a01 0) (a02 0) (a10 0) (a11 0) (a12 0) (a20 0) (a21 0) (a22 0))
   (make-array '(3 3) :initial-contents `((,a00 ,a01 ,a02)
@@ -48,6 +54,11 @@
 
 (defparameter *identity-matrix-3x3*
   (matrix3x3 1 0 0 0 1 0 0 0 1))
+
+
+;;
+
+(declaim (inline vec3-ser= vec3-multiply vec3-add-xy vec3-sub-xy vec3-factor-xy))
 
 (defun vec3-ser= (V1 V2)
   (and (ser= (vec3-x V1) (vec3-x V2))
@@ -61,24 +72,26 @@
           do (setf (aref V3 i) (* (aref V1 i) (aref V2 i))))
     V3))
 
-
 (defun vec3-add-xy (V1 V2)
   (vec3 (+ (vec3-x V1) (vec3-x V2))
         (+ (vec3-y V1) (vec3-y V2))
-        1))
+        1.0))
 
 (defun vec3-sub-xy (V1 V2)
   (vec3 (- (vec3-x V1) (vec3-x V2))
         (- (vec3-y V1) (vec3-y V2))
-        1))
+        1.0))
 
 (defun vec3-factor-xy (scalar Vn)
   (vec3 (* scalar (vec3-x Vn))
         (* scalar (vec3-y Vn))
-        1))
+        1.0))
 
 
-(defparameter *vec3-zero-xy* #(0.0 0.0 1.0))
+
+;;
+
+(declaim (inline vec3-inverse-xy vec3-length-xy vec3-length-xy^2 vec3-normalize-xy ))
 
 (defun vec3-inverse-xy (Vn)
   (vec3 (- (vec3-x Vn)) (- (vec3-y Vn)) 1))
@@ -94,6 +107,10 @@
     (if (< length *standard-error*)
         #(0 0 0)
         (vec3 (/ (vec3-x Vn) length) (/ (Vec3-y Vn) length) 1))))
+
+;;
+
+(declaim (inline vec3-dot-xy vec3-dot vec3-cross-xy vec3-cross ))
 
 (defun vec3-dot-xy (V1 V2)
   ;;(declare (optimize (speed 2) (debug 0) (safety 0)))
@@ -118,6 +135,10 @@
   (vec3 (- (* (vec3-y V1) (vec3-j V2)) (* (vec3-j V1) (vec3-y V2)))
         (- (* (vec3-j V1) (vec3-x V2)) (* (vec3-x V1) (vec3-j V2)))
         (- (* (vec3-x V1) (vec3-y V2)) (* (vec3-y V1) (vec3-x V2)))))
+
+;;
+
+(declaim (inline vec3-matrix-row vec3-matrix-col matrix3x3-vector3-product matrix3x3-product))
 
 (defun vec3-matrix-row (An row)
   (vec3 (aref An row 0)

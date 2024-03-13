@@ -71,6 +71,7 @@
 
 ;; standard error
 (declaim (ftype (function (float float &optional float) boolean) ser= ser> ser< ser>= ser<=))
+(declaim (inline ser= ser> ser< ser>= ser<=))
 
 (defun ser= (val1 val2 &optional (standard-error *standard-error*))
   "standard error rounded equal (=)"
