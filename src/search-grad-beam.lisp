@@ -149,7 +149,8 @@
    :file-name "piece-list.html")
   (write-piece-list-as-html
    (mapcar #'(lambda (state) (fs-frame-piece state)) gradient-stack)
-   :file-name "gradient-list.html"))
+   :file-name "gradient-list.html")
+)
 
 
 
@@ -209,17 +210,11 @@
   (let* ((primary-pieces (remove-if-not #'primary-piece-p whole-primary-piece-list))
          (frame-pieces   (remove-if-not #'(lambda (p) (shape-minus-p (piece-pm-sign p)))
                                         primary-pieces)))
+    ;; variables
     (init-meta-params primary-pieces
-                      :iter-max (ceiling (* (length whole-primary-piece-list) 3/2))
+                      :iter-max (ceiling (* (length whole-primary-piece-list) 3))
                       :stack-width-const-1 (ceiling (* (length whole-primary-piece-list) 3/2))
                       :beam-width 6)
-
-    ;; variables
-    (setf *n-search-iter* 0)
-
-    ;; parameters
-
-    (setf *n-search-iter-max* 25) ;; n:: depth
 
     ;; handle problem forms
     (cond

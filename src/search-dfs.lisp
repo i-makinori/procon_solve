@@ -99,20 +99,26 @@
         ;;(+ (expt (length (sy-select-parameters-from-piece-list primary-piece-list)) 2)
         ;;10))
         |#
-        #|
-        ;; C1 * num_combination(2-1, pattern) + C2
-        (+ (* 1/3
-              (num-combination-sequence
-               (- 2 1)
-               (length (sy-select-parameters-from-piece-list primary-piece-list))))
-           10)
-         |#
+        
         ;; num_combination(0, pattern) * C1 
-        (* 0.8 ;; depth ~= (1 + 1) + 0.x 
+        (*  ;; depth ~= (1 + 1) + 0.x 
            (num-combination-sequence
             1
-            (length (sy-select-parameters-from-piece-list primary-piece-list)))))
+            (* 1/2
+               (length (sy-select-parameters-from-piece-list primary-piece-list)))))
         
+        #|
+        (+ (num-combination-sequence
+            2 ;; Comb(2) ~= 3.X
+            (* 1/2
+               (+ 
+                (length (remove-duplicates 
+                         (flatten (mapcar #'piece-angle-list primary-piece-list))))
+                (length (remove-duplicates 
+                         (flatten (mapcar #'piece-segment-length^2-list primary-piece-list)))))))
+           100)
+        |#
+        )
   (setf *partial-iter-limit* ;; todo: are there some better iter limit?
         ;;(ceiling (/ *partial-width-limit* 2))) 
         (* 1 *partial-width-limit*))

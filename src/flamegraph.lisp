@@ -29,7 +29,7 @@
     nil))
     |#
     (time (progn (search-solution-grad-beam
-                  (nth 6 *problem-list*))
+                  (nth 5 *problem-list*))
                  nil))
 
     ))
