@@ -33,6 +33,13 @@ shape filling puzzle.
 
 # example usage
 
+```sh
+$ ros ./call-puzzle-solver.lisp 3 
+```
+<!--
+todo: not by number, by problem file name.
+-->
+
 ref `src/note.lisp`
 
 this is maybe older...
