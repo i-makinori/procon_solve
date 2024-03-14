@@ -172,6 +172,7 @@
 ;;; delete if exists jamed edge version of
 ;;; synthesizeable patterns filtered by partial problem
 
+
 (defun synthesizeable-patterns-of-specific-frame-vvsy-stores-end-state
     (frame-piece frame-vvsy
      primary-pieces primary-vvsy-s
@@ -196,10 +197,18 @@
                   synthable-angles nil synthable-length^2s nil))
              primary-vvsy-s))))
     (cond
-      ((or     (eq dict-angle-state 'all-paterns)  (eq dict-length^2-state 'all-paterns))
-       `((:synthesizes . ,all-synthesize-patterns) (:state . 'sy-vvsy-conver)))
-      ((and    (eq dict-angle-state 'divergence)   (eq dict-length^2-state 'divergence))
+      ((piece-nth-point-exist-duplicated-point-p (vvsy-nc frame-vvsy) frame-piece)
+       ;; diverg by duplicated point
        `((:synthesizes . ,all-synthesize-patterns) (:state . 'sy-vvsy-diverg)))
+      ((or     t                                   (eq dict-length^2-state 'divergence))
+       ;; diverg
+      `((:synthesizes . ,all-synthesize-patterns) (:state . 'sy-vvsy-diverg)))
+      ((and     (eq dict-angle-state 'all-paterns)  (eq dict-length^2-state 'all-paterns))
+       ;; conver
+       `((:synthesizes . ,all-synthesize-patterns) (:state . 'sy-vvsy-conver)))
+      (t 
+       ;; diverg
+      `((:synthesizes . ,all-synthesize-patterns) (:state . 'sy-vvsy-diverg)))
       (t
        (warn "warning something wrong. storeed end-state")
        `((:synthesizes . nil) (:state . 'sy-vvsy-conver)) ;; 'failure

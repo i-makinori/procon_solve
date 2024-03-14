@@ -377,6 +377,18 @@
                            pp+0
                            pp_first)))))))
 
+(defun ommit-point-on-line-from-rough-ommited-coords-list (rough-ommited-coords-list)
+  (mapcar
+   #'cadr
+   (remove-if
+    #'(lambda (p101) ;; point p_-1 p_+0 p_+1
+        (let ((p_-1 (car p101)) (p_+0 (cadr p101)) (p_+1 (cddr p101)))
+          (and 
+           (point-on-line-segment-detection p_+0 p_-1 p_+1)
+           (coord-points-exiest-duplicated-point-p p_+0 rough-ommited-coords-list))))
+    (make-3tuple-list (rot-right 1 rough-ommited-coords-list)))))
+
+
 
 (defun ommit-edge-points (coord-points)
   ;; usage example
@@ -399,7 +411,7 @@
        (if (equalp ommit-once coord-points)
            ;;(ommit-edge-points-for-point-on-line-segment ;; point on line
            ;; ommit-once (car (last ommit-once)) (car ommit-once))
-           ommit-once ;; ignore point on line
+           (ommit-point-on-line-from-rough-ommited-coords-list ommit-once) ;; ignore point on line
            (ommit-edge-points ommit-once))))))
 
 
