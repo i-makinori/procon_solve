@@ -47,28 +47,6 @@
                ;;(+ (/ 1 (piece-id piece_root)))
                      ))))))
 
-
-;;; evaluation functions for evaluate values
-
-(defun evaluation-value-by-delta-points_sum (state primary-piece-list)
-  primary-piece-list
-  (delta_points-of-synthesize_sum (fs-frame-piece state)))
-
-(defun evaluation-value-by-delta-points_delta (state primary-piece-list)
-  primary-piece-list
-  (delta_points-of-synthesize_delta (fs-frame-piece state)))
-
-(defun evaluation-value-by-remain-edges (state primary-piece-list)
-  ;;primaries
-  (let* ((frame-piece (fs-frame-piece state))
-         (frame-edges (length (piece-coord-points frame-piece)))
-         (remain-pieces (list-of-unused-primary-piece-list-of-synthesized-piece
-                         frame-piece primary-piece-list))
-         (remain-primes-edges (apply #'+ (mapcar #'(lambda (p) (length (piece-coord-points p)))
-                                          remain-pieces)))
-         (remain-edges (+ frame-edges remain-primes-edges)))
-    (- (* 50 50) remain-edges)))
-
 ;;; sort
 
 (defun sorted-states-by-evaluation-function (state-list-new state-list-resting)
@@ -87,3 +65,106 @@
   (if (every #'numberp (list evaluation-value_new evaluation-value_previous))
       (/ (- evaluation-value_new evaluation-value_previous) delta_t)
       0))
+
+
+;;; evaluation functions for evaluate values
+
+;; method I
+
+(defun evaluation-value-by-delta-points_sum (state primary-piece-list)
+  primary-piece-list
+  (delta_points-of-synthesize_sum (fs-frame-piece state)))
+
+(defun evaluation-value-by-delta-points_delta (state primary-piece-list)
+  primary-piece-list
+  (delta_points-of-synthesize_delta (fs-frame-piece state)))
+
+;; method II
+
+(defun evaluation-value-by-remain-edges (state primary-piece-list)
+  ;;primaries
+  (let* ((frame-piece (fs-frame-piece state))
+         (frame-edges (length (piece-coord-points frame-piece)))
+         (remain-pieces (list-of-unused-primary-piece-list-of-synthesized-piece
+                         frame-piece primary-piece-list))
+         (remain-primes-edges (apply #'+ (mapcar #'(lambda (p) (length (piece-coord-points p)))
+                                                 remain-pieces)))
+         (remain-edges (+ frame-edges remain-primes-edges)))
+    (- (* 50 50) remain-edges)))
+
+
+;; method III
+
+(defun piece-apply-recursive (func piece 
+                              &key
+                                (bottom #'(lambda (piece trm) piece trm nil))
+                                (transformation-matrixes-reversed (list *identity-matrix-3x3*)))
+  (cond ((primary-piece-p piece)
+         (funcall bottom
+                  piece
+                  (reduce #'matrix3x3-product (reverse transformation-matrixes-reversed))))
+        ((and (piece-p (transform-piece (piece-transform1 piece)))
+              (piece-p (transform-piece (piece-transform2 piece))))
+         (funcall func
+                  (piece-apply-recursive
+                   func
+                   (transform-piece (piece-transform1 piece))
+                   :bottom bottom
+                   :transformation-matrixes-reversed
+                   (cons (transform-transformation-matrix (piece-transform1 piece))
+                         transformation-matrixes-reversed))
+                  
+                  (piece-apply-recursive
+                   func
+                   (transform-piece (piece-transform2 piece))
+                   :bottom bottom
+                   :transformation-matrixes-reversed
+                   (cons (transform-transformation-matrix (piece-transform2 piece))
+                         transformation-matrixes-reversed))))
+        (t (warn "something srong for piece apply-recursive.")
+           nil)))
+        
+
+(defun synthesized-segments-of-piece (piece)
+  
+  )
+
+#|
+(defun synthesized-coord-points-of-piece (piece)
+  (let* ((root-points
+           (piece-coord-points piece))
+         (all-points
+           (piece-apply-recursive #'append piece
+                                  :bottom #'(lambda (p tr)
+                                              (shape-coord-points
+                                               (transform-shape-by-transformation-matrix
+                                                (piece-shape p)
+                                                tr)))))
+         (synthesized-points
+           (remove-if #'(lambda (cpa_n) (member cpa_n root-points :test #'vec3-ser=))
+                      all-points)))
+    (remove-duplicates synthesized-points :test #'vec3-ser=)))
+|#
+
+(defun synthesized-angles-of-piece (piece)
+  (let* ((root-angles
+           (piece-angle-list piece))
+         (all-angles
+           (piece-apply-recursive #'append piece
+                                  :bottom #'(lambda (p tr)
+                                              tr
+                                              (piece-angle-list p))))
+         (synthesized-angles
+           (remove-if #'(lambda (cpa_n) (member cpa_n root-angles :test #'ser=))
+                      all-angles)))
+    (remove-duplicates synthesized-angles :test #'ser=)))
+
+
+
+(defun evaluation-value-by-partial-synthesized_delta (delta primary-piece-list)
+  
+  )
+
+(defun evaluation-value-by-partial-synthesized_sum (state primary-piece-list)
+  
+  )
