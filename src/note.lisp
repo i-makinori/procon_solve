@@ -23,6 +23,15 @@
 
 #|
 
+(ql:quickload :puzzle-1617)
+(in-package :puzzle-1617)
+(time (progn (search-solution-grad-beam (nth 4 *problem-list-official*)) nil))
+
+|#
+
+
+#|
+
 ;;;; some tests
 
 (time (progn (search-solution-from-prime-pieces

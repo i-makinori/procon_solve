@@ -49,7 +49,8 @@
   ;; lim (n->infinity) => (f(n)->C) , C such as +2
   (setf (fs-evaluation-value fs)
         ((lambda (v)
-           (* v (/ 1 (+ 1 0.10))))
+           ;;(* v (/ 1 (+ 1 0.10))))
+           (* v (expt (exp 1) -1/3)))
          (fs-evaluation-value fs)))
   fs)
 
@@ -122,9 +123,10 @@
   ;; todo: treatment congruent piece state between each beam-stack and gradient-stack
   (let* ((states-of-next-step_fat
            (states-of-next-step-from-1-state state-this-step primary-piece-list))
+         #|
          (states-of-next-step
            states-of-next-step_fat))
-           #|
+|#
          ;; congruent filter, its beam and past gradient-stack
          (states-of-next-step
            (remove-if #'(lambda (state-this-step_i)
@@ -133,7 +135,7 @@
                                                             (fs-frame-piece filter-state_j)))
                                 additional-filter))
                       states-of-next-step_fat)))
-|#
+
     states-of-next-step))
 
 (defun next-gradient-stack (next-stack-of-this-step previous-gradient-stack)
@@ -258,10 +260,16 @@
          (frame-pieces   (remove-if-not #'(lambda (p) (shape-minus-p (piece-pm-sign p)))
                                         primary-pieces)))
     ;; variables
+    #|
     (init-meta-params primary-pieces
                       :iter-max (ceiling (* (length whole-primary-piece-list) 3))
                       :stack-width-const-1 (ceiling (* (length whole-primary-piece-list) 3/2))
                       :beam-width 6)
+    |#
+    (init-meta-params primary-pieces
+                      :iter-max (ceiling (* (length whole-primary-piece-list) 6/3))
+                      :stack-width-const-1 (ceiling (* (length whole-primary-piece-list) 7/2))
+                      :beam-width 12)
 
     ;; handle problem forms
     (cond
