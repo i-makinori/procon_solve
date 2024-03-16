@@ -249,7 +249,7 @@
              primary-piece-list next-gradient-stack))
            ((state-is-solution-p (car next-stack-of-this-step))
             ;; car is solution, return all states of its beam.
-            next-stack-of-this-step)
+            (values next-stack-of-this-step gradient-stack))
            (t ;; search with next beam
             (search-solution-aux-grad-beam (append rest-queue (list next-beam-of-this-step))
                                            primary-piece-list next-gradient-stack)))
@@ -292,12 +292,11 @@
               (beam-queue_t1
                 (generate-initial-beams *beam-width* stack_t1))
               (gradient-stack_t0
-                (insert-state-list-into-stack-by-grad stack_t1 '()))
-              ;; search solution in tree by beam with gradient-stack
-              (solution-and-paths (search-solution-aux-grad-beam
-                                   beam-queue_t1 none-frame-pieces gradient-stack_t0))
-              ;; solution piece list
-              (solution-piece-list (mapcar #'(lambda (s) (fs-frame-piece s)) solution-and-paths)))
-         (write-piece-list-as-html-from-fs-stacks-for-grad-beam solution-and-paths '())
-         solution-piece-list
-         )))))
+                (insert-state-list-into-stack-by-grad stack_t1 '())))
+         (multiple-value-bind (solution-and-paths gradient-stack)
+             (search-solution-aux-grad-beam
+              beam-queue_t1 none-frame-pieces gradient-stack_t0)
+           (write-piece-list-as-html-from-fs-stacks-for-grad-beam
+            solution-and-paths gradient-stack)
+           (mapcar #'(lambda (s) (fs-frame-piece s)) solution-and-paths)))
+         ))))

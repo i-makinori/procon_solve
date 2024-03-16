@@ -82,8 +82,9 @@
   (setf *step-function*
         ;;#'all-synthesizeable-patterns-of-pieces-to-frame
         ;;#'all-synthesizeables-of-pieces-to-piece_del-if-e-jam-edge
-        ;;#'rare-synthesizeables-of-pieces-to-piece
-        #'rare-synthesizeables-of-pieces-to-piece-_del-if-e-jam-edge
+        #'rare-synthesizeables-of-pieces-to-piece
+        ;;#'rare-synthesizeables-of-pieces-to-piece-_del-if-e-jam-edge
+        ;;#'rare-synthesizeables-of-pieces-to-piece-_del-if-e-jam-edge-take-only-rare-synth
         )   ;;"step function to get next pieces"
 
   (setf *evaluation-function*

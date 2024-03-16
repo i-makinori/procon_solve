@@ -123,43 +123,43 @@
                          transformation-matrixes-reversed))))
         (t (warn "something srong for piece apply-recursive.")
            nil)))
-        
-
-(defun synthesized-segments-of-piece (piece)
-  
-  )
 
 #|
-(defun synthesized-coord-points-of-piece (piece)
-  (let* ((root-points
-           (piece-coord-points piece))
-         (all-points
-           (piece-apply-recursive #'append piece
-                                  :bottom #'(lambda (p tr)
-                                              (shape-coord-points
-                                               (transform-shape-by-transformation-matrix
-                                                (piece-shape p)
-                                                tr)))))
-         (synthesized-points
-           (remove-if #'(lambda (cpa_n) (member cpa_n root-points :test #'vec3-ser=))
-                      all-points)))
-    (remove-duplicates synthesized-points :test #'vec3-ser=)))
-|#
+(defun f-synthesized-*-of-piece 
+    (listing-function &optional
+                        (testing-function #'ser=)
+                        (bottom-function #'(lambda (p tr) tr (funcall listing-function p))))
+  (lambda (piece)
+    (let* ((list-of-root-*
+             (funcall listing-function piece)
+           (list-of-all-*
+             (piece-apply-recursive #'append piece
+                                    :bottom bottom-function))
+           (synthesized-angles
+             (remove-if #'(lambda (cpa_n) (member cpa_n list-of-root-* :test testing-function))
+                        list-of-all-*)))
+      (remove-duplicates synthesized-angles :test testing-function))))
+
 
 (defun synthesized-angles-of-piece (piece)
-  (let* ((root-angles
-           (piece-angle-list piece))
-         (all-angles
-           (piece-apply-recursive #'append piece
-                                  :bottom #'(lambda (p tr)
-                                              tr
-                                              (piece-angle-list p))))
-         (synthesized-angles
-           (remove-if #'(lambda (cpa_n) (member cpa_n root-angles :test #'ser=))
-                      all-angles)))
-    (remove-duplicates synthesized-angles :test #'ser=)))
+  (funcall (f-synthesized-*-of-piece #'piece-angle-list #'ser=)
+           piece))
 
+(defun synthesized-coord-points-of-piece (piece)
+  (funcall (f-synthesized-*-of-piece
+            ;;#'piece-coord-points
+            #'(lambda (p tr)
+                (shape-coord-points
+                 (transform-shape-by-transformation-matrix (piece-shape p) tr))))
+           #'vec3-ser=
+            #'(lambda (p tr)
+                (shape-coord-points
+                 (transform-shape-by-transformation-matrix (piece-shape p) tr))))
+           piece))
 
+(defun synthesized-segments-of-piece (piece)
+  (funcall (f-synthesized-*-of-piece #'piece-
+  )
 
 (defun evaluation-value-by-partial-synthesized_delta (delta primary-piece-list)
   
@@ -168,3 +168,4 @@
 (defun evaluation-value-by-partial-synthesized_sum (state primary-piece-list)
   
   )
+|#

@@ -200,12 +200,15 @@
       ((piece-nth-point-exist-duplicated-point-p (vvsy-nc frame-vvsy) frame-piece)
        ;; diverg by duplicated point
        `((:synthesizes . ,all-synthesize-patterns) (:state . 'sy-vvsy-diverg)))
+      ;;((and     (eq dict-angle-state 'all-paterns)  (eq dict-length^2-state 'all-paterns))
+      ;; ;; conver
+      ;;`((:synthesizes . ,all-synthesize-patterns) (:state . 'sy-vvsy-conver)))
+      ((or     (eq dict-angle-state 'all-paterns)  (eq dict-length^2-state 'all-paterns))
+       ;; conver
+       `((:synthesizes . ,all-synthesize-patterns) (:state . 'sy-vvsy-conver)))
       ((or     t                                   (eq dict-length^2-state 'divergence))
        ;; diverg
       `((:synthesizes . ,all-synthesize-patterns) (:state . 'sy-vvsy-diverg)))
-      ((and     (eq dict-angle-state 'all-paterns)  (eq dict-length^2-state 'all-paterns))
-       ;; conver
-       `((:synthesizes . ,all-synthesize-patterns) (:state . 'sy-vvsy-conver)))
       (t 
        ;; diverg
       `((:synthesizes . ,all-synthesize-patterns) (:state . 'sy-vvsy-diverg)))
@@ -281,6 +284,87 @@
                                 (assocdr :synthesizes l_n))
                             synthes-and-state-list-of-each-edges))))))
 
+
+;;;
+
+#|
+(defun take-while (pred list)
+  (loop for x in list
+        while (funcall pred x)
+        collect x))
+
+(defun make-next-choice-by-sort-and-flat-sy-list-list (list-list-of-synthesizes)
+  (let* ((sort-by-length
+           (sort list-list-of-synthesizes
+                 #'(lambda (lis1 lis2) (< (length lis1) (length lis2)))))
+         (head-len (length (nth 0 sort-by-length)))
+         (low-choices
+           (flatten (take-while #'(lambda (sy-list)
+                                    (= (length sy-list) head-len))
+                                sort-by-length))))
+    (cond ((= 1 head-len)
+           (first-n 10 low-choices))
+          (t
+           (identity low-choices)))))
+
+(defun choice-nexts-synthesizes (state-synthesizes-list-for-each-points)
+  ;; inner evaluation value which uses results of partial problem
+  (let* ((st-sy-list state-synthesizes-list-for-each-points)
+         (conver-list
+           (remove nil (mapcar #'(lambda (st-sy)
+                                   (cond ((eq (assocdr :state st-sy) 'sy-vvsy-conver)
+                                          (assocdr :synthesizes st-sy))
+                                         (t nil)))
+                               st-sy-list)))
+         (diverg-list 
+           (remove nil (mapcar #'(lambda (st-sy)
+                                   (cond ((eq (assocdr :state st-sy) 'sy-vvsy-diverg)
+                                          (assocdr :synthesizes st-sy))
+                                         (t nil)))
+                               st-sy-list))))
+    (cond ((not (null conver-list))
+           (make-next-choice-by-sort-and-flat-sy-list-list conver-list))
+          ((not (null diverg-list))
+           ;;(make-next-choice-by-sort-and-flat-sy-list-list diverg-list))
+           diverg-list)
+          (t
+           '()))
+    ;;(format t "~A~%" (length conver-list))
+    ;;(append (make-next-choice-by-sort-and-flat-sy-list-list conver-list))
+    ;;(make-next-choice-by-sort-and-flat-sy-list-list conver-list)))
+  ))
+
+(defun rare-synthesizeables-of-pieces-to-piece-_del-if-e-jam-edge-take-only-rare-synth
+    (frame-piece piece-list primary-pieces)
+  ;;
+  ;; solve partial problem
+  (update-dictionary-by-new-piece! frame-piece primary-pieces
+                                   *partial-angle-dictionary* *partial-length^2-dictionary*)
+
+  ;;
+  ;; synthesize which uses solution of partial problem, filters jam edge synth
+  (let* ((avaiable-vvsy-s (sy-select-parameters-from-piece-list piece-list))
+         ;;
+         (synthes-and-state-list-of-each-edges
+           (mapcar
+            #'(lambda (nth)
+                (synthesizeable-patterns-of-specific-frame-nth-with-vvsy-remove-if-jam
+                 frame-piece nth primary-pieces avaiable-vvsy-s
+                 *partial-angle-dictionary* *partial-length^2-dictionary*))
+            (from-m-to-n-list 0 (1- (length (piece-points frame-piece)))))))
+    (cond ((find-if #'(lambda (l_n)
+                        #|(format t "~A, ~A~%" (assocdr :state l_n)
+                        (length (assocdr :synthesizes l_n)))|# ; for test
+                        (and (eq   (assocdr :state l_n) 'sy-vvsy-conver)
+                             (null (assocdr :synthesizes l_n)))
+                        #|(null (assocdr :synthesizes l_n))|# ;for test
+                        #|nil|# ; for test of cut
+                        )
+                    synthes-and-state-list-of-each-edges)
+           nil)
+          (t
+           (choice-nexts-synthesizes synthes-and-state-list-of-each-edges)))))
+  |# 
 
 ;;;
 ;;; set theoretical manipulations
