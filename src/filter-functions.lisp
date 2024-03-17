@@ -265,7 +265,7 @@
 ;; old implement.      args synthed-piece-list
 ;; where new implement args state-list
 
-#|
+
 (defun remove-congruent-from-synthesized-piece-list (synthesized-piece-list)
   (let ((lis synthesized-piece-list))
     (cond ((null lis) '())
@@ -275,6 +275,7 @@
                                    (detect-piece-congruent (car lis) p))
                                (cdr lis))))))))
 
+#|
 (defun remove-no-future-shaped-piece-from-synthesized-piece-list
     (synthesized-piece-list primary-piece-list)
   (remove-if

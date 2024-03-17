@@ -321,30 +321,38 @@
   (function-rare-synthesizeables-_del-if-e-jam-edge
    #'(lambda (synthes-and-state-list-of-each-edges)
     ;; choice from rare synthesize
-    (let*
-        ((sort-by-synth-able-patterns
-           (sort
-            synthes-and-state-list-of-each-edges
-            #'(lambda (l_n1 l_n2)
-                (< (length (assocdr :synthesizes l_n1))
-                   (length (assocdr :synthesizes l_n2))))))
-         (sorted-conver
-           (flatten (mapcar #'(lambda (l_n) 
-                                (if (eq *sy-vvsy-conver* (assocdr :state l_n))
-                                    (assocdr :synthesizes l_n) nil))
-                            sort-by-synth-able-patterns)))
-         (sorted-diverg
-           (flatten (mapcar
-                     #'(lambda (l_n) 
-                         (if (eq *sy-vvsy-diverg* (assocdr :state l_n))
-                             (assocdr :synthesizes l_n)))
-                     sort-by-synth-able-patterns))))
-      (cond (;;(not (null sorted-conver))
-             (<= 8 (length sorted-conver))
-             (format t "take convers")
-             (first-n 8 sorted-conver))
+    (let* ((sort-by-synth-able-patterns
+             (sort synthes-and-state-list-of-each-edges
+                   #'(lambda (l_n1 l_n2)
+                       (< (length (assocdr :synthesizes l_n1))
+                          (length (assocdr :synthesizes l_n2))))))
+           (exist-unique-synthesize-p
+             (find-if #'(lambda (l_n)
+                          (and (eq *sy-vvsy-conver* (assocdr :state l_n))
+                               (= 1 (length (remove-congruent-from-synthesized-piece-list
+                                             (assocdr :synthesizes l_n))))))
+                      synthes-and-state-list-of-each-edges))
+           (sorted-conver
+             (remove-congruent-from-synthesized-piece-list
+              (flatten (mapcar #'(lambda (l_n) 
+                                   (if (eq *sy-vvsy-conver* (assocdr :state l_n))
+                                       (assocdr :synthesizes l_n) nil))
+                               sort-by-synth-able-patterns))))
+           (sorted-diverg
+             (remove-congruent-from-synthesized-piece-list
+              (flatten (mapcar
+                        #'(lambda (l_n) 
+                            (if (eq *sy-vvsy-diverg* (assocdr :state l_n))
+                                (assocdr :synthesizes l_n) nil))
+                        sort-by-synth-able-patterns)))))
+      (cond (exist-unique-synthesize-p
+             (format t "take unique~%")
+             (first-n 1 sorted-conver))
+            ((<= 4 (length sorted-conver))
+             (format t "take convers~%")
+             (first-n 4 sorted-conver))
             (t
-             (format t "take diverg")
+             (format t "take diverg~%")
              (first-n 10 (append sorted-conver sorted-diverg)))
             )))))
 
