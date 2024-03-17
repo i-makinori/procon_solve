@@ -275,6 +275,12 @@
                  frame-piece nth primary-pieces avaiable-vvsy-s
                  *partial-angle-dictionary* *partial-length^2-dictionary*))
             (from-m-to-n-list 0 (1- (length (piece-points frame-piece)))))))
+    (format t "~A~%"
+            (mapcar #'(lambda (l_n)
+                        (format nil "~A:~A ,"
+                                (if (eq (assocdr :state l_n) *sy-vvsy-conver*) "con" "div")
+                                (length (assocdr :synthesizes l_n))))
+                    synthes-and-state-list-of-each-edges))
     (cond ((find-if #'(lambda (l_n)
                         (and (eq   (assocdr :state l_n) *sy-vvsy-conver*)
                              (null (assocdr :synthesizes l_n))))
@@ -283,10 +289,29 @@
            nil)
           (t
            (flatten (mapcar #'(lambda (l_n)
-                                (assocdr :synthesizes l_n))
-                            synthes-and-state-list-of-each-edges))))
-    ))
+                                    (assocdr :synthesizes l_n))
+                            synthes-and-state-list-of-each-edges))))))
 
+#|
+(defun hoge ()
+  ;; filter by converge or diverge
+  (let ((only-conver
+          (flatten (mapcar #'(lambda (l_n)
+                               (if (eq (assocdr :state l_n) *sy-vvsy-conver*)
+                                   (assocdr :synthesizes l_n)
+                                   nil))
+                           synthes-and-state-list-of-each-edges)))
+        (only-diverg
+          (flatten (mapcar #'(lambda (l_n)
+                               (if (eq (assocdr :state l_n) *sy-vvsy-diverg*)
+                                   (assocdr :synthesizes l_n)
+                                   nil))
+                           synthes-and-state-list-of-each-edges))))
+    (cond ((not (null only-conver))
+           only-conver)
+          (t
+           (append only-conver only-diverg)))))
+|#
 
 
 

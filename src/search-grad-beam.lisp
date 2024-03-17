@@ -264,7 +264,7 @@
     (init-meta-params primary-pieces
                       :iter-max (ceiling (* (length unique-piece-list) 6/4))
                       :stack-width-const-1 (ceiling (* (length unique-piece-list) 5/2))
-                      :beam-width 12)
+                      :beam-width 24)
 
     ;; handle problem forms
     (cond
