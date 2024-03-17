@@ -72,7 +72,7 @@
   (setf *n-search-iter* 0) ;; variable
   (setf *n-search-iter-max* iter-max) ;; parameter
   ;; stack size
-  (setf *beam-stack-width-const* 200) ;; todo "max stack width for search of its beam"
+  (setf *beam-stack-width-const* 150) ;; todo "max stack width for search of its beam"
   (setf *fs-stackwidth-const* stack-width-const-1) ;; todo "max stack width for common storage"
   ;; beam param
   (setf *beam-current-index* 0)
@@ -94,37 +94,10 @@
 
   ;; partial problem parameters
   (setf *partial-width-limit*
-        ;;(expt (* 49 7 1/2) 2)
-        #|
-        ;; pattern^2 + C1
-        ;;(+ (expt (length (sy-select-parameters-from-piece-list primary-piece-list)) 2)
-        ;;10))
-        |#
-        
-        ;; num_combination(0, pattern) * C1 
-        #|
-        (*  ;; depth ~= (1 + 1) + 0.x 
-           (num-combination-sequence
-            1
-            (* 1/2
-               (length (sy-select-parameters-from-piece-list primary-piece-list)))))
-        |#
-        (* (num-combination-sequence 
-            1 (* 1/2 (length (sy-select-parameters-from-piece-list primary-piece-list))))
-           0.33)
-        
-        #|
-        (+ (num-combination-sequence
-            2 ;; Comb(2) ~= 3.X
-            (* 1/2
-               (+ 
-                (length (remove-duplicates 
-                         (flatten (mapcar #'piece-angle-list primary-piece-list))))
-                (length (remove-duplicates 
-                         (flatten (mapcar #'piece-segment-length^2-list primary-piece-list)))))))
-           100)
-        |#
-        )
+        (min 10000
+             (* (num-combination-sequence 
+                 1 (* 1/2 (length (sy-select-parameters-from-piece-list primary-piece-list))))
+                0.33)))
   (setf *partial-iter-limit* ;; todo: are there some better iter limit?
         ;;(ceiling (/ *partial-width-limit* 2))) 
         (* 1 *partial-width-limit*))
