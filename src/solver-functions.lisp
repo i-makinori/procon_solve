@@ -256,127 +256,99 @@
              (:state       . ,state-returns))))))
 
 
-(defun rare-synthesizeables-of-pieces-to-piece-_del-if-e-jam-edge 
+(defun function-rare-synthesizeables-_del-if-e-jam-edge
+    (selection-function-after-remove-jam)
+  (lambda (frame-piece piece-list primary-pieces)
+    ;;
+    ;; solve partial problem
+    (update-dictionary-by-new-piece! frame-piece primary-pieces
+                                     *partial-angle-dictionary* *partial-length^2-dictionary*)
+
+    ;;
+    ;; synthesize which uses solution of partial problem, filters jam edge synth
+    (let* ((avaiable-vvsy-s (sy-select-parameters-from-piece-list piece-list))
+           ;;
+           (synthes-and-state-list-of-each-edges
+             (mapcar
+              #'(lambda (nth)
+                  (synthesizeable-patterns-of-specific-frame-nth-with-vvsy-remove-if-jam
+                   frame-piece nth primary-pieces avaiable-vvsy-s
+                   *partial-angle-dictionary* *partial-length^2-dictionary*))
+              (from-m-to-n-list 0 (1- (length (piece-points frame-piece)))))))
+      (format t "~A~%"
+              (mapcar #'(lambda (l_n)
+                          (format nil "~A:~A ,"
+                                  (if (eq (assocdr :state l_n) *sy-vvsy-conver*) "con" "div")
+                                  (length (assocdr :synthesizes l_n))))
+                      synthes-and-state-list-of-each-edges))
+      (cond ((find-if #'(lambda (l_n)
+                          (and (eq   (assocdr :state l_n) *sy-vvsy-conver*)
+                               (null (assocdr :synthesizes l_n))))
+                      synthes-and-state-list-of-each-edges)
+             (format t "Cut~%")
+             nil)
+            (t
+             (funcall selection-function-after-remove-jam
+                      synthes-and-state-list-of-each-edges))))))
+
+
+
+(defun function-rare-synthesizeables-of-pieces-to-piece-_del-if-e-jam-edge ()
+  (function-rare-synthesizeables-_del-if-e-jam-edge
+   #'(lambda (synthes-and-state-list-of-each-edges)
+    (flatten (mapcar #'(lambda (l_n)
+                         (assocdr :synthesizes l_n))
+                     synthes-and-state-list-of-each-edges)))))
+
+(defun rare-synthesizeables-of-pieces-to-piece-_del-if-e-jam-edge
     (frame-piece piece-list primary-pieces)
-  ;;
-  ;; solve partial problem
-  (update-dictionary-by-new-piece! frame-piece primary-pieces
-                                   *partial-angle-dictionary* *partial-length^2-dictionary*)
-
-  ;;
-  ;; synthesize which uses solution of partial problem, filters jam edge synth
-  (let* ((avaiable-vvsy-s (sy-select-parameters-from-piece-list piece-list))
-         ;;
-         (synthes-and-state-list-of-each-edges
-           (mapcar
-            #'(lambda (nth)
-                (synthesizeable-patterns-of-specific-frame-nth-with-vvsy-remove-if-jam
-                 frame-piece nth primary-pieces avaiable-vvsy-s
-                 *partial-angle-dictionary* *partial-length^2-dictionary*))
-            (from-m-to-n-list 0 (1- (length (piece-points frame-piece)))))))
-    (format t "~A~%"
-            (mapcar #'(lambda (l_n)
-                        (format nil "~A:~A ,"
-                                (if (eq (assocdr :state l_n) *sy-vvsy-conver*) "con" "div")
-                                (length (assocdr :synthesizes l_n))))
-                    synthes-and-state-list-of-each-edges))
-    (cond ((find-if #'(lambda (l_n)
-                        (and (eq   (assocdr :state l_n) *sy-vvsy-conver*)
-                             (null (assocdr :synthesizes l_n))))
-                    synthes-and-state-list-of-each-edges)
-           (format t "Cut~%")
-           nil)
-          (t
-           (flatten (mapcar #'(lambda (l_n)
-                                    (assocdr :synthesizes l_n))
-                            synthes-and-state-list-of-each-edges))))))
-
-#|
-(defun hoge ()
-  ;; filter by converge or diverge
-  (let ((only-conver
-          (flatten (mapcar #'(lambda (l_n)
-                               (if (eq (assocdr :state l_n) *sy-vvsy-conver*)
-                                   (assocdr :synthesizes l_n)
-                                   nil))
-                           synthes-and-state-list-of-each-edges)))
-        (only-diverg
-          (flatten (mapcar #'(lambda (l_n)
-                               (if (eq (assocdr :state l_n) *sy-vvsy-diverg*)
-                                   (assocdr :synthesizes l_n)
-                                   nil))
-                           synthes-and-state-list-of-each-edges))))
-    (cond ((not (null only-conver))
-           only-conver)
-          (t
-           (append only-conver only-diverg)))))
-|#
-
+  (funcall
+   (function-rare-synthesizeables-of-pieces-to-piece-_del-if-e-jam-edge)
+   frame-piece piece-list primary-pieces))
 
 
 ;;; synthesize from low pattern VVSY angle and segments
+
 (defun rare-synthesizeables-of-pieces-to-piece-by-partial-problem-evaluations
     (frame-piece piece-list primary-pieces)
+  (funcall
+   (function-rare-synthesizeables-of-pieces-to-piece-by-partial-problem-evaluations)
+   frame-piece piece-list primary-pieces))
+
+
+(defun function-rare-synthesizeables-of-pieces-to-piece-by-partial-problem-evaluations ()
   ;; take n 10 of low pattern angle-segment VVSY synthesize
+  (function-rare-synthesizeables-_del-if-e-jam-edge
+   #'(lambda (synthes-and-state-list-of-each-edges)
+    ;; choice from rare synthesize
+    (let*
+        ((sort-by-synth-able-patterns
+           (sort
+            synthes-and-state-list-of-each-edges
+            #'(lambda (l_n1 l_n2)
+                (< (length (assocdr :synthesizes l_n1))
+                   (length (assocdr :synthesizes l_n2))))))
+         (sorted-conver
+           (flatten (mapcar #'(lambda (l_n) 
+                                (if (eq *sy-vvsy-conver* (assocdr :state l_n))
+                                    (assocdr :synthesizes l_n) nil))
+                            sort-by-synth-able-patterns)))
+         (sorted-diverg
+           (flatten (mapcar
+                     #'(lambda (l_n) 
+                         (if (eq *sy-vvsy-diverg* (assocdr :state l_n))
+                             (assocdr :synthesizes l_n)))
+                     sort-by-synth-able-patterns))))
+      (cond (;;(not (null sorted-conver))
+             (<= 8 (length sorted-conver))
+             (format t "take convers")
+             (first-n 8 sorted-conver))
+            (t
+             (format t "take diverg")
+             (first-n 10 (append sorted-conver sorted-diverg)))
+            )))))
 
-  ;;
-  ;; solve partial problem
-  (update-dictionary-by-new-piece! frame-piece primary-pieces
-                                   *partial-angle-dictionary* *partial-length^2-dictionary*)
 
-  ;;
-  ;; synthesize which uses solution of partial problem, filters jam edge synth
-  (let* ((avaiable-vvsy-s (sy-select-parameters-from-piece-list piece-list))
-         ;;
-         (synthes-and-state-list-of-each-edges
-           (mapcar
-            #'(lambda (nth)
-                (synthesizeable-patterns-of-specific-frame-nth-with-vvsy-remove-if-jam
-                 frame-piece nth primary-pieces avaiable-vvsy-s
-                 *partial-angle-dictionary* *partial-length^2-dictionary*))
-            (from-m-to-n-list 0 (1- (length (piece-points frame-piece)))))))
-    #|
-    (format t "~A~%"
-            (mapcar #'(lambda (l_n)
-                        (format nil "~A:~A ,"
-                                (if (eq (assocdr :state l_n) *sy-vvsy-conver*) "con" "div")
-                                (length (assocdr :synthesizes l_n))))
-                    synthes-and-state-list-of-each-edges))
-    |#
-    (cond ((find-if #'(lambda (l_n)
-                        (and (eq   (assocdr :state l_n) *sy-vvsy-conver*)
-                             (null (assocdr :synthesizes l_n))))
-                    synthes-and-state-list-of-each-edges)
-           (format t "Cut~%")
-           nil)
-          (t
-           ;; choice from rare synthesize
-           (let*
-               ((sort-by-synth-able-patterns
-                  (sort
-                   synthes-and-state-list-of-each-edges
-                   #'(lambda (l_n1 l_n2)
-                       (< (length (assocdr :synthesizes l_n1))
-                          (length (assocdr :synthesizes l_n2))))))
-                (sorted-conver
-                  (flatten (mapcar #'(lambda (l_n) 
-                                       (if (eq *sy-vvsy-conver* (assocdr :state l_n))
-                                           (assocdr :synthesizes l_n) nil))
-                                   sort-by-synth-able-patterns)))
-                (sorted-diverg
-                  (flatten (mapcar
-                            #'(lambda (l_n) 
-                                (if (eq *sy-vvsy-diverg* (assocdr :state l_n))
-                                    (assocdr :synthesizes l_n)))
-                            sort-by-synth-able-patterns))))
-             (cond (;;(not (null sorted-conver))
-                    (<= 8 (length sorted-conver))
-                    (format t "take convers")
-                    (first-n 8 sorted-conver))
-                   (t
-                    (format t "take diverg")
-                    (first-n 10 (append sorted-conver sorted-diverg)))
-))))))
 
 ;;; fusion method
 
