@@ -63,9 +63,10 @@
   (funcall tester (apply #'+ value-list) objective-value))
 
 
-#|
+
 ;; functional version
 
+#|
 (defun solve-partial-problem-aux (objective-value choice-value-list
                                   this-depth-queue next-depth-queue solutions
                                   current-iter)
@@ -98,12 +99,11 @@
             (append next-depth-queue step-next-depth-queue)
             (append solutions step-solutions)
             (+ 1 current-iter))))))
-
-
 |#
+
 ;; loop version
 
-#|
+
 (defun solve-partial-problem-aux (objective-value choice-value-list
                                   first-queue _bottom1_ first-solution _bottom3)
   _bottom1_ _bottom3
@@ -136,10 +136,10 @@
                ;;step-solutions
                ))
     (values solutions end-state)))
-|#
 
 
 ;; loop wave version
+#|
 (defun solve-partial-problem-aux (objective-value choice-value-list
                                   first-queue _bottom1_ first-solution _bottom3)
   _bottom1_ _bottom3
@@ -186,7 +186,7 @@
                 (setf queue_t+1 (append step-next-depth-queue queue_t+1))
                 (setf solutions (append solutions step-solutions)))))
     (values solutions end-state)))
-
+|#
 
 (defun num-combination-sequence (m n)
   ;; calc number of combination.

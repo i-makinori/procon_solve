@@ -74,23 +74,6 @@
 (defun piece-id-tml-string-describe (piece)
   (format nil "describe_~A" (piece-id-tml-string piece)))
 
-#|
-(defun piece-into-svg-element-aux (piece)
-  (if (null piece)
-      ""
-      (let ((current-text (shape-svg-element-text (piece-shape piece))))
-        (cond ((equal 'leaf (piece-leaf-or-synthed piece))
-               ;;current-text
-               "")
-              (t
-               (format nil "~A~A~A"
-                       current-text
-                       (piece-into-svg-element-aux
-                        (transform-piece (piece-transform1 piece)))
-                       (piece-into-svg-element-aux
-                        (transform-piece (piece-transform2 piece)))))))))
-|#
-
 (defun piece-into-svg-element-aux1 (piece transformation-matrixes-reversed)
   (cond ((null piece) "")
         ((primary-piece-p piece)

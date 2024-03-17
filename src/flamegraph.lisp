@@ -23,11 +23,6 @@
   (flamegraph:save-flame-graph
       (*flame-file*)
     ;;(profile-easy-problem)
-    #|
-    (time (progn (search-solution-from-prime-pieces
-    (nth 2 *problem-list*))
-    nil))
-    |#
     (time (progn (search-solution-grad-beam
                   (nth 5 *problem-list*))
                  nil))

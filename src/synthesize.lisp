@@ -37,26 +37,6 @@
     (identity      (whole-set-of-point-and-edge-selections-piece
                     piece2 :piece-by-nth_point-only nil)))))
 
-#|
-(defun whole-set-of-point-and-edge-selections-piece-piece
-    (piece1 piece2 &key (piece1-by-nth_point-only nil))
-  (let ((combinations
-          ;; (or {A[n]} (A_l)) X (B_l) X {A+, A-} X {B+, B-}
-          ;; where (A_l), (B_l) types of {0,1, ... , (n_points-1)}.
-          (cartesian
-           (if piece1-by-nth_point-only
-               (list (mod piece1-by-nth_point-only (length (piece-points piece1)))) ;; {A[n]}
-               (from-m-to-n-list 0 (1-             (length (piece-points piece1)))) ;; (A_l)
-               )
-           (from-m-to-n-list 0 (1- (length (piece-points piece2))))
-           (list '+1 '-1)
-           (list '+1 '-1))))
-  (mapcar
-   #'(lambda (cp12_pm12) ;; [cp1, cp2, pm1, pm2]
-       (make-sy-select :p1  piece1 :n1 (nth 0 cp12_pm12) :pm1 (nth 2 cp12_pm12)
-                       :p2  piece2 :n2 (nth 1 cp12_pm12) :pm2 (nth 3 cp12_pm12)))
-   combinations)))
-|#
 
 ;;; note: test
 #|
@@ -368,9 +348,7 @@
         (cond (;; on Lined :(-1):--:(0):--:(1): => (1)--(2)--...
                (point-on-line-segment-detection pp+0 pp-1 pp+1)
                (identity (ommit-edge-points-for-point-on-line-segment
-                          (cdr coord-points)
-                          pp-1 #| save starting point of line |#
-                          pp_first)))
+                          (cdr coord-points) pp-1 pp_first)))
               (t
                (cons pp+0 (ommit-edge-points-for-point-on-line-segment
                            (cdr coord-points)

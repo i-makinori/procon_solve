@@ -168,13 +168,6 @@
 ;; reference of transformation matrix.
 ;; https://ch.mathworks.com/help/images/matrix-representation-of-geometric-transformations.html
 
-#|
-(defun transform-parallel-move (transform-x transform-y)
-  (matrix3x3 1 0 transform-x
-             0 1 transform-y
-             0 0 1))
-|#
-
 (defun transform-parallel-move (vec-moves)
   (matrix3x3 1 0 (vec3-x vec-moves)
              0 1 (vec3-y vec-moves)

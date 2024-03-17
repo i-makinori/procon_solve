@@ -257,7 +257,8 @@
 
 (defun search-solution-grad-beam (whole-primary-piece-list)
   (let* (;; search easy before search frame.
-         (unique-piece-list (search-unique-synthesize-bfs whole-primary-piece-list))
+         ;;(unique-piece-list (search-unique-synthesize-bfs whole-primary-piece-list))
+         (unique-piece-list (identity whole-primary-piece-list))         
          ;; params
          ;;(primary-pieces (remove-if-not #'primary-piece-p unique-piece-list))
          (primary-pieces unique-piece-list)

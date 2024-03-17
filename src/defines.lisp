@@ -142,3 +142,53 @@
                       :segment-length^2-list segment-length^2-list
                       :angle-list angle-list)))
   
+
+
+
+;;;
+;;; set theoretical manipulations
+
+(defun primary-piece-p (piece-common)
+  ;; piece- null?
+  (eq 'leaf (piece-leaf-or-synthed piece-common)))
+
+(defun frame-piece-of-primary-list (primary-piece-list)
+  (find-if #'(lambda (p) (shape-minus-p (piece-shape p))) primary-piece-list))
+
+(defun list-of-primary-piece-list-of-synthesized-piece (synthesized-piece)
+  (labels ((aux (p_n)
+             (cond ((primary-piece-p p_n) (list p_n))
+                   (t (append
+                       (if (piece-transform1 p_n)
+                           (aux (transform-piece (piece-transform1 p_n)))
+                           nil)
+                       (if (piece-transform2 p_n)
+                           (aux (transform-piece (piece-transform2 p_n)))
+                           nil))))))
+    (aux synthesized-piece)))
+
+(defun list-of-piece-of-synthesized-piece (synthesized-piece)
+  (labels ((aux (p_n)
+             (cond ((null p_n) nil)
+                   (t (append
+                       (list p_n)
+                       (if (piece-transform1 p_n)
+                           (aux (transform-piece (piece-transform1 p_n)))
+                           nil)
+                       (if (piece-transform2 p_n)
+                           (aux (transform-piece (piece-transform2 p_n)))
+                           nil))))))
+    (aux synthesized-piece)))
+
+(defun list-of-unused-primary-piece-list-of-synthesized-piece (synthesized-piece primary-piece-list)
+  (set-difference ;; set of (original - used)
+   primary-piece-list
+   (list-of-primary-piece-list-of-synthesized-piece synthesized-piece)
+   :test #'(lambda (p1 p2) (equal (piece-id p1) (piece-id p2)))))
+
+(defun list-of-unused-piece-list-of-piece (piece piece-list)
+  (set-difference ;; set of (original - used)
+   piece-list
+   (list-of-piece-of-synthesized-piece piece)
+   :test #'(lambda (p1 p2) (equal (piece-id p1) (piece-id p2)))))
+
