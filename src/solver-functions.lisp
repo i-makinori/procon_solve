@@ -285,7 +285,16 @@
                             synthes-and-state-list-of-each-edges))))))
 
 
-;;;
+
+
+;; the VVSY is low patterns and of angle and length^2, evalueation is high
+(defun synthesizeables-of-pieces-to-piece-by-partial-problem-evaluations
+    (frame-piece piece-list primary-pieces)
+
+  )
+
+
+;;; something search method
 
 #|
 (defun take-while (pred list)

@@ -38,6 +38,7 @@
              (:file "evaluation-functions")
              (:file "filter-functions")
              ;; solver
+             (:file "search-unique-synthesize")
              (:file "search-dfs")
              (:file "search-beam")
              (:file "search-grad-beam")

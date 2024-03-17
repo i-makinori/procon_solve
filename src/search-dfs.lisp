@@ -102,11 +102,16 @@
         |#
         
         ;; num_combination(0, pattern) * C1 
+        #|
         (*  ;; depth ~= (1 + 1) + 0.x 
            (num-combination-sequence
             1
             (* 1/2
                (length (sy-select-parameters-from-piece-list primary-piece-list)))))
+        |#
+        (* (num-combination-sequence 
+            1 (* 1/2 (length (sy-select-parameters-from-piece-list primary-piece-list))))
+           0.33)
         
         #|
         (+ (num-combination-sequence
@@ -152,6 +157,7 @@
            (filter-fs-list fs-all-combinations state-this-step))
          ;; stack of states
          (states-of-next-step spl-filtered))
+    (format t "remains: ~A: ~A~%" (length fs-all-combinations) (length spl-filtered))
     states-of-next-step))
 
 (defun next-state-stack (states-new states-rest)

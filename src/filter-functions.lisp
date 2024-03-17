@@ -72,7 +72,7 @@
 
 ;;; detect congruent of piece and piece call
 
-(defun detect-piece-congruent (piece1 piece2)
+(defun detect-piece-congruent (piece1 piece2 &optional (shape-congruent-only-p nil))
   ;; detect piece1 === piece2
   (and
    ;; == pm_sign
@@ -82,8 +82,9 @@
    (= (length (piece-coord-points piece1))
       (length (piece-coord-points piece2)))
    ;; == primary piecese which composes its piece.
-   (set-equal (mapcar #'piece-id (list-of-primary-piece-list-of-synthesized-piece piece1))
-              (mapcar #'piece-id (list-of-primary-piece-list-of-synthesized-piece piece2)))
+   (and (not shape-congruent-only-p)
+        (set-equal (mapcar #'piece-id (list-of-primary-piece-list-of-synthesized-piece piece1))
+                   (mapcar #'piece-id (list-of-primary-piece-list-of-synthesized-piece piece2))))
 
    ;; new implement
    (or
@@ -263,8 +264,8 @@
 
 ;; old implement.      args synthed-piece-list
 ;; where new implement args state-list
-#|
 
+#|
 (defun remove-congruent-from-synthesized-piece-list (synthesized-piece-list)
   (let ((lis synthesized-piece-list))
     (cond ((null lis) '())

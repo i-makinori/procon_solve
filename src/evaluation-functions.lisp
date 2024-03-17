@@ -93,7 +93,13 @@
     (- (* 50 50) remain-edges)))
 
 
+
 ;; method III
+
+;; (defun evaluation-value-by-remain-edge-combinations ()
+
+
+;; method IV
 
 (defun piece-apply-recursive (func piece 
                               &key
