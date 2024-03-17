@@ -200,10 +200,9 @@
                   synthable-angles nil synthable-length^2s nil))
              primary-vvsy-s))))
     (cond
-      ;; bug? 重複点 todo
-      ;;((not (piece-nth-point-exist-duplicated-point-p (vvsy-nc frame-vvsy) frame-piece))
+      ((piece-nth-point-exist-duplicated-point-p (vvsy-nc frame-vvsy) frame-piece)
        ;; diverg by duplicated point
-      ;;`((:synthesizes . ,all-synthesize-patterns) (:state . ,*sy-vvsy-diverg*)))
+        `((:synthesizes . ,all-synthesize-patterns) (:state . ,*sy-vvsy-diverg*)))
       ((or     (eq dict-angle-state 'all-paterns)  (eq dict-length^2-state 'all-paterns))
        ;; conver
        `((:synthesizes . ,all-synthesize-patterns) (:state . ,*sy-vvsy-conver*)))
