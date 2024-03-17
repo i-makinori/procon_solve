@@ -82,9 +82,9 @@
   (setf *step-function*
         ;;#'all-synthesizeable-patterns-of-pieces-to-frame
         ;;#'all-synthesizeables-of-pieces-to-piece_del-if-e-jam-edge
-        ;;#'rare-synthesizeables-of-pieces-to-piece
-        #'rare-synthesizeables-of-pieces-to-piece-_del-if-e-jam-edge
-        ;;#'rare-synthesizeables-of-pieces-to-piece-_del-if-e-jam-edge-take-only-rare-synth
+        #'rare-synthesizeables-of-pieces-to-piece
+        ;#'rare-synthesizeables-of-pieces-to-piece-_del-if-e-jam-edge
+        ;#'synthesizeables-by-fusuon-method-for-stuffing ;; for debug
         )   ;;"step function to get next pieces"
 
   (setf *evaluation-function*
@@ -94,13 +94,13 @@
 
   ;; partial problem parameters
   (setf *partial-width-limit*
-        (max 8000
+        (max 4000
              (* (num-combination-sequence 
                  1 (* 1/2 (length (sy-select-parameters-from-piece-list primary-piece-list))))
                 0.33)))
   (setf *partial-iter-limit* ;; todo: are there some better iter limit?
         ;;(ceiling (/ *partial-width-limit* 2))) 
-        (* 6 *partial-width-limit*))
+        (* 3 *partial-width-limit*))
   ;;; dictionaries
   (setf *partial-angle-dictionary* (make-dictionary))
   (setf *partial-length^2-dictionary* (make-dictionary))

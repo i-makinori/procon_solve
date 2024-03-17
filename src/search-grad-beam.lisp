@@ -123,10 +123,6 @@
   ;; todo: treatment congruent piece state between each beam-stack and gradient-stack
   (let* ((states-of-next-step_fat
            (states-of-next-step-from-1-state state-this-step primary-piece-list))
-         #|
-         (states-of-next-step
-           states-of-next-step_fat))
-|#
          ;; congruent filter, its beam and past gradient-stack
          (states-of-next-step
            (remove-if #'(lambda (state-this-step_i)

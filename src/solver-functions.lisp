@@ -289,3 +289,26 @@
   )
 
 
+;;; fusion method
+
+#|
+;;(setf *step-function* synthesizeables-by-fusuon-method-for-stuffing)
+
+(defun synthesizeables-by-fusuon-method-for-stuffing
+    (frame-piece piece-list primary-pieces)
+  (cond ((> 3 (length piece-list))
+         (format t "stuffing~%")
+         (sleep 0.1)
+         (let ((rests-patterns
+                 (all-synthesizeable-patterns-of-pieces-to-frame
+                  frame-piece piece-list primary-pieces)))
+           (write-piece-list-as-html rests-patterns)
+           (format t "length: ~A~%" (length rests-patterns))
+           (format t ">>> ") (read)
+
+           rests-patterns))
+        (t
+         ;;(rare-synthesizeables-of-pieces-to-piece-_del-if-e-jam-edge
+         (rare-synthesizeables-of-pieces-to-piece
+          frame-piece piece-list primary-pieces))))
+|#

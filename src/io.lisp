@@ -34,8 +34,9 @@
       )))
 
 (defun line-string-into-piece (id pm-sign line-text)
-  (let* ((coords (line-text-into-vector-list line-text))
-         (shape (shape pm-sign coords)))
+  (let* ((coords-with-side-effect (line-text-into-vector-list line-text))
+         (coords-ommit-duplicates (ommit-edge-points coords-with-side-effect))
+         (shape (shape pm-sign coords-ommit-duplicates)))
     (piece :leaf-or-synthed 'leaf :id id :shape shape)))
 
 (defun load-problem-file-into-puzzle (file-name)
