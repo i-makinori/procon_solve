@@ -413,8 +413,13 @@
 (defun list-of-unused-primary-piece-list-of-synthesized-piece (synthesized-piece primary-piece-list)
   (set-difference ;; set of (original - used)
    primary-piece-list
-   (list-of-primary-piece-list-of-synthesized-piece
-    synthesized-piece)
+   (list-of-primary-piece-list-of-synthesized-piece synthesized-piece)
+   :test #'(lambda (p1 p2) (equal (piece-id p1) (piece-id p2)))))
+
+(defun list-of-unused-piece-list-of-piece (piece piece-list)
+  (set-difference ;; set of (original - used)
+   piece-list
+   (list-of-piece-of-synthesized-piece piece)
    :test #'(lambda (p1 p2) (equal (piece-id p1) (piece-id p2)))))
 
 

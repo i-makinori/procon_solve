@@ -256,19 +256,17 @@
          )))))
 
 (defun search-solution-grad-beam (whole-primary-piece-list)
-  (let* ((primary-pieces (remove-if-not #'primary-piece-p whole-primary-piece-list))
+  (let* (;; search easy before search frame.
+         (unique-piece-list (search-unique-synthesize-bfs whole-primary-piece-list))
+         ;; params
+         ;;(primary-pieces (remove-if-not #'primary-piece-p unique-piece-list))
+         (primary-pieces unique-piece-list)
          (frame-pieces   (remove-if-not #'(lambda (p) (shape-minus-p (piece-pm-sign p)))
                                         primary-pieces)))
     ;; variables
-    #|
     (init-meta-params primary-pieces
-                      :iter-max (ceiling (* (length whole-primary-piece-list) 3))
-                      :stack-width-const-1 (ceiling (* (length whole-primary-piece-list) 3/2))
-                      :beam-width 6)
-    |#
-    (init-meta-params primary-pieces
-                      :iter-max (ceiling (* (length whole-primary-piece-list) 6/3))
-                      :stack-width-const-1 (ceiling (* (length whole-primary-piece-list) 7/2))
+                      :iter-max (ceiling (* (length unique-piece-list) 6/4))
+                      :stack-width-const-1 (ceiling (* (length unique-piece-list) 5/2))
                       :beam-width 12)
 
     ;; handle problem forms

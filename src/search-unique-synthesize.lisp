@@ -18,23 +18,6 @@
 ;; synthesize at point
 
 
-
-
-#|
-(defun maybe-unique-synthesize-to-piece-1point (nth-point piece piece-list)
-  ;;
-  (let* ((synth-patterns 
-           (all-synthesizeable-patterns-of-pieces-to-piece-point 
-            nth-point piece piece-list))
-         (demi-unique-patterns
-           (remove-congruent-shape-from-synthesized-piece-list
-            synth-patterns)))
-    (format t "~A, ~A~%" (length synth-patterns) (length demi-unique-patterns))
-    (if (= 1 (length demi-unique-patterns))
-        (car demi-unique-patterns)
-        nil)))
-|#
-
 (defun maybe-unique-synthesize-to-piece-1point (nth-point piece piece-list)
   ;;
   (let* ((avaiable-vvsy-s (sy-select-parameters-from-piece-list piece-list))
@@ -81,23 +64,14 @@
          )
     synthed-piece))
 
+;;
 
-(defun list-of-unused-piece-list-of-piece (piece piece-list)
-  (set-difference ;; set of (original - used)
-   piece-list
-   ;;(list-of-primary-piece-list-of-synthesized-piece
-   (list-of-piece-of-synthesized-piece
-    piece)
-   :test #'(lambda (p1 p2) (equal (piece-id p1) (piece-id p2)))))
-
-                                    
-
-
-
-(defun search-unique-synthesize-bfs-aux (primary-piece-list)
+(defun search-unique-synthesize-bfs-aux (primary-piece-list current-iter)
   (cond 
     ((null (cdr primary-piece-list)) ;; uniquely synthesized
-     (car primary-piece-list))
+     primary-piece-list)
+    ((> current-iter (length primary-piece-list)) ;; end
+     primary-piece-list)
     (t                               ;; recursive
      (let* ((piece-synth-to (car primary-piece-list))
             (piece-synth-for (cdr primary-piece-list))
@@ -105,20 +79,23 @@
             (maybe-unique-synthesize
               (maybe-unique-synthesize-to-piece-1step
                piece-synth-to piece-synth-for primary-piece-list)))
-       (sleep 0.1)
        (write-piece-list-as-html primary-piece-list)
        (search-unique-synthesize-bfs-aux
         (append
-         ;;(list-of-unused-primary-piece-list-of-synthesized-piece
          (list-of-unused-piece-list-of-piece
           maybe-unique-synthesize primary-piece-list)
-         (list maybe-unique-synthesize)))))))
+         (list maybe-unique-synthesize))
+        (if (not (= (piece-id piece-synth-to) (piece-id maybe-unique-synthesize)))
+            0 (+ 1 current-iter)))))))
 
 
 (defun search-unique-synthesize-bfs (whole-primary-piece-list)
   (let* ((primary-pieces (remove-if-not #'primary-piece-p whole-primary-piece-list))
          (frame-pieces   (remove-if-not #'(lambda (p) (shape-minus-p (piece-pm-sign p)))
                                         primary-pieces)))
+    ;;
+    (init-meta-params whole-primary-piece-list)
+    ;;
     (cond
       ;; handle error
       ((not (= 1 (length frame-pieces)))
@@ -131,6 +108,5 @@
                          :iter-max 4000)
        ;; call-search
        (let* ((unique-synthesizes
-                (search-unique-synthesize-bfs-aux whole-primary-piece-list)))
-         unique-synthesizes
-         )))))
+                (search-unique-synthesize-bfs-aux whole-primary-piece-list 0)))
+         unique-synthesizes)))))
