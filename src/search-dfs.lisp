@@ -95,13 +95,13 @@
 
   ;; partial problem parameters
   (setf *partial-width-limit*
-        (max 4000
+        (min 2000
              (* (num-combination-sequence 
                  1 (* 1/2 (length (sy-select-parameters-from-piece-list primary-piece-list))))
                 0.33)))
   (setf *partial-iter-limit* ;; todo: are there some better iter limit?
         ;;(ceiling (/ *partial-width-limit* 2))) 
-        (* 3 *partial-width-limit*))
+        (* 1/1 *partial-width-limit*))
   ;;; dictionaries
   (setf *partial-angle-dictionary* (make-dictionary))
   (setf *partial-length^2-dictionary* (make-dictionary))
