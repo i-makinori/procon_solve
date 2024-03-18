@@ -1,12 +1,29 @@
+
+
+/* A4: 210 x 297 [mm]*/
+
+body{
+    /* 297 - 20 - 20 [mm] */
+    /* width: 257mm; */
+    max-width: 297mm;
+    width: 90%;
+    margin-right: auto;
+    margin-left : auto;
+}
+
+/* tables */
+
 table , td, th {
     border: 1px solid #999999;
     border-collapse: collapse;
+    max-width: 100%;
 }
+
+
 td, th {
     padding: 3px;
-    width: 30px;
-    height: 25px;
 }
+
 th {
     /*background: #f0e6cc;*/
 }
