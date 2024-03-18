@@ -18,6 +18,11 @@
                     (t (aux (cdr rest) (cons (car rest) memo))))))
     (aux into '())))
 
+(defun take-while (pred list)
+  (loop for x in list
+        while (funcall pred x)
+        collect x))
+
 ;; assoc
 (defun assocdr (item alist)
   (cdr (assoc item alist)))

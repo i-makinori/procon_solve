@@ -279,7 +279,8 @@
               (mapcar #'(lambda (l_n)
                           (format nil "~A:~A ,"
                                   (if (eq (assocdr :state l_n) *sy-vvsy-conver*) "con" "div")
-                                  (length (assocdr :synthesizes l_n))))
+                                  (length (remove-congruent-from-synthesized-piece-list
+                                           (assocdr :synthesizes l_n)))))
                       synthes-and-state-list-of-each-edges))
       (cond ((find-if #'(lambda (l_n)
                           (and (eq   (assocdr :state l_n) *sy-vvsy-conver*)
@@ -315,7 +316,53 @@
    (function-rare-synthesizeables-of-pieces-to-piece-by-partial-problem-evaluations)
    frame-piece piece-list primary-pieces))
 
+(defun function-rare-synthesizeables-of-pieces-to-piece-by-partial-problem-evaluations ()
+  ;; take n 10 of low pattern angle-segment VVSY synthesize
+  (function-rare-synthesizeables-_del-if-e-jam-edge
+   #'(lambda (synthes-and-state-list-of-each-edges)
+    ;; choice from rare synthesize
+    (let* ((sort-by-synth-able-patterns
+             (sort synthes-and-state-list-of-each-edges
+                   #'(lambda (l_n1 l_n2)
+                       (<= (length (assocdr :synthesizes l_n1))
+                           (length (assocdr :synthesizes l_n2))))))
+           (sorted-conver
+             (remove nil (mapcar
+                      #'(lambda (l_n) 
+                          (if (eq *sy-vvsy-conver* (assocdr :state l_n))
+                              (remove-congruent-from-synthesized-piece-list
+                               (assocdr :synthesizes l_n))
+                              nil))
+                      sort-by-synth-able-patterns)))
+           #|
+           (sorted-diverg
+             (remove nil (mapcar
+                          #'(lambda (l_n) 
+                              (if (eq *sy-vvsy-diverg* (assocdr :state l_n))
+                                  (remove-congruent-from-synthesized-piece-list
+                                   (assocdr :synthesizes l_n))
+                                  nil))
+                          sort-by-synth-able-patterns)))
+           |#
+           (conver-head-length
+             (length (nth 0 sorted-conver))))
+      ;;(format t "conver-len: ~A~%" conver-head-length)
+      (cond ((= 1 conver-head-length)
+             (format t "take unique~%")
+             (first-n 1 (flatten sorted-conver)))
+            ((<= 1 (length sorted-conver))
+             (format t "take convers~%")
+             ;;(flatten sorted-conver))
+             (flatten (take-while #'(lambda (conver-list_n)
+                                      (>= (1+ conver-head-length) (length conver-list_n)))
+                                  sorted-conver)))
+            (t
+             (format t "take diverg~%")
+             ;(first-n 1000 (append (flatten sorted-conver) (flatten sorted-diverg))))
+             nil)
+            )))))
 
+#|
 (defun function-rare-synthesizeables-of-pieces-to-piece-by-partial-problem-evaluations ()
   ;; take n 10 of low pattern angle-segment VVSY synthesize
   (function-rare-synthesizeables-_del-if-e-jam-edge
@@ -358,7 +405,7 @@
             |#
             (t (append sorted-conver sorted-diverg))
             )))))
-
+|#
 
 
 ;;; fusion method
