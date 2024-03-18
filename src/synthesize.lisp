@@ -363,7 +363,7 @@
         (let ((p_-1 (car p101)) (p_+0 (cadr p101)) (p_+1 (cddr p101)))
           (and 
            (point-on-line-segment-detection p_+0 p_-1 p_+1)
-           (coord-points-exiest-duplicated-point-p p_+0 rough-ommited-coords-list))))
+           (not (coord-points-exiest-duplicated-point-p p_+0 rough-ommited-coords-list)))))
     (make-3tuple-list (rot-right 1 rough-ommited-coords-list)))))
 
 
@@ -391,6 +391,7 @@
            ;; ommit-once (car (last ommit-once)) (car ommit-once))
            (ommit-point-on-line-from-rough-ommited-coords-list ommit-once) ;; ignore point on line
            (ommit-edge-points ommit-once))))))
+
 
 
 #|

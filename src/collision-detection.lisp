@@ -176,11 +176,10 @@
 ;;; utils
 
 (defun coord-points-exiest-duplicated-point-p (point coord-points)
-  (= 1 
+  (< 1 
      (length (remove-if-not #'(lambda (px) (vec3-ser= point px)) coord-points))))
 
 (defun piece-nth-point-exist-duplicated-point-p (nth-point piece)
   (let* ((piece-coords (piece-coord-points piece))
          (point_nth (modnth nth-point piece-coords)))
-    (< 1
-       (length (remove-if-not #'(lambda (px) (vec3-ser= point_nth px)) piece-coords)))))
+    (coord-points-exiest-duplicated-point-p point_nth piece-coords)))
