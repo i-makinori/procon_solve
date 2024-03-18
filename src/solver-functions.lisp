@@ -348,12 +348,15 @@
       (cond (exist-unique-synthesize-p
              (format t "take unique~%")
              (first-n 1 sorted-conver))
+            #|
             ((<= 1 (length sorted-conver))
              (format t "take convers~%")
              (first-n 100 sorted-conver))
             (t
              (format t "take diverg~%")
              (first-n 12 (append sorted-conver sorted-diverg)))
+            |#
+            (t (append sorted-conver sorted-diverg))
             )))))
 
 
