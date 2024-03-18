@@ -41,7 +41,7 @@
 
 
 ;; evaluation value updator for fs
-
+#|
 (defun fs-decrease-d/dt-evaluation-by-retake (fs)
   ;; greedic version
   "retake its state, gradient (d/dt) of evaluation value is decreased"
@@ -53,8 +53,9 @@
            (* v (expt (exp 1) -1/3)))
          (fs-evaluation-value fs)))
   fs)
+|#
 
-#|
+
 (defun fs-decrease-d/dt-evaluation-by-retake (fs)
 ;; d/dt version
   "retake its state, gradient (d/dt) of evaluation value is decreased"
@@ -62,14 +63,14 @@
   ;; lim (n->infinity) => (f(n)->C) , C such as +2
   (setf (fs-d/dt-evaluation-value fs)
         ((lambda (v)
-           (* v (/ 1 (+ 1 0.05)))) ;; V_next = V_now * 1 / (1+ε)
+           ;;(* v (/ 1 (+ 1 0.05)))) ;; V_next = V_now * 1 / (1+ε)
+           (* v (expt (exp 1) -1/3)))
   (fs-d/dt-evaluation-value fs)))
-
   fs)
-|#
+
 
 ;; insert to stack
-
+#|
 (defun insert-state-into-stack-by-grad (fs stack-by-grad) ;; (state)
   ;; greedic version
   (cond ((composition-of-filters fs stack-by-grad)
@@ -82,7 +83,9 @@
                                         (fs-evaluation-value stack_n)))))
         (t stack-by-grad)))
 
-#|
+|#
+
+
 (defun insert-state-into-stack-by-grad (fs stack-by-grad) ;; (state)
   ;; d/dt version
   (cond ((composition-of-filters fs stack-by-grad)
@@ -91,7 +94,7 @@
                                      (> (fs-d/dt-evaluation-value fs)
                                      (fs-d/dt-evaluation-value stack_n)))))
         (t stack-by-grad)))
-|#
+
 
 (defun insert-state-list-into-stack-by-grad (fs-list stack-by-grad)
   (reduce #'(lambda (fs stack-by-grad)
@@ -267,7 +270,7 @@
     (init-meta-params primary-pieces
                       :iter-max (ceiling (* (length unique-piece-list) 6/4))
                       :stack-width-const-1 (ceiling (* (length unique-piece-list) 5/2))
-                      :beam-width 12)
+                      :beam-width 40)
 
     ;; handle problem forms
     (cond
