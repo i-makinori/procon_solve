@@ -94,13 +94,11 @@
                  (transform-shape-by-transformation-matrix
                   (piece-shape piece)
                   (reduce #'matrix3x3-product (reverse transformation-matrixes-reversed))))
-               (frame?
-                 (if (shape-minus-p (piece-pm-sign piece)) t nil)))
+               ;;(frame?
+               ;;(if (shape-minus-p (piece-pm-sign piece)) t nil))
+               )
            (shape-svg-element-text transfomed-shape
-                                   :frame-piece-p frame?
-                                   ;;:fill-color "#fff1cf" ;; "#ebe1a9"
-                                   :fill-color "#fff0e0"  ;; from "#feecd6"
-                                   :stroke-color "#00a497")))
+                                   :stroke-width 0.7071067)))
         (t
          (let ((trans1 (piece-transform1 piece))
                (trans2 (piece-transform2 piece)))
@@ -130,9 +128,9 @@
                  (if (shape-minus-p (piece-pm-sign piece)) t nil)))
            (concatenate
             'string
-            (piece-into-svg-element-aux2 piece transformation-matrixes-reversed)
-            (shape-svg-element-text transfomed-shape :frame-piece-p frame?)
-            )))
+            (shape-svg-element-text transfomed-shape :frame-piece-p frame?
+                                                     :stroke-width 2.1213202)
+            (piece-into-svg-element-aux2 piece transformation-matrixes-reversed))))
         (t
          (let ((trans1 (piece-transform1 piece))
                (trans2 (piece-transform2 piece)))
@@ -178,7 +176,8 @@
      #'(lambda (s1 s2) (concatenate 'string s1 s2))
      (mapcar
       #'(lambda (n)
-          (format nil "<text x='~A' y='~A' font-size='6'>~A</text>~%"
+          ;; konpeki no iro
+          (format nil "<text x='~A' y='~A' style='fill:#007bbb;' font-size='9'>~A</text>~%"
                   (tml-coord (vec3-x (nth n coords)))
                   (tml-coord (vec3-y (nth n coords)))
                   n))
@@ -190,8 +189,8 @@
          (template "<svg id='~A' ~A width='600' height='600'>~%~A~%~A~%</svg>~%")
          (viewbox (piece-svg-viewbox-string piece))
          (id-text (piece-id-tml-string-svg piece))
-         ;; ume no hana moe qithesu iro.
-         (origin-point-element "<circle r='5' cx='0' cy='0' fill='#f3a7a5' />~%") ;; genten
+         ;; hi noboru iro.
+         (origin-point-element "<circle r='5' cx='0' cy='0' fill='#c85554' />~%") ;; genten
          (coord-numbers (piece-shape-coords-numbering-svg-element piece))
          (elm-memo (concatenate 'string coord-numbers origin-point-element))
          ;; elements
