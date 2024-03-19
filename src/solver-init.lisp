@@ -1,5 +1,7 @@
 (in-package :puzzle-1617)
 
+;;;; paarameter and variables and init solver functions
+
 
 ;;; parameters and variables
 
@@ -16,7 +18,7 @@
 (defparameter *evaluation-function* #'identity)
 
 
-;;;; init solver functions
+;;; init solver functions
 
 
 (defun init-dictionaries ()

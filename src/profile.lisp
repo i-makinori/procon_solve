@@ -21,16 +21,6 @@
   )
 
 
-(defun profile-remove-congruents ()
-  (let ((search1
-          (sort-by-delta_points
-           (all-synthesizeable-patterns-of-pieces-to-frame
-            (car *example-problem-9*) (cdr *example-problem-9*)))))
-    (profile-form ()
-      (write-piece-list-as-html (remove-congruent-from-synthesized-piece-list search1))
-      )))
-
-
 (defun profile-easy-problem ()
   (profile-form ()
     ()
