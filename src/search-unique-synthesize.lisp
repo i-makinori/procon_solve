@@ -29,6 +29,29 @@
              synthed-piece))
           (t piece))))
 
+;; write html
+
+(defparameter *timestamp-next-html-write-after-for-unique-search* (local-time:now))
+
+(defun write-piece-list-as-html-from-fs-stacks-for-unique-search
+    (unique-piece-list &optional (by-delta-time-p-millisec nil))
+
+  (when (or (not (numberp by-delta-time-p-millisec))
+            (local-time:timestamp>= (local-time:now)
+                                    *timestamp-next-html-write-after-for-unique-search*))
+
+    (write-piece-list-as-html
+     ;;(mapcar #'(lambda (state) (fs-frame-piece state)) gradient-stack)
+     unique-piece-list
+     :file-name "unique-piece-list.html")
+    
+    (when (numberp by-delta-time-p-millisec)
+      (setf *timestamp-next-html-write-after-for-unique-search*
+            (local-time:timestamp+ (local-time:now)
+                                   (* by-delta-time-p-millisec (expt 1000 2))
+                                   :nsec)))))
+
+
 ;; search
 
 (defun search-unique-synthesize-bfs-aux
@@ -56,7 +79,10 @@
               (maybe-unique-synthesize-to-piece-1step
                piece-synth-to piece-synth-for primary-piece-list-whole)))
        ;; format
-       ;;(write-piece-list-as-html (append primary-piece-list-currents primary-piece-list-next))
+       ;;              ;; HTML by 10000[ms]
+       (write-piece-list-as-html-from-fs-stacks-for-unique-search
+        (append primary-piece-list-currents primary-piece-list-next)
+        10000)
        ;; search next (demi) prime-piece
        (search-unique-synthesize-bfs-aux
         first-primary-piece-list
@@ -89,4 +115,7 @@
        (let* ((unique-synthesizes
                 (search-unique-synthesize-bfs-aux
                  whole-primary-piece-list whole-primary-piece-list '())))
+         ;; render to html
+         (write-piece-list-as-html-from-fs-stacks-for-unique-search unique-synthesizes)
+         ;; return
          unique-synthesizes)))))
