@@ -100,10 +100,11 @@
 
   ;; partial problem parameters
   (setf *partial-width-limit*
-        (min 2000
-             (* (num-combination-sequence 
-                 1 (* 1/2 (length (sy-select-parameters-from-piece-list primary-piece-list))))
-                0.33)))
+        (max 2000
+             (min 100
+                  (* (num-combination-sequence 
+                      1 (* 1/2 (length (sy-select-parameters-from-piece-list primary-piece-list))))
+                     0.33))))
   (setf *partial-iter-limit* ;; todo: are there some better iter limit?
         ;;(ceiling (/ *partial-width-limit* 2))) 
         (* 1/1 *partial-width-limit*))

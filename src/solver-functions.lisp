@@ -201,18 +201,6 @@
              primary-vvsy-s))))
     (cond
       ((piece-nth-point-exist-duplicated-point-p (vvsy-nc frame-vvsy) frame-piece)
-       ;; ;; (find-if
-       ;; ;;  #'(lambda (next-synth)
-       ;; ;;      (coord-points-exiest-duplicated-point-p 
-       ;; ;;       (nth (vvsy-nc frame-vvsy) (piece-coord-points frame-piece))
-       ;; ;;       (piece-coord-points next-synth)))
-       ;; ;;  all-synthesize-patterns)
-       ;; diverg by duplicated point
-       #|
-       (format t ":: duplicated point: ~A, ~A~%"
-               (vvsy-nc frame-vvsy)
-               (nth (vvsy-nc frame-vvsy) (piece-coord-points frame-piece)))
-       |#
        `((:synthesizes . ,all-synthesize-patterns) (:state . ,*sy-vvsy-diverg*)))
       ((or     (eq dict-angle-state 'all-paterns)  (eq dict-length^2-state 'all-paterns))
        ;; conver
@@ -294,6 +282,7 @@
                                            (assocdr :synthesizes l_n)))))
                       synthes-and-state-list-of-each-edges))
       #|
+      ;; for debug
       (write-piece-list-as-html 
        (flatten
         (mapcar #'(lambda (syst) (assocdr :synthesizes syst))
@@ -365,6 +354,7 @@
              (length (nth 0 sorted-conver))))
       
       #|
+      ;; for debug
       (format t "sorted *: ~A~%"
               (mapcar #'(lambda (syst) (length (assocdr :synthesizes syst))) 
                       sort-by-synth-able-patterns))
