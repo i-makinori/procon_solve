@@ -118,7 +118,6 @@
            (objective-length^2
              (cond (;; if subjective is hole[-], minimal line-length of piece[+] is objective
                     (shape-minus-p (piece-shape synthesized-piece))
-
                     (afcl #'min *num-divergent*
                           (flatten
                            (mapcar #'(lambda (p)
@@ -142,32 +141,59 @@
         (:objective-length^2 . ,objective-length^2))
       )))
 
+
+
+(defun shape-angle-list-not-on-duplicated-point (shape-s)
+  (let ((coord-points (shape-coord-points shape-s))
+        (angles-list (shape-angle-list shape-s)))
+    (remove
+     nil
+     (loop for i from 0 to (1- (length coord-points))
+           collect
+           (if (coord-points-exiest-duplicated-point-p (modnth i coord-points) coord-points)
+               nil
+               (nth i angles-list))))))
+
+(defun shape-segment-length^2-list-not-on-duplicated-point (shape-s)
+  (let ((coord-points  (shape-coord-points shape-s))
+        (length^2-list (shape-segment-length^2-list shape-s)))
+    (remove
+     nil
+     (loop for i from 0 to (1- (length coord-points))
+           collect
+           (if (and
+                (coord-points-exiest-duplicated-point-p (modnth (+ i 0) coord-points) coord-points)
+                (coord-points-exiest-duplicated-point-p (modnth (+ i 1) coord-points) coord-points))
+               nil
+               (nth i length^2-list))))))
+                
+
 (defun no-future-angles-p (angle-list minimal-angle)
-  ;; Cut if ∃(angle_n + min_angle > 360°)
+  ;; Cut if ∃(angle_not_duplicated_n + min_angle > 360°)
   (find-if #'(lambda (a_n)   (ser> (+ a_n minimal-angle) *pi*2*)) angle-list))
 
 (defun no-future-hole-lines-p (hole-length^2-list minimal-length^2)
-  ;; Cut if ∃(hole_length_n < min_length)
+  ;; Cut if ∃(hole_length_not_duplicated_n < min_length)
   (find-if #'(lambda (l^2_n) (ser< l^2_n minimal-length^2)) hole-length^2-list))
 
 (defun no-future-piece-lines-p (piece-length^2-list hole-maximum-length^2)
-  ;; Cut if ∃(piece_length_n > hole_max_length)
+  ;; Cut if ∃(piece_length_not_duplicated_n > hole_max_length)
   (find-if #'(lambda (l^2_n) (ser> l^2_n hole-maximum-length^2)) piece-length^2-list))
 
 (defun no-future-shape-p (shape primary-params)
   (let ((minimal-angle  (assocdr :minimal-angle   primary-params))
         (objective-length^2 (assocdr :objective-length^2 primary-params))
         ;;
-        (angle-list (shape-angle-list shape))
-        (length^2-list (shape-segment-length^2-list shape)))
+        (angle-list-not-on-duplicate (shape-angle-list-not-on-duplicated-point shape))
+        (length^2-list-not-on-duplicate (shape-segment-length^2-list-not-on-duplicated-point shape)))
     (or
      ;; angle
-     (no-future-angles-p angle-list minimal-angle)
+     (no-future-angles-p angle-list-not-on-duplicate minimal-angle)
      ;; line length
      (cond ((shape-minus-p shape) ;; if subjective is hole [-] ,
-            (no-future-hole-lines-p  length^2-list objective-length^2))
+            (no-future-hole-lines-p  length^2-list-not-on-duplicate objective-length^2))
            ((shape-plus-p shape)  ;; if subjective is piece[+] ,
-            (no-future-piece-lines-p length^2-list objective-length^2) )
+            (no-future-piece-lines-p length^2-list-not-on-duplicate objective-length^2) )
            (t                     ;; if none Real sign
             t)))))
 
@@ -311,7 +337,6 @@
       (remove-congruent-from-state-list fs-list)))
     ;; todo. this is once old frame. frame of this step is may be better
     state-this-step)))
-
 
 #|
 (defun filter-piece-list-from-synthesized-piece-list
