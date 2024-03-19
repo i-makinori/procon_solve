@@ -201,7 +201,18 @@
              primary-vvsy-s))))
     (cond
       ((piece-nth-point-exist-duplicated-point-p (vvsy-nc frame-vvsy) frame-piece)
+       ;; ;; (find-if
+       ;; ;;  #'(lambda (next-synth)
+       ;; ;;      (coord-points-exiest-duplicated-point-p 
+       ;; ;;       (nth (vvsy-nc frame-vvsy) (piece-coord-points frame-piece))
+       ;; ;;       (piece-coord-points next-synth)))
+       ;; ;;  all-synthesize-patterns)
        ;; diverg by duplicated point
+       #|
+       (format t ":: duplicated point: ~A, ~A~%"
+               (vvsy-nc frame-vvsy)
+               (nth (vvsy-nc frame-vvsy) (piece-coord-points frame-piece)))
+       |#
        `((:synthesizes . ,all-synthesize-patterns) (:state . ,*sy-vvsy-diverg*)))
       ((or     (eq dict-angle-state 'all-paterns)  (eq dict-length^2-state 'all-paterns))
        ;; conver
@@ -282,6 +293,13 @@
                                   (length (remove-congruent-from-synthesized-piece-list
                                            (assocdr :synthesizes l_n)))))
                       synthes-and-state-list-of-each-edges))
+      #|
+      (write-piece-list-as-html 
+       (flatten
+        (mapcar #'(lambda (syst) (assocdr :synthesizes syst))
+                synthes-and-state-list-of-each-edges))
+       :file-name "piece-list-debug.html")
+      |#
       (cond ((find-if #'(lambda (l_n)
                           (and (eq   (assocdr :state l_n) *sy-vvsy-conver*)
                                (null (assocdr :synthesizes l_n))))
@@ -322,6 +340,7 @@
    #'(lambda (synthes-and-state-list-of-each-edges)
     ;; choice from rare synthesize
     (let* ((sort-by-synth-able-patterns
+             ;; less combinations of synthesize by its point
              (sort synthes-and-state-list-of-each-edges
                    #'(lambda (l_n1 l_n2)
                        (<= (length (assocdr :synthesizes l_n1))
@@ -344,7 +363,17 @@
                           sort-by-synth-able-patterns)))
            (conver-head-length
              (length (nth 0 sorted-conver))))
-      ;;(format t "conver-len: ~A~%" conver-head-length)
+      
+      #|
+      (format t "sorted *: ~A~%"
+              (mapcar #'(lambda (syst) (length (assocdr :synthesizes syst))) 
+                      sort-by-synth-able-patterns))
+      (format t "sorted conv: ~A~%" (mapcar #'length sorted-conver))
+      (format t "conver-len: ~A~%" conver-head-length)
+      (write-piece-list-as-html (append (flatten sorted-conver) (flatten sorted-diverg)))
+      (format t ">>> ") (read) (format t "~%")
+      |#
+      
       (cond ((= 1 conver-head-length)
              (format t "take unique~%")
              (first-n 1 (flatten sorted-conver)))
