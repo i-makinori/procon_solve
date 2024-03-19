@@ -4,35 +4,55 @@
 
 ;;;; collision detection
 
+;;; AABB
+
+(defun point-on-aabb-p (point point-a1 point-a2)
+  "Detect whether point contained in the box (AABB) of point-a1 and point-a2.
+ boundary returns t."
+  (and (ser<= (vec3-x point) (max (vec3-x point-a1) (vec3-x point-a2)))
+       (ser>= (vec3-x point) (min (vec3-x point-a1) (vec3-x point-a2)))
+       (ser<= (vec3-y point) (max (vec3-y point-a1) (vec3-y point-a2)))
+       (ser>= (vec3-y point) (min (vec3-y point-a1) (vec3-y point-a2)))))
+
+(defun point-line-aabb-overlap-p (point-a1 point-a2 point-b1 point-b2)
+  "Detect whether point range duplication (AABB). boundary returns t.
+box-A: point-a1 and point-a2. box-B: point-b1 and point-b2"
+  (and (ser<= (min (vec3-x point-a1) (vec3-x point-a2)) (max (vec3-x point-b1) (vec3-x point-b2)))
+       (ser>= (max (vec3-x point-a1) (vec3-x point-a2)) (min (vec3-x point-b1) (vec3-x point-b2)))
+       (ser<= (min (vec3-y point-a1) (vec3-y point-a2)) (max (vec3-y point-b1) (vec3-y point-b2)))
+       (ser>= (max (vec3-y point-a1) (vec3-y point-a2)) (min (vec3-y point-b1) (vec3-y point-b2)))))
+
+
 ;;; point on line-segment
 
 (defun point-on-line-segment-detection (point point1 point2)
-  (let ((v1 (vec3-sub-xy point point1))
-        (v2 (vec3-sub-xy point point2)))
-    (and (not (vec3-ser= point point1)) ;; not on point1
-         (not (vec3-ser= point point2)) ;; not on point2
-         (vec3-ser= (identity (vec3-normalize-xy v1)) ;; point are inner range of edge P1--P2.
-                    (vec3-inverse-xy (vec3-normalize-xy v2))))))
-
-
+  (and (point-on-aabb-p point point1 point2) ;; on AABB of point1 and point2
+       (let ((v1 (vec3-sub-xy point point1))
+             (v2 (vec3-sub-xy point point2)))
+         (and (not (vec3-ser= point point1)) ;; not on point1
+              (not (vec3-ser= point point2)) ;; not on point2
+              (vec3-ser= ;; point are inner range of edge P1--P2.
+               (identity        (vec3-normalize-xy v1))
+               (vec3-inverse-xy (vec3-normalize-xy v2)))))))
 
 ;;; collision detection for boundary lines
 
 (defun point-line-collision-detection (point-a1 point-a2 point-b1 point-b2)
-  ;; {   0 < (A1A2 X A1B1) * (A1A2 X A1B2)
-  ;;  && 0 < (B1B2 X B1A1) * (B1B2 X B1A2)}
-  ;; => 2D line A1A2 and B1B2 are crossing.
-  ;; Ref: https://qiita.com/zu_rin/items/e04fdec4e3dec6072104
-  (let ((vec-a1a2 (vec3-sub-xy point-a2 point-a1))
-        (vec-b1b2 (vec3-sub-xy point-b2 point-b1)))
-    (and
-     (> (- -0.0001 *standard-error*) ;; round tolerance, remove line-on points.
-        (* (vec3-cross-xy vec-a1a2 (vec3-sub-xy point-b1 point-a1))   ;; A1A2 X A1B1
-           (vec3-cross-xy vec-a1a2 (vec3-sub-xy point-b2 point-a1)))) ;; A1A2 X A1B2
-     (> (- -0.0001 *standard-error*) ;; round tolerance, remove line-on points.
-        (* (vec3-cross-xy vec-b1b2 (vec3-sub-xy point-a1 point-b1))   ;; B1B2 X B1A1
-           (vec3-cross-xy vec-b1b2 (vec3-sub-xy point-a2 point-b1)))) ;; B1B2 X B1A2
-     )))
+  (and (point-line-aabb-overlap-p point-a1 point-a2 point-b1 point-b2) ;; AABB detect
+       ;; {   0 < (A1A2 X A1B1) * (A1A2 X A1B2)
+       ;;  && 0 < (B1B2 X B1A1) * (B1B2 X B1A2)}
+       ;; => 2D line A1A2 and B1B2 are crossing.
+       ;; Ref: https://qiita.com/zu_rin/items/e04fdec4e3dec6072104
+       (let ((vec-a1a2 (vec3-sub-xy point-a2 point-a1))
+             (vec-b1b2 (vec3-sub-xy point-b2 point-b1)))
+         (and
+          (> (- -0.0001 *standard-error*) ;; round tolerance, remove line-on points.
+             (* (vec3-cross-xy vec-a1a2 (vec3-sub-xy point-b1 point-a1))   ;; A1A2 X A1B1
+                (vec3-cross-xy vec-a1a2 (vec3-sub-xy point-b2 point-a1)))) ;; A1A2 X A1B2
+          (> (- -0.0001 *standard-error*) ;; round tolerance, remove line-on points.
+             (* (vec3-cross-xy vec-b1b2 (vec3-sub-xy point-a1 point-b1))   ;; B1B2 X B1A1
+                (vec3-cross-xy vec-b1b2 (vec3-sub-xy point-a2 point-b1)))) ;; B1B2 X B1A2
+          ))))
 
 (defun shape-shape-boundary-collision-detection (shape1 shape2)
   (labels ((some-line-collisions-p (papb pnpms)
@@ -43,8 +63,9 @@
     (let* ((tu-points1 (make-tuple-list (shape-coord-points shape1)))
            (tu-points2 (make-tuple-list (shape-coord-points shape2))))
       ;; if some edge by 2 points crosses to another edges, piece1 and piece2 are touch crossing.
-      (or (some #'(lambda (p1ap1b) (some-line-collisions-p p1ap1b tu-points2)) tu-points1)
-          (some #'(lambda (p2ap2b) (some-line-collisions-p p2ap2b tu-points1)) tu-points2)))))
+      ;;(or (some #'(lambda (p1ap1b) (some-line-collisions-p p1ap1b tu-points2)) tu-points1)
+      ;;    (some #'(lambda (p2ap2b) (some-line-collisions-p p2ap2b tu-points1)) tu-points2)))))
+      (some #'(lambda (tu-points2_n) (some-line-collisions-p tu-points2_n tu-points1)) tu-points2))))
 
 
 

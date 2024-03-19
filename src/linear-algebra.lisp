@@ -105,7 +105,7 @@
 (defun vec3-normalize-xy (Vn)
   (let ((length (vec3-length-xy Vn)))
     (if (< length *standard-error*)
-        #(0 0 0)
+        #(0.0 0.0 0.0)
         (vec3 (/ (vec3-x Vn) length) (/ (Vec3-y Vn) length) 1))))
 
 ;;
