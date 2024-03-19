@@ -71,8 +71,8 @@
             (search-unique-synthesize-bfs-aux
              primary-piece-list-next primary-piece-list-next '()))))
     (t
-     (let* ((piece-synth-to (car primary-piece-list-currents))
-            (primary-piece-list-whole (append primary-piece-list-currents primary-piece-list-next))
+     (let* ((primary-piece-list-whole (append primary-piece-list-currents primary-piece-list-next))
+            (piece-synth-to (car primary-piece-list-currents))
             (piece-synth-for (cdr primary-piece-list-whole))
             ;;
             (maybe-unique-synthesize
@@ -84,13 +84,22 @@
         (append primary-piece-list-currents primary-piece-list-next)
         10000)
        ;; search next (demi) prime-piece
-       (search-unique-synthesize-bfs-aux
-        first-primary-piece-list
-        (list-of-unused-piece-list-of-piece maybe-unique-synthesize primary-piece-list-currents)
-        (cons
-         maybe-unique-synthesize
-         (list-of-unused-piece-list-of-piece maybe-unique-synthesize primary-piece-list-next)
-         ))))))
+       (if (equal (piece-id piece-synth-to) (piece-id maybe-unique-synthesize))
+           (search-unique-synthesize-bfs-aux
+            first-primary-piece-list
+            (list-of-unused-piece-list-of-piece maybe-unique-synthesize
+                                                primary-piece-list-currents)
+            (cons maybe-unique-synthesize
+                  (list-of-unused-piece-list-of-piece maybe-unique-synthesize
+                                                      primary-piece-list-next)))
+           (search-unique-synthesize-bfs-aux
+            first-primary-piece-list
+            (cons maybe-unique-synthesize
+                  (list-of-unused-piece-list-of-piece maybe-unique-synthesize
+                                                      primary-piece-list-currents))
+            (list-of-unused-piece-list-of-piece maybe-unique-synthesize
+                                                primary-piece-list-next))
+           )))))
 
 
 
