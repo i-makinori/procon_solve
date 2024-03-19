@@ -246,7 +246,9 @@
       (solve-partial-problem (- *pi*2* (vvsy-angle vvsy))
                              (flatten (mapcar #'piece-angle-list
                                               available-piece-list)))
-    (values partials end-state)))
+    (if (ser= *pi* (vvsy-angle vvsy))
+        (values partials 'divergence)
+        (values partials end-state))))
 
 (defun solve-partial-length^2 (vvsy available-piece-list)
   (multiple-value-bind
