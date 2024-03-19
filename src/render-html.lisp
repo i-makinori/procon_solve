@@ -19,19 +19,25 @@
   ;;(round (* number *display-scale-multiply*)))
   (format nil "~,4f" (tml-coord number)))
 
-(defun point-list-into-svg-polygon (point-list pm)
+(defun point-list-into-svg-polygon (point-list pm 
+                                    &key
+                                      (stroke-color nil) (fill-color nil) (stroke-width 0.7071067))
   (let* ((points-text
            (apply #'concatenate 'string
                   (mapcar #'(lambda (p) (format nil "~A,~A "
                                                 (tml-coord-text (vec3-x p))
                                                 (tml-coord-text (vec3-y p))))
                           point-list)))
-         (fill-color (cond ;; suna no iro, hinoki no iro, sora no tairakeki iro,
-                       ((eq pm *+shape*) "#feecd6")
-                       ((eq pm *-shape*) "#eadec9")
-                       (t                "#fcf5e3")))
+         (fill-color1 (cond ;; suna no iro, hinoki no iro, sora no tairakeki iro,
+                        ((stringp fill-color) fill-color)
+                        ((eq pm *+shape*) "#feecd6")
+                        ((eq pm *-shape*) "#eadec9")
+                        (t                "#fcf5e3")))
          ;; nil no annkoku no iro
-         (style (format nil "style='fill:~A;stroke:#16160e;stroke-width:0.7071067'" fill-color)))
+         (stroke-color (cond ((stringp stroke-color) stroke-color)
+                             (t "#16160e")))
+         (style (format nil "style='fill:~A;stroke:~A;stroke-width:~A'"
+                        fill-color1 stroke-color stroke-width)))
     (format nil "<polygon points='~A' ~A />~%"
             points-text style)))
 
@@ -51,11 +57,15 @@
 
 ;;; piece list version HTML
 
-(defun shape-svg-element-text (shape &key (frame-piece-p nil))
+(defun shape-svg-element-text
+    (shape &key (frame-piece-p nil) (stroke-color nil) (fill-color nil) (stroke-width 0.7071067))
   (format nil
           ;;"~A~%"
           "~A~A~%"
-          (point-list-into-svg-polygon (shape-coord-points shape) (shape-pm-sign shape))
+          (point-list-into-svg-polygon (shape-coord-points shape) (shape-pm-sign shape)
+                                       :stroke-color stroke-color
+                                       :fill-color fill-color
+                                       :stroke-width stroke-width)
           (approx-coords-into-svg-dots (shape-approx-points shape)
                                        :frame-piece-p frame-piece-p)))
 
@@ -74,7 +84,41 @@
 (defun piece-id-tml-string-describe (piece)
   (format nil "describe_~A" (piece-id-tml-string piece)))
 
+(defun piece-into-svg-element-aux2 (piece transformation-matrixes-reversed)
+  "aux until no transforms. for unique-search"
+  (cond ((null piece) "")
+        (;(primary-piece-p piece)
+         (or (null (piece-transform1 piece)) (null (piece-transform2 piece)))
+         (let ((transfomed-shape
+                 ;; transform-shape-by-transformation-matrix (shape transformation-matrix)
+                 (transform-shape-by-transformation-matrix
+                  (piece-shape piece)
+                  (reduce #'matrix3x3-product (reverse transformation-matrixes-reversed))))
+               (frame?
+                 (if (shape-minus-p (piece-pm-sign piece)) t nil)))
+           (shape-svg-element-text transfomed-shape
+                                   :frame-piece-p frame?
+                                   ;;:fill-color "#fff1cf" ;; "#ebe1a9"
+                                   :fill-color "#fff0e0"  ;; from "#feecd6"
+                                   :stroke-color "#00a497")))
+        (t
+         (let ((trans1 (piece-transform1 piece))
+               (trans2 (piece-transform2 piece)))
+           (format nil "~A~A~A"
+                   ""
+                   (piece-into-svg-element-aux2
+                    (transform-piece trans1)
+                    (cons (transform-transformation-matrix trans1)
+                          transformation-matrixes-reversed))
+                   (piece-into-svg-element-aux2
+                    (transform-piece trans2)
+                    (cons (transform-transformation-matrix trans2)
+                          transformation-matrixes-reversed))
+                   )))))
+
+
 (defun piece-into-svg-element-aux1 (piece transformation-matrixes-reversed)
+  "aux until prime piece, also call unique synthesize renderer."
   (cond ((null piece) "")
         ((primary-piece-p piece)
          (let ((transfomed-shape
@@ -84,7 +128,11 @@
                   (reduce #'matrix3x3-product (reverse transformation-matrixes-reversed))))
                (frame?
                  (if (shape-minus-p (piece-pm-sign piece)) t nil)))
-           (shape-svg-element-text transfomed-shape :frame-piece-p frame?)))
+           (concatenate
+            'string
+            (piece-into-svg-element-aux2 piece transformation-matrixes-reversed)
+            (shape-svg-element-text transfomed-shape :frame-piece-p frame?)
+            )))
         (t
          (let ((trans1 (piece-transform1 piece))
                (trans2 (piece-transform2 piece)))
