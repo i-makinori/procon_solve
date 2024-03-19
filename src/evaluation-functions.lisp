@@ -98,7 +98,8 @@
   (let* ((nth-synthesize
            (- (length (list-of-primary-piece-list-of-synthesized-piece (fs-frame-piece state)))
               1))
-         (fix-by-synthesizes (- (* 2.00 nth-synthesize)))) ;; -2 is 0
+         ;;(fix-by-synthesizes (- (* 2.00 nth-synthesize)))) ;; -2 is 0
+         (fix-by-synthesizes (- (* (- 2.00 1.00) nth-synthesize)))) ;; -2 is 0
     (+ (evaluation-value-by-remain-edges state primary-piece-list)
        fix-by-synthesizes)))
 
@@ -112,7 +113,7 @@
           (- k 1)))))
 
 (defun evaluation-value-by-remain-edges-in-reduce-in-k-step (state-of-frame primary-piece-list)
-  (let* ((k 10) ;; k-step
+  (let* ((k 3) ;; k-step
          (frame-piece-k-step-before
            (frame-piece-before-k-step (fs-frame-piece state-of-frame) k))
          (state-of-k-step-before
