@@ -366,13 +366,14 @@
       
       (cond ((= 1 conver-head-length)
              (format t "take unique~%")
-             (first-n 1 (flatten sorted-conver)))
+             (values (first-n 1 (flatten sorted-conver)) 'unique-synthesizes))
             ((<= 1 (length sorted-conver))
              (format t "take convers~%")
              ;(flatten sorted-conver))
-             (flatten (take-while #'(lambda (conver-list_n)
-                                      (>= (1+ conver-head-length) (length conver-list_n)))
-                                  sorted-conver)))
+             (values (flatten (take-while #'(lambda (conver-list_n)
+                                              (>= (1+ conver-head-length) (length conver-list_n)))
+                                          sorted-conver))
+                     'converge-synthesizes))
             (t
              (format t "take diverg~%")
              ;;(first-n 1000 (append (flatten sorted-conver) (flatten sorted-diverg))))
