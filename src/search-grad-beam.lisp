@@ -178,26 +178,23 @@
                     (first-n 20 next-gradient-stack)))))
 
 
-(defparameter *timestamp-next-html-write-after-for-grad-beam* (local-time:now))
-
-(defun write-piece-list-as-html-from-fs-stacks-for-grad-beam
-    (next-stack-of-this-step gradient-stack &optional (by-delta-time-p-millisec nil))
-
-  (when (or (not (numberp by-delta-time-p-millisec))
-            (local-time:timestamp>= (local-time:now)
-                                    *timestamp-next-html-write-after-for-grad-beam*))
-    (write-piece-list-as-html
-     (mapcar #'(lambda (state) (fs-frame-piece state)) next-stack-of-this-step)
-     :file-name "piece-list.html")
-    (write-piece-list-as-html
-     (mapcar #'(lambda (state) (fs-frame-piece state)) gradient-stack)
-     :file-name "gradient-list.html")
-    
-    (when (numberp by-delta-time-p-millisec)
-      (setf *timestamp-next-html-write-after-for-grad-beam*
-            (local-time:timestamp+ (local-time:now)
-                                   (* by-delta-time-p-millisec (expt 1000 2))
-                                   :nsec)))))
+(let ((++timestamp-next-html-write-after-for-grad-beam++ (local-time:now)))
+  (defun write-piece-list-as-html-from-fs-stacks-for-grad-beam
+      (next-stack-of-this-step gradient-stack &optional (by-delta-time-p-millisec nil))
+    (when (or (not (numberp by-delta-time-p-millisec))
+              (local-time:timestamp>= (local-time:now)
+                                      ++timestamp-next-html-write-after-for-grad-beam++))
+      (write-piece-list-as-html
+       (mapcar #'(lambda (state) (fs-frame-piece state)) next-stack-of-this-step)
+       :file-name "piece-list.html")
+      (write-piece-list-as-html
+       (mapcar #'(lambda (state) (fs-frame-piece state)) gradient-stack)
+       :file-name "gradient-list.html")
+      (when (numberp by-delta-time-p-millisec)
+        (setf ++timestamp-next-html-write-after-for-grad-beam++
+              (local-time:timestamp+ (local-time:now)
+                                     (* by-delta-time-p-millisec (expt 1000 2))
+                                     :nsec))))))
 
 
 

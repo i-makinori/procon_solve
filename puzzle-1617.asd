@@ -36,6 +36,7 @@
              (:file "solver-functions")
              (:file "evaluation-functions")
              (:file "filter-functions")
+             (:file "solver-init")
              ;; solver
              (:file "search-unique-synthesize")
              (:file "search-dfs")

@@ -65,25 +65,24 @@
 
 ;; write html
 
-(defparameter *timestamp-next-html-write-after-for-unique-search* (local-time:now))
+;;(defparameter *timestamp-next-html-write-after-for-unique-search* (local-time:now))
 
-(defun write-piece-list-as-html-from-fs-stacks-for-unique-search
-    (unique-piece-list &optional (by-delta-time-p-millisec nil))
-
-  (when (or (not (numberp by-delta-time-p-millisec))
-            (local-time:timestamp>= (local-time:now)
-                                    *timestamp-next-html-write-after-for-unique-search*))
-
-    (write-piece-list-as-html
-     ;;(mapcar #'(lambda (state) (fs-frame-piece state)) gradient-stack)
-     unique-piece-list
-     :file-name "unique-piece-list.html")
-    
-    (when (numberp by-delta-time-p-millisec)
-      (setf *timestamp-next-html-write-after-for-unique-search*
-            (local-time:timestamp+ (local-time:now)
-                                   (* by-delta-time-p-millisec (expt 1000 2))
-                                   :nsec)))))
+(let ((++timestamp-next-html-write-after-for-unique-search++ (local-time:now)))
+  (defun write-piece-list-as-html-from-fs-stacks-for-unique-search
+      (unique-piece-list &optional (by-delta-time-p-millisec nil))
+    (when (or (not (numberp by-delta-time-p-millisec))
+              (local-time:timestamp>= (local-time:now)
+                                      ++timestamp-next-html-write-after-for-unique-search++))
+      (write-piece-list-as-html
+       ;;(mapcar #'(lambda (state) (fs-frame-piece state)) gradient-stack)
+       unique-piece-list
+       :file-name "unique-piece-list.html")
+      
+      (when (numberp by-delta-time-p-millisec)
+        (setf ++timestamp-next-html-write-after-for-unique-search++
+              (local-time:timestamp+ (local-time:now)
+                                     (* by-delta-time-p-millisec (expt 1000 2))
+                                     :nsec))))))
 
 
 ;; search
