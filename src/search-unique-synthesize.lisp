@@ -19,6 +19,30 @@
 
 ;; synthesize piece
 
+
+#|
+(defun unique-detection-for-2nd-step (synthesized-piece-list primary-piece-list)
+  (let ((list-of-nil-and-sy_x
+          (remove nil
+                  (mapcar
+                   #'(lambda (sy_n)
+                       (multiple-value-bind (synthed-pieces state)
+                           (rare-synthesizeables-of-pieces-to-piece-by-partial-problem-evaluations
+                            sy_n
+                            (list-of-unused-primary-piece-list-of-synthesized-piece
+                             ;;synthesized-piece-list
+                             sy_n
+                             primary-piece-list)
+                            primary-piece-list)
+                         synthed-pieces state
+                         (if (not (null state)) sy_n nil)))
+                   synthesized-piece-list))))
+    (if (= 1 (length list-of-nil-and-sy_x))
+        (nth 0 list-of-nil-and-sy_x)
+        nil)))
+|#
+
+
 (defun maybe-unique-synthesize-to-piece-1step (piece piece-list primary-piece-list)
   (multiple-value-bind (synthed-pieces state)
       (rare-synthesizeables-of-pieces-to-piece-by-partial-problem-evaluations
@@ -27,6 +51,16 @@
            (let ((synthed-piece (car synthed-pieces)))
              (setf (piece-leaf-or-synthed synthed-piece) 'leaf)
              synthed-piece))
+          ((eq state 'converge-synthesizes)
+           #|
+           (let ((maybe-unique
+                   (unique-detection-for-2nd-step synthed-pieces primary-piece-list)))
+             (if maybe-unique
+                 (progn (setf (piece-leaf-or-synthed maybe-unique) 'leaf)
+                        maybe-unique)
+                 piece)))
+           |#
+           piece)
           (t piece))))
 
 ;; write html
