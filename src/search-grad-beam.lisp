@@ -212,7 +212,10 @@
       (;; not enough beams
        ;;(and (< (length beam-queue) *beam-width*) (not (null gradient-stack)))
        ;; not enough beams and need to search in wide
-       (and (< (length beam-queue) *beam-width*) (not (null gradient-stack))
+       (and (< (length beam-queue) *beam-width*)
+            ;;(not (null gradient-stack))
+            ;;(not (= 1 (length beam-queue))))
+            (< (length beam-queue) (length gradient-stack))
             (not (= 1 (length beam-queue))))
        (format t "=== new beam ===~%")
        (multiple-value-bind (new-beam next-gradient-stack)

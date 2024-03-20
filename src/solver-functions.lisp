@@ -319,9 +319,34 @@
 
 (defun rare-synthesizeables-of-pieces-to-piece-by-partial-problem-evaluations
     (frame-piece piece-list primary-pieces)
-  (funcall
-   (function-rare-synthesizeables-of-pieces-to-piece-by-partial-problem-evaluations)
-   frame-piece piece-list primary-pieces))
+  (funcall (function-rare-synthesizeables-of-pieces-to-piece-by-partial-problem-evaluations)
+           frame-piece piece-list primary-pieces))
+
+#|
+(defun rare-synthesizeables-of-pieces-to-piece-by-partial-problem-evaluations-while-unique
+    (frame-piece piece-list primary-pieces)
+  "take while unique"
+  (multiple-value-bind (synthesized-piece-list synthesize-status)
+      (funcall (function-rare-synthesizeables-of-pieces-to-piece-by-partial-problem-evaluations)
+               frame-piece piece-list primary-pieces)
+    synthesize-status
+    (let* ((state-this-step (make-fs-from-piece frame-piece primary-pieces))
+           (fs-all-combinations
+             (mapcar #'(lambda (sy_n) (make-fs-from-piece sy_n primary-pieces))
+                     synthesized-piece-list))
+           (fs-filtered
+             (filter-fs-list fs-all-combinations state-this-step))
+           (fs-head (nth 0 fs-filtered)))
+      (cond ((= 1 (length fs-filtered))
+             (format t "take again because of unique synthesize.~%")
+             (rare-synthesizeables-of-pieces-to-piece-by-partial-problem-evaluations-while-unique
+              (fs-frame-piece fs-head)
+              (list-of-unused-primary-piece-list-of-synthesized-piece
+               (fs-frame-piece fs-head) primary-pieces)
+              primary-pieces))
+            (t
+             synthesized-piece-list)))))
+|#
 
 (defun function-rare-synthesizeables-of-pieces-to-piece-by-partial-problem-evaluations ()
   ;; take n 10 of low pattern angle-segment VVSY synthesize

@@ -46,6 +46,7 @@
         ;;#'rare-synthesizeables-of-pieces-to-piece
         ;;#'rare-synthesizeables-of-pieces-to-piece-_del-if-e-jam-edge
         #'rare-synthesizeables-of-pieces-to-piece-by-partial-problem-evaluations
+        ;; ;; #'rare-synthesizeables-of-pieces-to-piece-by-partial-problem-evaluations-while-unique
         ;;#'synthesizeables-by-fusuon-method-for-stuffing ;; for debug
         )   ;;"step function to get next pieces"
 
