@@ -140,6 +140,16 @@
 
 ;; loop wave version
 
+(declaim (inline sum))
+(defun sum (number-list)
+  (apply #'+ number-list))
+
+(defun sum-ser< (number-list objective-value)
+  (ser< (sum number-list) objective-value))
+
+(defun sum-ser= (number-list objective-value)
+  (ser= (sum number-list) objective-value))
+
 (defun solve-partial-problem-aux (objective-value choice-value-list
                                   first-queue _bottom1_ first-solution _bottom3)
   _bottom1_ _bottom3
@@ -148,7 +158,6 @@
          ;;(queue_t+1 (mapcar #'list first-queue))
          (queue_t+1 first-queue)
          (queue_t+0 nil))
-
     (loop
       named depth-loop for iter from 0 ;; whole depth
       if (null queue_t+1)
@@ -176,16 +185,17 @@
                        (mapcar #'(lambda (v) (cons v step-vs)) 
                                choice-value-list))
                      (step-next-depth-queue
-                       (remove-if-not #'(lambda (vs) (compare-sigma #'ser< vs objective-value))
+                       (remove-if-not #'(lambda (vs) (sum-ser< vs objective-value))
                                       step-next-depth-queue-combination))
                      (step-solutions
-                       (remove-if-not #'(lambda (vs) (compare-sigma #'ser= vs objective-value))
+                       (remove-if-not #'(lambda (vs) (sum-ser= vs objective-value))
                                       step-next-depth-queue-combination)))
                 (incf iter)
                 ;;(format t "~A: ~A: ~A~%" iter step-vs "");;step-next-depth-queue)
                 (setf queue_t+1 (append step-next-depth-queue queue_t+1))
                 (setf solutions (append solutions step-solutions)))))
     (values solutions end-state)))
+
 
 (defun num-combination-sequence (m n)
   ;; calc number of combination.
