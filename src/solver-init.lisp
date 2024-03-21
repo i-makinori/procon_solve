@@ -53,9 +53,9 @@
   (setf *evaluation-function*
         ;;#'evaluation-value-by-delta-points_sum
         ;;#'evaluation-value-by-num-used-pieces
-        ;;#'evaluation-value-by-remain-edges
+        #'evaluation-value-by-remain-edges
         ;;#'evaluation-value-by-remain-edges-in-reduce-in-k-step
-        #'evaluation-value-by-remain-edges-rest-better-synthesize
+        ;;#'evaluation-value-by-remain-edges-rest-better-synthesize
         ;;#'evaluation-value-by-remain-edge-combinations
         )
 
