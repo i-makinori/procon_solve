@@ -34,7 +34,14 @@ shape filling puzzle.
 # example usage
 
 ```sh
+$ # call solver program by problem number
 $ ./call-puzzle-solver.ros 3 
+# ... solution messages ...
+$ 
+$ # or call it by problem file name
+$ ./procon_solve/call-puzzle-solver.ros --problem-file some/directory/problems/puzzle_XX.txt
+# ... solution messages ...
+$ 
 ```
 <!--
 todo: not by number, by problem file name.
@@ -70,7 +77,10 @@ PUZZLE-1617> ;; beam search
 PUZZLE-1617> (time (progn (search-solution-from-prime-pieces-beam
                            (nth 3 *problem-list*))
                           nil))
+
 ;; omit
+
+;; and evaluation-value saved beam search 
 PUZZLE-1617> ;; gradient stacked beam search
 PUZZLE-1617> (time (progn (search-solution-grad-beam
                            (nth 3 *problem-list*))
@@ -99,27 +109,8 @@ releases are available here [Releases · i-makinori/procon_solve](https://github
 
 I'm going to do...
 
-- [X] 辺の相手と重なる頂点座標による分割
-- [X] 頂点の省略演算
-- [X] ピース合成演算を一般化した函数の定義
-- [X] 探索
-- [X] まともなUI
-- [ ] 正しい評価関数、
-  - 正しい評価値。 
-  - 零形状のスコアを0(最小)又は最大に、解に近い程0に近く、
-  - 総減少頂点数だけでなく、利用したピースあたりの減少頂点数も考慮するように(?)、、、
-- [X] 解探索試験・高速化I
-- [X] 解探索の試験II。 幅優先探索に切り替えても、解に到達できることを確認する必要がある。
-- [X] モデルの一般化。
-  - 例えば、枠にピースをはめるだけでなく、ピースとピースを合成できるように。 など。
-- [ ] ドキュメント生成
-
-以上、3/15~3/20 頃にまでに。
-
-- [ ] 著作権などの確認。問題の著作権、問題の引用などについて。
-- [ ] 理論と技術に関する資料の公開
-
-以上、3月中旬に確認を開始し、準備が整い次第。
+- [ ] コマンド引数の整理
+- [ ] ドキュメント整備
 
 
 # known bugs
@@ -161,6 +152,7 @@ Thank you for these libraries.
 - profiler, flamegraph  
   [40ants/cl-flamegraph](https://github.com/40ants/cl-flamegraph) (common lisp implement),  
   [speedscope](https://www.speedscope.app/) (web viewer of flamegraph)  
-
+- execution script for Common Lisp  
+  [roswell/](https://github.com/roswell/roswell)
 
 Thank you!

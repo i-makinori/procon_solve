@@ -45,10 +45,17 @@ exec ros -Q -- $0 "$@"
 )
 |#
 
+;; 
+
+(defun integer-string-p (string)
+  (handler-case
+      (parse-integer string)
+    (sb-int:simple-parse-error (e) e nil)))
 
 ;;
 
 (defun help-formula-to-input ()
+  "Puzzle-1617. the solver of shape filling puzzle"
   )
 
 
@@ -58,16 +65,35 @@ exec ros -Q -- $0 "$@"
   (time (progn (search-solution-grad-beam problem)
                nil)))
 
+
+
 ;; main
 
 (defun main (&rest argv)
-  (let ((tmp nil))
-    tmp
+  (let ((argvlen (length argv)))
     (format t "Puzzle1617 Solver Program ~%")
-    (help-formula-to-input)
-    (call-solver-grad-beam
-     ;; todo: not by number, by problem file name.
-     (nth (parse-integer (nth 0 argv))
-          *problem-list-official*))))
+    (cond
+      ((= 0 argvlen)
+       (help-formula-to-input))
+      ;; by problem number
+      ((and (= 1 argvlen)
+            (integer-string-p (nth 0 argv)))
+       (call-solver-grad-beam
+        (nth (parse-integer (nth 0 argv))
+             *problem-list-official*)))
+      ;; by file name
+      ((and (= 2 argvlen)
+            (string-equal "--problem-file" (nth 0 argv))
+            ;;(probe-file (merge-pathnames (nth 1 argv) *load-pathname*)))
+            (probe-file  (merge-pathnames (nth 1 argv) (uiop/os:getcwd))))
+       (call-solver-grad-beam
+        (load-problem-file-into-puzzle
+         ;(merge-pathnames (nth 1 argv) *load-pathname*)
+         (merge-pathnames (nth 1 argv) (uiop/os:getcwd))
+         )))
+      ;; help text
+      (t
+       (help-formula-to-input))
+      )))
 
 
