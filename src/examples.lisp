@@ -34,7 +34,12 @@
   (mapcar #'load-problem-file-into-puzzle
           *file-names-of-problems-official-type*))
 
+(defparameter *file-names-of-problems-y-puzzles*
+  (directory (problem-file-path "./y_puzzles/*.txt")))
 
+(defparameter *problem-list-y-puzzles*
+  (mapcar #'load-problem-file-into-puzzle
+          *file-names-of-problems-y-puzzles*))
 
 ;;;;
 
