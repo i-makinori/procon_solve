@@ -34,7 +34,7 @@ shape filling puzzle.
 # example usage
 
 ```sh
-$ ros ./call-puzzle-solver.lisp 3 
+$ ./call-puzzle-solver.ros 3 
 ```
 <!--
 todo: not by number, by problem file name.

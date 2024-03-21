@@ -1,0 +1,73 @@
+#!/bin/sh
+#|-*- mode:lisp -*-|#
+#|
+exec ros -Q -- $0 "$@"
+|#
+
+(defun load-puzzle-1617-system ()
+  
+  ;; load puzzle-1617 system
+  ;; Defining file for ASDF system of puzzle-1617 is placed at "<project-root>/puzzle1617.asd"
+  ;; where this script file is placed at "<project-root>/call-puzzle-solver.ros"
+  (let ((pathname-to-puzzle-1617-asdf
+          (merge-pathnames "./puzzle-1617.asd" (directory-namestring *load-truename*))))
+    (load pathname-to-puzzle-1617-asdf))
+  (asdf:load-system :puzzle-1617))
+
+(progn ;;init forms
+  (ros:ensure-asdf)
+
+  (format t "Load systems: ~%")
+
+  ;; load depended packages
+  ;; Ref: :depends-on of puzzle-1617.asd
+  ;; 
+  #+quicklisp (ql:quickload (list :cl-template :sb-sprof :local-time) :silent t)
+
+  ;; load puzzle-1617 package
+  (load-puzzle-1617-system)
+
+  ;; in package
+  (in-package :puzzle-1617)
+
+  (format t "System Loading is Completed.~%")
+  )
+
+
+
+
+#|
+(defun main (&rest argv)
+  (declare (ignorable argv))
+
+  (format t "arg: ~A: ~A~%" (length argv) argv)
+  (format t "types: ~A~%" (mapcar #'type-of argv))
+)
+|#
+
+
+;;
+
+(defun help-formula-to-input ()
+  )
+
+
+;;
+
+(defun call-solver-grad-beam (problem)
+  (time (progn (search-solution-grad-beam problem)
+               nil)))
+
+;; main
+
+(defun main (&rest argv)
+  (let ((tmp nil))
+    tmp
+    (format t "Puzzle1617 Solver Program ~%")
+    (help-formula-to-input)
+    (call-solver-grad-beam
+     ;; todo: not by number, by problem file name.
+     (nth (parse-integer (nth 0 argv))
+          *problem-list-official*))))
+
+
