@@ -27,6 +27,9 @@ is sitting downs to synthesized stones, is thinkingh how to solve puzzle into ze
 
 # solver of shape filling puzzle.
 
+![shape_filling_image](./documents/screenshot.png)
+
+
 
 shape filling puzzle.
 
